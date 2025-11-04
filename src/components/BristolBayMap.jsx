@@ -1,7 +1,20 @@
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useState, useEffect } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  GeoJSON,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import {
+  getDistricts,
+  getDailySummary,
+  getDistrict,
+  formatNumber,
+} from "../services/api";
 
 // Fix for default marker icons in React-Leaflet
 import icon from "leaflet/dist/images/marker-icon.png";
@@ -50,6 +63,25 @@ const DISTRICTS = {
   },
 };
 
+// GeoJSON style functions
+const districtStyle = (feature) => ({
+  fillColor: "transparent",
+  weight: 3,
+  opacity: 1,
+  color: "#fbbf24",
+  dashArray: "10, 10",
+  fillOpacity: 0.1,
+});
+
+const sectionStyle = (feature) => ({
+  fillColor: "transparent",
+  weight: 1,
+  opacity: 0.6,
+  color: "#60a5fa",
+  dashArray: "5, 5",
+  fillOpacity: 0.05,
+});
+
 // Create custom markers for each district
 const createCustomIcon = (color, emoji) => {
   return L.divIcon({
@@ -89,11 +121,121 @@ function MapController({ selectedDistrict }) {
   return null;
 }
 
+function GeoJSONLayers() {
+  const [districts, setDistricts] = useState(null);
+  const [sections, setSections] = useState(null);
+
+  useEffect(() => {
+    // Load district boundaries
+    fetch("/geojson/Commercial_Fisheries_Bristol_Bay_Salmon_Districts.geojson")
+      .then((res) => res.json())
+      .then((data) => setDistricts(data))
+      .catch((err) =>
+        console.log("Districts GeoJSON not found (optional):", err.message)
+      );
+
+    // Load section boundaries
+    fetch("/geojson/Commercial_Fisheries_Bristol_Bay_Salmon_Sections.geojson")
+      .then((res) => res.json())
+      .then((data) => setSections(data))
+      .catch((err) =>
+        console.log("Sections GeoJSON not found (optional):", err.message)
+      );
+  }, []);
+
+  return (
+    <>
+      {sections && (
+        <GeoJSON
+          data={sections}
+          style={sectionStyle}
+          onEachFeature={(feature, layer) => {
+            if (feature.properties && feature.properties.name) {
+              layer.bindTooltip(feature.properties.name, {
+                permanent: false,
+                direction: "center",
+                className: "section-label",
+              });
+            }
+          }}
+        />
+      )}
+      {districts && (
+        <GeoJSON
+          data={districts}
+          style={districtStyle}
+          onEachFeature={(feature, layer) => {
+            if (feature.properties && feature.properties.name) {
+              layer.bindPopup(`<strong>${feature.properties.name}</strong>`);
+            }
+          }}
+        />
+      )}
+    </>
+  );
+}
+
 export default function BristolBayMap() {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
+  const [districtData, setDistrictData] = useState({});
+  const [summaryData, setSummaryData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   // Bristol Bay center point
   const bristolBayCenter = [58.5, -157.5];
+
+  // Fetch all district data on mount
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [districts, summary] = await Promise.all([
+          getDistricts(),
+          getDailySummary(),
+        ]);
+
+        // Convert array to object keyed by district id
+        const dataMap = {};
+        districts.forEach((d) => {
+          dataMap[d.id] = d;
+        });
+
+        setDistrictData(dataMap);
+        setSummaryData(summary);
+        setLastUpdated(new Date(summary.scrapedAt));
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load data from server");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+
+    // Refresh data every 5 minutes
+    const interval = setInterval(fetchData, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch detailed data when district is selected
+  useEffect(() => {
+    if (selectedDistrict) {
+      getDistrict(selectedDistrict)
+        .then((data) => {
+          setDistrictData((prev) => ({
+            ...prev,
+            [selectedDistrict]: { ...prev[selectedDistrict], ...data },
+          }));
+        })
+        .catch((err) => console.error("Error fetching district details:", err));
+    }
+  }, [selectedDistrict]);
+
+  const selectedData = selectedDistrict ? districtData[selectedDistrict] : null;
 
   return (
     <div
@@ -126,6 +268,13 @@ export default function BristolBayMap() {
         </h1>
         <p style={{ color: "#bfdbfe", margin: 0 }}>
           Bristol Bay Sockeye Salmon Run Interactive Display
+          {lastUpdated && (
+            <span
+              style={{ marginLeft: "10px", fontSize: "12px", opacity: 0.8 }}
+            >
+              • Last updated: {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
         </p>
       </div>
 
@@ -143,45 +292,69 @@ export default function BristolBayMap() {
               zIndex: 1,
             }}
           >
-            {/* Tile Layer - OpenStreetMap (free!) */}
-            {/*<TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />*/}
+            {/* Satellite Tile Layer */}
+            <TileLayer
+              attribution="Tiles &copy; Esri"
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            />
 
-            {/* Alternative: Satellite-ish view using ESRI */}
-            {/* Uncomment this and comment out the one above to use satellite imagery */}
-            {
-              <TileLayer
-                attribution="Tiles &copy; Esri"
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              />
-            }
+            {/* GeoJSON Boundaries */}
+            <GeoJSONLayers />
 
             {/* District Markers */}
-            {Object.entries(DISTRICTS).map(([key, district]) => (
-              <Marker
-                key={key}
-                position={district.center}
-                icon={createCustomIcon(district.color, district.icon)}
-                eventHandlers={{
-                  click: () => setSelectedDistrict(key),
-                }}
-              >
-                <Popup>
-                  <div style={{ padding: "8px" }}>
-                    <h3 style={{ margin: "0 0 8px 0", color: "#1e293b" }}>
-                      {district.name}
-                    </h3>
-                    <p
-                      style={{ margin: 0, fontSize: "12px", color: "#64748b" }}
-                    >
-                      Click for details →
-                    </p>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+            {Object.entries(DISTRICTS).map(([key, district]) => {
+              const data = districtData[key];
+              return (
+                <Marker
+                  key={key}
+                  position={district.center}
+                  icon={createCustomIcon(district.color, district.icon)}
+                  eventHandlers={{
+                    click: () => setSelectedDistrict(key),
+                  }}
+                >
+                  <Popup>
+                    <div style={{ padding: "8px", minWidth: "200px" }}>
+                      <h3 style={{ margin: "0 0 8px 0", color: "#1e293b" }}>
+                        {district.name}
+                      </h3>
+                      {data ? (
+                        <>
+                          <div style={{ fontSize: "12px", lineHeight: "1.6" }}>
+                            <div>
+                              <strong>Cumulative Catch:</strong>{" "}
+                              {formatNumber(data.catchCumulative)}
+                            </div>
+                            <div>
+                              <strong>Daily Catch:</strong>{" "}
+                              {formatNumber(data.catchDaily)}
+                            </div>
+                            <div>
+                              <strong>Escapement:</strong>{" "}
+                              {formatNumber(data.escapementCumulative)}
+                            </div>
+                            <div>
+                              <strong>Total Run:</strong>{" "}
+                              {formatNumber(data.totalRun)}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: "12px",
+                            color: "#64748b",
+                          }}
+                        >
+                          Loading data...
+                        </p>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
 
             {/* Map Controller for animations */}
             <MapController selectedDistrict={selectedDistrict} />
@@ -210,7 +383,7 @@ export default function BristolBayMap() {
                 fontWeight: "bold",
               }}
             >
-              🗺️ Map Info
+              🗺️ Map Legend
             </h3>
             <ul
               style={{
@@ -221,23 +394,29 @@ export default function BristolBayMap() {
                 lineHeight: "1.6",
               }}
             >
-              <li>Free OpenStreetMap tiles (no API key!)</li>
-              <li>Click markers to view district info</li>
-              <li>Zoom and pan to explore</li>
-              <li>Data integration coming soon</li>
+              <li>
+                <span style={{ color: "#fbbf24" }}>━━</span> District Boundaries
+              </li>
+              <li>
+                <span style={{ color: "#60a5fa" }}>- - -</span> Section Lines
+              </li>
+              <li>🐟 District Markers (click for data)</li>
+              <li>Live data from ADF&G</li>
             </ul>
-            <div
-              style={{
-                marginTop: "12px",
-                paddingTop: "12px",
-                borderTop: "1px solid #334155",
-                fontSize: "11px",
-                color: "#94a3b8",
-              }}
-            >
-              💡 To switch to satellite view, uncomment the ESRI tile layer in
-              the code
-            </div>
+            {error && (
+              <div
+                style={{
+                  marginTop: "12px",
+                  padding: "8px",
+                  backgroundColor: "#7f1d1d",
+                  borderRadius: "4px",
+                  fontSize: "11px",
+                  color: "#fca5a5",
+                }}
+              >
+                ⚠️ {error}
+              </div>
+            )}
           </div>
         </div>
 
@@ -260,10 +439,10 @@ export default function BristolBayMap() {
               marginBottom: "16px",
             }}
           >
-            District Info
+            {loading ? "Loading..." : "District Info"}
           </h2>
 
-          {selectedDistrict ? (
+          {selectedData ? (
             <div style={{ color: "white" }}>
               <div
                 style={{
@@ -294,7 +473,9 @@ export default function BristolBayMap() {
                     }}
                   >
                     <span style={{ color: "#94a3b8" }}>Today's Catch:</span>
-                    <span style={{ fontWeight: "bold" }}>---</span>
+                    <span style={{ fontWeight: "bold" }}>
+                      {formatNumber(selectedData.catchDaily)}
+                    </span>
                   </div>
                   <div
                     style={{
@@ -304,7 +485,21 @@ export default function BristolBayMap() {
                     }}
                   >
                     <span style={{ color: "#94a3b8" }}>Season Total:</span>
-                    <span style={{ fontWeight: "bold" }}>---</span>
+                    <span style={{ fontWeight: "bold" }}>
+                      {formatNumber(selectedData.catchCumulative)}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <span style={{ color: "#94a3b8" }}>Escapement:</span>
+                    <span style={{ fontWeight: "bold" }}>
+                      {formatNumber(selectedData.escapementCumulative)}
+                    </span>
                   </div>
                   <div
                     style={{
@@ -313,61 +508,59 @@ export default function BristolBayMap() {
                     }}
                   >
                     <span style={{ color: "#94a3b8" }}>Status:</span>
-                    <span style={{ color: "#10b981" }}>Awaiting Data</span>
+                    <span
+                      style={{
+                        color:
+                          selectedData.catchDaily > 0 ? "#10b981" : "#f59e0b",
+                      }}
+                    >
+                      {selectedData.catchDaily > 0 ? "Active" : "Closed"}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div
-                style={{
-                  backgroundColor: "#334155",
-                  padding: "16px",
-                  borderRadius: "8px",
-                }}
-              >
-                <h4
-                  style={{
-                    fontSize: "14px",
-                    color: "#94a3b8",
-                    marginBottom: "12px",
-                  }}
-                >
-                  Recent Trend
-                </h4>
+              {selectedData.rivers && selectedData.rivers.length > 0 && (
                 <div
                   style={{
-                    height: "80px",
-                    backgroundColor: "#1e293b",
-                    borderRadius: "4px",
-                    display: "flex",
-                    alignItems: "flex-end",
-                    justifyContent: "space-around",
-                    padding: "8px",
+                    backgroundColor: "#334155",
+                    padding: "16px",
+                    borderRadius: "8px",
+                    marginBottom: "16px",
                   }}
                 >
-                  {[40, 65, 55, 80, 70].map((height, i) => (
+                  <h4
+                    style={{
+                      fontSize: "14px",
+                      color: "#94a3b8",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    Rivers in District
+                  </h4>
+                  {selectedData.rivers.map((river, i) => (
                     <div
                       key={i}
                       style={{
-                        width: "16%",
-                        height: `${height}%`,
-                        backgroundColor: DISTRICTS[selectedDistrict].color,
-                        borderRadius: "2px 2px 0 0",
+                        fontSize: "12px",
+                        marginBottom: "6px",
+                        paddingBottom: "6px",
+                        borderBottom:
+                          i < selectedData.rivers.length - 1
+                            ? "1px solid #1e293b"
+                            : "none",
                       }}
-                    />
+                    >
+                      <div style={{ fontWeight: "bold", color: "#e2e8f0" }}>
+                        {river.name}
+                      </div>
+                      <div style={{ color: "#94a3b8" }}>
+                        Escapement: {formatNumber(river.escapementCumulative)}
+                      </div>
+                    </div>
                   ))}
                 </div>
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "#64748b",
-                    marginTop: "8px",
-                    marginBottom: 0,
-                  }}
-                >
-                  Last 5 days (placeholder data)
-                </p>
-              </div>
+              )}
             </div>
           ) : (
             <div>
@@ -396,16 +589,40 @@ export default function BristolBayMap() {
                 >
                   Season Overview
                 </h4>
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "#94a3b8",
-                    margin: 0,
-                  }}
-                >
-                  Data integration coming soon. This will show real-time updates
-                  from ADF&G daily reports.
-                </p>
+                {summaryData ? (
+                  <div style={{ fontSize: "12px", color: "#cbd5e1" }}>
+                    <div style={{ marginBottom: "8px" }}>
+                      <strong>Total Catch:</strong>{" "}
+                      {formatNumber(summaryData.summary.totalCatch)}
+                    </div>
+                    <div style={{ marginBottom: "8px" }}>
+                      <strong>Total Escapement:</strong>{" "}
+                      {formatNumber(summaryData.summary.totalEscapement)}
+                    </div>
+                    <div>
+                      <strong>Total Run:</strong>{" "}
+                      {formatNumber(summaryData.summary.totalRun)}
+                    </div>
+                    {summaryData.summary.totalRun === 0 && (
+                      <div
+                        style={{
+                          marginTop: "12px",
+                          padding: "8px",
+                          backgroundColor: "#1e293b",
+                          borderRadius: "4px",
+                          fontSize: "11px",
+                          color: "#fbbf24",
+                        }}
+                      >
+                        ℹ️ Fishery is currently closed for the season
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: "12px", color: "#94a3b8", margin: 0 }}>
+                    Loading season data...
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -428,97 +645,65 @@ export default function BristolBayMap() {
             >
               ALL DISTRICTS
             </h3>
-            {Object.entries(DISTRICTS).map(([key, district]) => (
-              <div
-                key={key}
-                onClick={() => setSelectedDistrict(key)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "10px",
-                  marginBottom: "4px",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  backgroundColor:
-                    selectedDistrict === key ? "#334155" : "transparent",
-                  transition: "background-color 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  if (selectedDistrict !== key) {
-                    e.currentTarget.style.backgroundColor = "#1e293b";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (selectedDistrict !== key) {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }
-                }}
-              >
-                <span style={{ fontSize: "20px", marginRight: "12px" }}>
-                  {district.icon}
-                </span>
-                <div style={{ flex: 1 }}>
+            {Object.entries(DISTRICTS).map(([key, district]) => {
+              const data = districtData[key];
+              return (
+                <div
+                  key={key}
+                  onClick={() => setSelectedDistrict(key)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "10px",
+                    marginBottom: "4px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    backgroundColor:
+                      selectedDistrict === key ? "#334155" : "transparent",
+                    transition: "background-color 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedDistrict !== key) {
+                      e.currentTarget.style.backgroundColor = "#1e293b";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedDistrict !== key) {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }
+                  }}
+                >
+                  <span style={{ fontSize: "20px", marginRight: "12px" }}>
+                    {district.icon}
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        color: "white",
+                        fontSize: "14px",
+                        fontWeight:
+                          selectedDistrict === key ? "bold" : "normal",
+                      }}
+                    >
+                      {district.name}
+                    </div>
+                    {data && (
+                      <div style={{ fontSize: "11px", color: "#94a3b8" }}>
+                        {formatNumber(data.catchCumulative)} fish
+                      </div>
+                    )}
+                  </div>
                   <div
                     style={{
-                      color: "white",
-                      fontSize: "14px",
-                      fontWeight: selectedDistrict === key ? "bold" : "normal",
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      backgroundColor: district.color,
                     }}
-                  >
-                    {district.name}
-                  </div>
+                  />
                 </div>
-                <div
-                  style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    backgroundColor: district.color,
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Quick Stats */}
-          <div
-            style={{
-              marginTop: "24px",
-              paddingTop: "24px",
-              borderTop: "1px solid #334155",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "14px",
-                color: "#94a3b8",
-                marginBottom: "12px",
-                fontWeight: 600,
-              }}
-            >
-              QUICK STATS
-            </h3>
-            <div style={{ fontSize: "14px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "8px",
-                }}
-              >
-                <span style={{ color: "#94a3b8" }}>Total Season:</span>
-                <span style={{ color: "white" }}>--- million</span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#94a3b8" }}>Last Updated:</span>
-                <span style={{ color: "white" }}>Pending</span>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -545,10 +730,10 @@ export default function BristolBayMap() {
             marginRight: "12px",
           }}
         >
-          Phase 1: MVP
+          Phase 2: Live Data
         </span>
-        Interactive Leaflet map • 100% free • No API keys needed • Data
-        integration next
+        Real-time ADF&G data • District boundaries • GeoJSON layers •
+        Auto-refresh every 5min
       </div>
     </div>
   );
