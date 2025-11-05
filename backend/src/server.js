@@ -210,7 +210,7 @@ app.get("/api/daily", async (req, res) => {
       districts: data.districts,  // Return full district data with all fields
       rivers: data.rivers,        // Return full river data
       totalRun: data.totalRun,    // Return all the run data
-      sockeyePerDelivery: data.sockeyePerDelivery,
+      sockeyePerDelivery: data.sockeyePerDelivery || {},
     });
   } catch (error) {
     console.error("Error in /api/daily:", error);
@@ -265,6 +265,12 @@ app.get("/api/districts/:id", async (req, res) => {
     const districtRivers = data.rivers.filter((r) =>
       r.name.toLowerCase().includes(district.name.toLowerCase().split("-")[0])
     );
+
+    //include per delivery stat
+    const districts = data.districts.map(d => ({
+      ...d,
+      sockeyePerDelivery: data.sockeyePerDelivery?.[d.id] || 0
+    }));
 
     res.json({
       ...district,

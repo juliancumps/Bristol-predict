@@ -213,7 +213,7 @@ function saveScrapedData(db, data) {
         // After saving river data, add this:
 
 // Save sockeye per delivery data
-const sockeeyeStmt = db.prepare(`
+const sockeyeStmt = db.prepare(`
   INSERT OR REPLACE INTO sockeye_per_delivery 
   (run_date, district_id, district_name, sockeye_per_delivery)
   VALUES (?, ?, ?, ?)
@@ -230,14 +230,14 @@ const districtIdToName = {
 
 Object.entries(data.sockeyePerDelivery).forEach(([districtId, sockeye]) => {
   const districtName = districtIdToName[districtId] || districtId;
-  sockeeyeStmt.run(
+  sockeyeStmt.run(
     data.runDate,
     districtId,
     districtName,
     sockeye
   );
 });
-sockeeyeStmt.finalize();
+sockeyeStmt.finalize();
 
 
         // Commit transaction
@@ -261,27 +261,38 @@ sockeeyeStmt.finalize();
 }
 
 /**
- * Get data for a specific date
+ * Get data for a specific date from the database
  */
-function getDataByDate(db, runDate) {
-  return new Promise((resolve, reject) => {
+async function getDataByDate(db, runDate) {
+  return new Promise(async (resolve, reject) => {
     db.get(
-      "SELECT data_json FROM daily_summaries WHERE run_date = ?",
+      `
+      SELECT * FROM daily_summaries 
+      WHERE run_date = ?
+      `,
       [runDate],
-      (err, row) => {
+      async (err, row) => {
         if (err) {
           reject(err);
           return;
         }
+
         if (!row) {
           resolve(null);
           return;
         }
+
         try {
+          // Get the main data from JSON
           const data = JSON.parse(row.data_json);
+
+          // Get sockeye per delivery data from database
+          const sockeyeData = await getSockeyePerDeliveryByDate(db, runDate);
+          data.sockeyePerDelivery = sockeyeData;
+
           resolve(data);
-        } catch (parseErr) {
-          reject(parseErr);
+        } catch (error) {
+          reject(error);
         }
       }
     );
@@ -302,6 +313,39 @@ function getAvailableDates(db) {
           return;
         }
         resolve(rows);
+      }
+    );
+  });
+}
+
+
+/**
+ * Get sockeye per delivery data for a date
+ */
+function getSockeyePerDeliveryByDate(db, runDate) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `
+      SELECT district_id, sockeye_per_delivery 
+      FROM sockeye_per_delivery 
+      WHERE run_date = ?
+      ORDER BY district_id
+      `,
+      [runDate],
+      (err, rows) => {
+        if (err) {
+          console.error("❌ Error fetching sockeye data:", err);
+          reject(err);
+          return;
+        }
+
+        // Convert to object format: { naknek: 1410, egegik: 991, ... }
+        const sockeyeMap = {};
+        rows.forEach((row) => {
+          sockeyeMap[row.district_id] = row.sockeye_per_delivery;
+        });
+
+        resolve(sockeyeMap);
       }
     );
   });
@@ -335,5 +379,6 @@ module.exports = {
   getDataByDate,
   getAvailableDates,
   getSeasonDateRange,
+  getSockeyePerDeliveryByDate,
   DB_PATH,
 };
