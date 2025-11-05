@@ -192,17 +192,20 @@ export default function BristolBayMap() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   
-  // NEW: Date range support
+  // Date range support
   const [dateRangeMode, setDateRangeMode] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState(null);
   const [rangeData, setRangeData] = useState(null);
   
-  // NEW: Historical data for charts
+  // Historical data for charts
   const [historicalData, setHistoricalData] = useState([]);
-  const [chartMode, setChartMode] = useState("single"); // "single" | "comparison" | "distribution" | "multitrend"
+  const [chartMode, setChartMode] = useState("single");
 
-  // NEW: Rivers data
+  // Rivers data
   const [riversData, setRiversData] = useState([]);
+  
+  // Sidebar popup state
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const bristolBayCenter = [58.5, -157.5];
 
@@ -308,52 +311,56 @@ export default function BristolBayMap() {
 
   return (
     <div className="bristol-bay-map-container">
-      {/* Header */}
-      <div className="header-section">
-        <h1>Bristol Predict 🐟</h1>
-        <p>Bristol Bay Sockeye Salmon Run Interactive Display</p>
-        {lastUpdated && (
-          <span className="last-updated">
-            • Last updated: {lastUpdated.toLocaleTimeString()}
-          </span>
-        )}
+      {/* Compact Header */}
+      <div className="header-compact">
+        <div className="header-left">
+          <h1>Bristol Predict 🐟</h1>
+        </div>
+        
+        <div className="header-center">
+          <DatePicker
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+            dateRangeMode={dateRangeMode}
+            selectedDateRange={selectedDateRange}
+            onDateRangeChange={(start, end) =>
+              setSelectedDateRange({ startDate: start, endDate: end })
+            }
+          />
+        </div>
 
-        {/* Mode Toggle */}
-        <div className="mode-toggle">
+        <div className="header-right">
           <button
             className={`toggle-btn ${!dateRangeMode ? "active" : ""}`}
             onClick={() => setDateRangeMode(false)}
+            title="Single Date Mode"
           >
-            📅 Single Date
+            📅
           </button>
           <button
             className={`toggle-btn ${dateRangeMode ? "active" : ""}`}
             onClick={() => setDateRangeMode(true)}
+            title="Date Range Mode"
           >
-            📊 Date Range
+            📊
+          </button>
+          <button
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            title={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
+          >
+            {sidebarOpen ? "✕" : "☰"}
           </button>
         </div>
-
-        {/* DatePicker */}
-        <DatePicker
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-          dateRangeMode={dateRangeMode}
-          selectedDateRange={selectedDateRange}
-          onDateRangeChange={(start, end) =>
-            setSelectedDateRange({ startDate: start, endDate: end })
-          }
-        />
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - Map takes full space */}
       <div className="main-content">
-        {/* Map Container */}
         <div className="map-section">
           <MapContainer
             center={bristolBayCenter}
             zoom={8}
-            style={{ width: "100%", height: "100%", borderRadius: "8px" }}
+            style={{ width: "100%", height: "100%", borderRadius: "0" }}
           >
             <TileLayer
               attribution="Tiles &copy; Esri"
@@ -401,109 +408,123 @@ export default function BristolBayMap() {
             <MapController selectedDistrict={selectedDistrict} />
           </MapContainer>
         </div>
-
-        {/* Sidebar */}
-        <div className="sidebar">
-          {/* Summary Stats */}
-          {summaryData && (
-            <div className="summary-box">
-              <h3>Daily Summary</h3>
-              <div className="summary-grid">
-                <div className="summary-stat">
-                  <span className="summary-label">Total Daily Catch</span>
-                  <span className="summary-value">
-                    {formatNumber(totalCatch)}
-                  </span>
-                </div>
-                <div className="summary-stat">
-                  <span className="summary-label">Total Daily Escapement</span>
-                  <span className="summary-value">
-                    {formatNumber(summaryData.summary?.totalEscapement || 0)}
-                  </span>
-                </div>
-                <div className="summary-stat">
-                  <span className="summary-label">Total Run</span>
-                  <span className="summary-value">
-                    {formatNumber(summaryData.summary?.totalRun || 0)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* District Details */}
-          {selectedDistrict && selectedDistrictData && (
-            <DistrictStats
-              district={DISTRICTS[selectedDistrict]}
-              districtData={selectedDistrictData}
-              totalCatch={totalCatch}
-              rivers={riversData}
-              isDateRange={dateRangeMode}
-            />
-          )}
-
-          {/* Chart Toggle */}
-          <div className="chart-toggle">
-            <h4>Chart Views</h4>
-            <div className="chart-buttons">
-              <button
-                className={`chart-btn ${chartMode === "single" ? "active" : ""}`}
-                onClick={() => setChartMode("single")}
-              >
-                📈 Trend
-              </button>
-              <button
-                className={`chart-btn ${chartMode === "comparison" ? "active" : ""}`}
-                onClick={() => setChartMode("comparison")}
-              >
-                📊 Compare
-              </button>
-              <button
-                className={`chart-btn ${chartMode === "distribution" ? "active" : ""}`}
-                onClick={() => setChartMode("distribution")}
-              >
-                🥧 Distribution
-              </button>
-              <button
-                className={`chart-btn ${chartMode === "multitrend" ? "active" : ""}`}
-                onClick={() => setChartMode("multitrend")}
-              >
-                📉 Multi
-              </button>
-            </div>
-          </div>
-
-          {/* District List */}
-          <div className="districts-list">
-            <h3>All Districts</h3>
-            {Object.entries(DISTRICTS).map(([key, district]) => {
-              const data = districtData[key];
-              return (
-                <div
-                  key={key}
-                  className={`district-item ${selectedDistrict === key ? "selected" : ""}`}
-                  onClick={() => setSelectedDistrict(key)}
-                >
-                  <span className="district-emoji">{district.icon}</span>
-                  <div className="district-name-info">
-                    <div className="district-name">{district.name}</div>
-                    {data && (
-                      <div className="district-catch">
-                        {formatNumber(data.catchDaily)} 
-                        <span className="catch-percentage">
-                          {calculatePercentage(data.catchDaily, totalCatch)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
       </div>
 
-      {/* Charts Section */}
+      {/* Popup Sidebar - Full Height */}
+      {sidebarOpen && (
+        <div className="sidebar-popup">
+          <div className="sidebar-header">
+            <h3>📊 Data Panel</h3>
+            <button
+              className="close-btn"
+              onClick={() => setSidebarOpen(false)}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="sidebar-content">
+            {/* Summary Stats */}
+            {summaryData && (
+              <div className="summary-box">
+                <h4>Daily Summary</h4>
+                <div className="summary-grid">
+                  <div className="summary-stat">
+                    <span className="summary-label">Total Daily Catch</span>
+                    <span className="summary-value">
+                      {formatNumber(totalCatch)}
+                    </span>
+                  </div>
+                  <div className="summary-stat">
+                    <span className="summary-label">Daily Escapement</span>
+                    <span className="summary-value">
+                      {formatNumber(summaryData.summary?.totalEscapement || 0)}
+                    </span>
+                  </div>
+                  <div className="summary-stat">
+                    <span className="summary-label">Total Run</span>
+                    <span className="summary-value">
+                      {formatNumber(summaryData.summary?.totalRun || 0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* District Details */}
+            {selectedDistrict && selectedDistrictData && (
+              <DistrictStats
+                district={DISTRICTS[selectedDistrict]}
+                districtData={selectedDistrictData}
+                totalCatch={totalCatch}
+                rivers={riversData}
+                isDateRange={dateRangeMode}
+              />
+            )}
+
+            {/* Chart Toggle */}
+            <div className="chart-toggle">
+              <h4>Chart Views</h4>
+              <div className="chart-buttons">
+                <button
+                  className={`chart-btn ${chartMode === "single" ? "active" : ""}`}
+                  onClick={() => setChartMode("single")}
+                >
+                  📈
+                </button>
+                <button
+                  className={`chart-btn ${chartMode === "comparison" ? "active" : ""}`}
+                  onClick={() => setChartMode("comparison")}
+                >
+                  📊
+                </button>
+                <button
+                  className={`chart-btn ${chartMode === "distribution" ? "active" : ""}`}
+                  onClick={() => setChartMode("distribution")}
+                >
+                  🥧
+                </button>
+                <button
+                  className={`chart-btn ${chartMode === "multitrend" ? "active" : ""}`}
+                  onClick={() => setChartMode("multitrend")}
+                >
+                  📉
+                </button>
+              </div>
+            </div>
+
+            {/* District List */}
+            <div className="districts-list">
+              <h4>Districts</h4>
+              {Object.entries(DISTRICTS).map(([key, district]) => {
+                const data = districtData[key];
+                return (
+                  <div
+                    key={key}
+                    className={`district-item ${selectedDistrict === key ? "selected" : ""}`}
+                    onClick={() => setSelectedDistrict(key)}
+                  >
+                    <span className="district-emoji">{district.icon}</span>
+                    <div className="district-name-info">
+                      <div className="district-name">{district.name}</div>
+                      {data && (
+                        <div className="district-catch">
+                          {formatNumber(data.catchDaily)} 
+                          <span className="catch-percentage">
+                            {calculatePercentage(data.catchDaily, totalCatch)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Charts Section - Scrolls, shifts when sidebar open */}
       <div className="charts-section">
         {chartMode === "single" && (
           <LineChart_DayToDayComparison

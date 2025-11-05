@@ -189,28 +189,33 @@ app.get("/api/daily", async (req, res) => {
   try {
     const date = req.query.date;
     const data = await getFreshData(date);
-    const summary = getSummaryStats(data);
+
+    // ✅ Use DAILY values, not cumulative
+    const dailyTotals = {
+      catchDaily: data.districts.reduce((sum, d) => sum + (d.catchDaily || 0), 0),
+      escapementDaily: data.districts.reduce((sum, d) => sum + (d.escapementDaily || 0), 0),
+    };
 
     res.json({
       scrapedAt: data.scrapedAt,
       runDate: data.runDate,
       season: data.season,
       summary: {
-        totalCatch: summary.totalCatch,
-        totalEscapement: summary.totalEscapement,
-        totalRun: summary.totalRun,
-        districtCount: summary.districtCount,
-        riverCount: summary.riverCount,
+        totalCatch: dailyTotals.catchDaily,        // ✅ Daily, not cumulative
+        totalEscapement: dailyTotals.escapementDaily, // ✅ Daily, not cumulative
+        totalRun: data.totalRun.totalRun || 0,   // This is already total
+        districtCount: data.districts.length,
+        riverCount: data.rivers.length,
       },
-      districts: data.districts,
-      rivers: data.rivers,
-      totalRun: data.totalRun,
+      districts: data.districts,  // Return full district data with all fields
+      rivers: data.rivers,        // Return full river data
+      totalRun: data.totalRun,    // Return all the run data
     });
   } catch (error) {
     console.error("Error in /api/daily:", error);
     res.status(500).json({
       error: "Failed to fetch daily summary",
-      message: error.message,
+      message: error.message
     });
   }
 });
@@ -270,6 +275,118 @@ app.get("/api/districts/:id", async (req, res) => {
     res.status(500).json({
       error: "Failed to fetch district data",
       message: error.message,
+    });
+  }
+});
+
+
+// Date range endpoint - fetches multiple days and returns as array
+app.get("/api/range", async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        error: "Missing startDate or endDate",
+        example: "/api/range?startDate=06-01-2024&endDate=06-07-2024"
+      });
+    }
+
+    console.log(`📅 Fetching date range: ${startDate} to ${endDate}`);
+
+    // Convert dates for comparison
+    const start = new Date(startDate.split('-').reverse().join('-'));
+    const end = new Date(endDate.split('-').reverse().join('-'));
+    
+    if (start > end) {
+      return res.status(400).json({
+        error: "startDate must be before endDate"
+      });
+    }
+
+    // Build array of all dates in range
+    const datesInRange = [];
+    const currentDate = new Date(start);
+    
+    while (currentDate <= end) {
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      const year = currentDate.getFullYear();
+      datesInRange.push(`${month}-${day}-${year}`);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    console.log(`📆 Dates to fetch: ${datesInRange.length} days`);
+
+    // Fetch data for each date
+    const rangeData = [];
+    for (const date of datesInRange) {
+      try {
+        const data = await getFreshData(date);
+        rangeData.push(data);
+      } catch (error) {
+        console.warn(`⚠️  No data for ${date}:`, error.message);
+      }
+    }
+
+    if (rangeData.length === 0) {
+      return res.status(404).json({
+        error: "No data found for date range",
+        startDate,
+        endDate
+      });
+    }
+
+    console.log(`✅ Retrieved ${rangeData.length} days of data`);
+
+    res.json(rangeData);
+  } catch (error) {
+    console.error("Error in /api/range:", error);
+    res.status(500).json({
+      error: "Failed to fetch date range data",
+      message: error.message
+    });
+  }
+});
+
+// Optional: Add historical endpoint for last N days
+app.get("/api/historical", async (req, res) => {
+  try {
+    const days = Math.min(parseInt(req.query.days) || 30, 90); // Max 90 days
+    
+    console.log(`📊 Fetching last ${days} days of data`);
+
+    // Get all available dates
+    const availableDates = await getAvailableDates(db);
+    
+    if (availableDates.length === 0) {
+      return res.status(404).json({
+        error: "No data available",
+      });
+    }
+
+    // Take the last N dates
+    const datesToFetch = availableDates.slice(0, days).map(d => d.run_date);
+    
+    // Fetch data for each date
+    const historicalData = [];
+    for (const date of datesToFetch) {
+      try {
+        const data = await getFreshData(date);
+        historicalData.push(data);
+      } catch (error) {
+        console.warn(`⚠️  No data for ${date}`);
+      }
+    }
+
+    console.log(`✅ Retrieved ${historicalData.length} days of historical data`);
+
+    res.json(historicalData);
+  } catch (error) {
+    console.error("Error in /api/historical:", error);
+    res.status(500).json({
+      error: "Failed to fetch historical data",
+      message: error.message
     });
   }
 });

@@ -8,122 +8,191 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Header */
-.header-section {
+/* Compact Header - Single Row */
+.header-compact {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
   background: linear-gradient(to right, #1e3a8a, #1e40af);
-  padding: 20px 24px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  overflow-y: auto;
-  max-height: 30vh;
   border-bottom: 2px solid #3b82f6;
+  height: 60px;
+  flex-shrink: 0;
 }
 
-.header-section h1 {
-  margin: 0 0 8px 0;
-  font-size: 28px;
+.header-left {
+  flex-shrink: 0;
+}
+
+.header-left h1 {
+  margin: 0;
+  font-size: 20px;
   font-weight: bold;
   color: white;
 }
 
-.header-section p {
-  margin: 0 0 8px 0;
-  color: #bfdbfe;
-  font-size: 14px;
+.header-center {
+  flex: 1;
+  min-width: 300px;
 }
 
-.last-updated {
-  display: inline-block;
-  margin-left: 10px;
-  font-size: 12px;
-  color: #93c5fd;
-  opacity: 0.8;
-}
-
-/* Mode Toggle */
-.mode-toggle {
+.header-right {
   display: flex;
   gap: 8px;
-  margin: 12px 0;
+  flex-shrink: 0;
 }
 
-.toggle-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
+.toggle-btn,
+.sidebar-toggle {
+  padding: 8px 12px;
+  border-radius: 4px;
   border: 1px solid #3b82f6;
   background-color: transparent;
   color: #60a5fa;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  min-width: 40px;
 }
 
-.toggle-btn:hover {
+.toggle-btn:hover,
+.sidebar-toggle:hover {
   background-color: rgba(59, 130, 246, 0.1);
 }
 
-.toggle-btn.active {
+.toggle-btn.active,
+.sidebar-toggle.active {
   background-color: #3b82f6;
   color: white;
 }
 
-/* Main Content */
+.sidebar-toggle {
+  font-size: 18px;
+  padding: 8px 10px;
+}
+
+/* Main Content - Flex container for map and sidebar */
 .main-content {
   flex: 1;
   display: flex;
-  gap: 16px;
-  padding: 16px;
+  position: relative;
   overflow: hidden;
 }
 
 .map-section {
   flex: 1;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  border: 1px solid #3b82f6;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
 }
 
-/* Sidebar */
-.sidebar {
-  width: 320px;
+.map-section .leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* Sidebar Popup - Full Height Overlay */
+.sidebar-popup {
+  position: fixed;
+  right: 0;
+  top: 60px; /* Start below header */
+  width: 350px;
+  height: calc(100vh - 60px); /* Full height minus header */
+  background-color: rgba(15, 23, 42, 0.98);
+  border-left: 2px solid #3b82f6;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.3);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(8px);
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #334155;
+  flex-shrink: 0;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #e2e8f0;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow-y: auto;
-  padding-right: 8px;
 }
 
-.sidebar::-webkit-scrollbar {
+.sidebar-content::-webkit-scrollbar {
   width: 6px;
 }
 
-.sidebar::-webkit-scrollbar-track {
+.sidebar-content::-webkit-scrollbar-track {
   background: rgba(30, 41, 59, 0.5);
-  border-radius: 3px;
 }
 
-.sidebar::-webkit-scrollbar-thumb {
+.sidebar-content::-webkit-scrollbar-thumb {
   background: #475569;
   border-radius: 3px;
 }
 
-.sidebar::-webkit-scrollbar-thumb:hover {
+.sidebar-content::-webkit-scrollbar-thumb:hover {
   background: #64748b;
 }
 
 /* Summary Box */
 .summary-box {
-  padding: 16px;
-  background-color: rgba(15, 23, 42, 0.8);
-  border-radius: 8px;
+  padding: 12px;
+  background-color: rgba(30, 41, 59, 0.6);
+  border-radius: 6px;
   border: 1px solid #3b82f6;
+  flex-shrink: 0;
 }
 
-.summary-box h3 {
-  margin: 0 0 12px 0;
-  font-size: 14px;
+.summary-box h4 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
   font-weight: 600;
   color: #60a5fa;
   text-transform: uppercase;
@@ -140,20 +209,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
-  background-color: rgba(30, 41, 59, 0.6);
+  padding: 6px;
+  background-color: rgba(30, 41, 59, 0.4);
   border-radius: 4px;
   border: 1px solid #334155;
+  font-size: 11px;
 }
 
 .summary-label {
-  font-size: 11px;
   color: #94a3b8;
   font-weight: 500;
 }
 
 .summary-value {
-  font-size: 14px;
   font-weight: bold;
   color: #10b981;
 }
@@ -161,13 +229,14 @@
 /* Chart Toggle */
 .chart-toggle {
   padding: 12px;
-  background-color: rgba(15, 23, 42, 0.8);
-  border-radius: 8px;
+  background-color: rgba(30, 41, 59, 0.6);
+  border-radius: 6px;
   border: 1px solid #3b82f6;
+  flex-shrink: 0;
 }
 
 .chart-toggle h4 {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   font-size: 12px;
   font-weight: 600;
   color: #60a5fa;
@@ -178,7 +247,7 @@
 .chart-buttons {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .chart-btn {
@@ -187,8 +256,7 @@
   border: 1px solid #475569;
   background-color: transparent;
   color: #cbd5e1;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -207,12 +275,13 @@
 /* Districts List */
 .districts-list {
   padding: 12px;
-  background-color: rgba(15, 23, 42, 0.8);
-  border-radius: 8px;
+  background-color: rgba(30, 41, 59, 0.6);
+  border-radius: 6px;
   border: 1px solid #3b82f6;
+  flex-shrink: 0;
 }
 
-.districts-list h3 {
+.districts-list h4 {
   margin: 0 0 8px 0;
   font-size: 12px;
   font-weight: 600;
@@ -225,9 +294,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px;
+  padding: 8px;
   margin-bottom: 4px;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   background-color: transparent;
   transition: all 0.2s;
@@ -245,7 +314,8 @@
 }
 
 .district-emoji {
-  font-size: 18px;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .district-name-info {
@@ -253,35 +323,46 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .district-name {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .district-catch {
-  font-size: 11px;
+  font-size: 10px;
   color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .catch-percentage {
-  margin-left: 6px;
+  margin-left: 4px;
   color: #10b981;
   font-weight: 600;
-  padding: 0 4px;
-  background-color: rgba(16, 185, 129, 0.1);
-  border-radius: 2px;
 }
 
-/* Charts Section */
+/* Charts Section - Now takes remaining space and scrolls */
 .charts-section {
   padding: 16px;
   background-color: rgba(15, 23, 42, 0.6);
   border-top: 2px solid #3b82f6;
-  max-height: 40vh;
+  flex: 1;
   overflow-y: auto;
+  transition: margin-right 0.3s ease-out;
+  margin-right: 0; /* No margin when sidebar is closed */
+}
+
+/* When sidebar is open, shift charts to the left */
+.sidebar-popup ~ .charts-section {
+  margin-right: 350px;
 }
 
 .charts-section::-webkit-scrollbar {
@@ -311,24 +392,24 @@
 /* Marker Popup */
 .marker-popup {
   font-size: 12px;
-  min-width: 200px;
+  min-width: 180px;
 }
 
 .marker-popup h3 {
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   color: #1e293b;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .popup-stats {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   color: #1e293b;
 }
 
 .popup-stats div {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .popup-stats strong {
@@ -336,116 +417,69 @@
 }
 
 /* Responsive */
-@media (max-width: 1440px) {
-  .sidebar {
-    width: 280px;
-  }
-}
-
 @media (max-width: 1024px) {
-  .main-content {
-    flex-direction: column;
-  }
-
-  .map-section {
-    flex: 0 1 40%;
-    min-height: 300px;
-  }
-
-  .sidebar {
-    width: 100%;
-    flex-direction: row;
+  .header-compact {
     flex-wrap: wrap;
-    overflow-y: visible;
+    height: auto;
+    gap: 8px;
+    padding: 8px;
   }
 
-  .summary-box,
-  .chart-toggle,
-  .districts-list {
-    flex: 1;
-    min-width: 250px;
-  }
-
-  .charts-section {
-    max-height: 30vh;
+  .sidebar-popup {
+    width: 300px;
+    top: auto; /* Let it position naturally */
+    height: auto;
   }
 }
 
 @media (max-width: 768px) {
-  .bristol-bay-map-container {
-    height: 100%;
+  .header-compact {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
   }
 
-  .header-section {
-    padding: 16px;
-    max-height: 20vh;
+  .header-left h1 {
+    font-size: 18px;
   }
 
-  .header-section h1 {
-    font-size: 20px;
+  .sidebar-popup {
+    width: 100%;
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    border-radius: 0;
   }
 
   .main-content {
     flex-direction: column;
-    padding: 8px;
-    gap: 8px;
   }
 
   .map-section {
-    flex: 0 1 30vh;
-  }
-
-  .sidebar {
-    flex-direction: column;
-  }
-
-  .summary-box,
-  .chart-toggle,
-  .districts-list {
-    min-width: auto;
-  }
-
-  .mode-toggle {
-    flex-wrap: wrap;
-  }
-
-  .chart-buttons {
-    grid-template-columns: repeat(2, 1fr);
+    height: 50%;
   }
 
   .charts-section {
-    max-height: 25vh;
-    padding: 12px;
+    margin-right: 0;
   }
 }
 
 @media (max-width: 480px) {
-  .bristol-bay-map-container {
-    height: 100%;
+  .header-compact {
+    padding: 8px;
+    gap: 6px;
   }
 
-  .header-section {
-    padding: 12px;
+  .header-left h1 {
+    font-size: 16px;
   }
 
-  .header-section h1 {
-    font-size: 18px;
+  .sidebar-popup {
+    width: 100%;
   }
 
-  .header-section p {
-    font-size: 12px;
-  }
-
-  .sidebar {
-    padding-right: 0;
-  }
-
-  .map-section {
-    flex: 0 1 25vh;
-    border-radius: 4px;
-  }
-
-  .chart-buttons {
-    grid-template-columns: 1fr;
+  .district-item {
+    padding: 6px;
   }
 }
