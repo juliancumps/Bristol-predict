@@ -28,6 +28,31 @@ function parseNumber(text) {
   return isNaN(num) ? 0 : num;
 }
 
+function getSummaryStats(data) {
+  const totalCatch = data.districts.reduce(
+    (sum, d) => sum + d.catchCumulative,
+    0
+  );
+  const totalEscapement = data.districts.reduce(
+    (sum, d) => sum + d.escapementCumulative,
+    0
+  );
+  const totalRun = totalCatch + totalEscapement;
+
+  return {
+    totalCatch,
+    totalEscapement,
+    totalRun,
+    districtCount: data.districts.length,
+    riverCount: data.rivers.length,
+    topDistrict: data.districts.reduce(
+      (max, d) => (d.catchCumulative > (max?.catchCumulative || 0) ? d : max),
+      null
+    ),
+  };
+}
+
+
 /**
  * Wait for an element with retry and debug logging
  */
@@ -252,4 +277,5 @@ module.exports = {
   parseNumber,
   formatDateForURL,
   waitForElement,
+  getSummaryStats,
 };
