@@ -9,6 +9,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import DatePicker from "./DatePicker";
 import {
   getDistricts,
   getDailySummary,
@@ -33,31 +34,31 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const DISTRICTS = {
   naknek: {
     name: "Naknek-Kvichak",
-    center: [58.7, -156.5],
+    center: [58.7, -157.1755],
     color: "#3b82f6",
     icon: "🐟",
   },
   egegik: {
     name: "Egegik",
-    center: [58.2, -157.4],
+    center: [58.222, -157.525],
     color: "#8b5cf6",
     icon: "🐠",
   },
   ugashik: {
     name: "Ugashik",
-    center: [57.5, -157.75],
+    center: [57.6, -157.75],
     color: "#ec4899",
     icon: "🎣",
   },
   nushagak: {
     name: "Nushagak",
-    center: [58.9, -158.5],
+    center: [58.72, -158.54],
     color: "#10b981",
     icon: "🐡",
   },
   togiak: {
     name: "Togiak",
-    center: [59.0, -160.4],
+    center: [58.83, -160.45],
     color: "#f59e0b",
     icon: "🦈",
   },
@@ -128,20 +129,41 @@ function GeoJSONLayers() {
   useEffect(() => {
     // Load district boundaries
     fetch("/geojson/Commercial_Fisheries_Bristol_Bay_Salmon_Districts.geojson")
-      .then((res) => res.json())
-      .then((data) => setDistricts(data))
-      .catch((err) =>
-        console.log("Districts GeoJSON not found (optional):", err.message)
-      );
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Districts GeoJSON loaded:", data);
+        setDistricts(data);
+      })
+      .catch((err) => {
+        console.log("Districts GeoJSON not found (optional):", err.message);
+      });
 
     // Load section boundaries
     fetch("/geojson/Commercial_Fisheries_Bristol_Bay_Salmon_Sections.geojson")
-      .then((res) => res.json())
-      .then((data) => setSections(data))
-      .catch((err) =>
-        console.log("Sections GeoJSON not found (optional):", err.message)
-      );
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Sections GeoJSON loaded:", data);
+        setSections(data);
+      })
+      .catch((err) => {
+        console.log("Sections GeoJSON not found (optional):", err.message);
+      });
   }, []);
+
+  // Return null if there's nothing to render yet
+  if (!sections && !districts) {
+    return null;
+  }
 
   return (
     <>
@@ -183,18 +205,34 @@ export default function BristolBayMap() {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
 
+  // NEW: State for date selection
+  const [selectedDate, setSelectedDate] = useState(null);
+
   // Bristol Bay center point
   const bristolBayCenter = [58.5, -157.5];
 
-  // Fetch all district data on mount
+  // UPDATED: Fetch all district data when date changes
   useEffect(() => {
+    // Don't fetch if no date selected yet
+    if (!selectedDate) {
+      console.log("⏳ Waiting for date to be selected...");
+      return;
+    }
+
+    console.log(`📅 Fetching data for date: ${selectedDate}`);
+
     async function fetchData() {
       try {
         setLoading(true);
+        setError(null);
+
         const [districts, summary] = await Promise.all([
-          getDistricts(),
-          getDailySummary(),
+          getDistricts(selectedDate),
+          getDailySummary(selectedDate),
         ]);
+
+        console.log("✅ Districts received:", districts);
+        console.log("✅ Summary received:", summary);
 
         // Convert array to object keyed by district id
         const dataMap = {};
@@ -205,26 +243,22 @@ export default function BristolBayMap() {
         setDistrictData(dataMap);
         setSummaryData(summary);
         setLastUpdated(new Date(summary.scrapedAt));
-        setError(null);
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load data from server");
+        console.error("❌ Error fetching data:", err);
+        console.error("Error details:", err.response?.data || err.message);
+        setError(`Failed to load data: ${err.message}`);
       } finally {
         setLoading(false);
       }
     }
 
     fetchData();
-
-    // Refresh data every 5 minutes
-    const interval = setInterval(fetchData, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+  }, [selectedDate]); // Changed dependency to selectedDate
 
   // Fetch detailed data when district is selected
   useEffect(() => {
-    if (selectedDistrict) {
-      getDistrict(selectedDistrict)
+    if (selectedDistrict && selectedDate) {
+      getDistrict(selectedDistrict, selectedDate)
         .then((data) => {
           setDistrictData((prev) => ({
             ...prev,
@@ -233,7 +267,7 @@ export default function BristolBayMap() {
         })
         .catch((err) => console.error("Error fetching district details:", err));
     }
-  }, [selectedDistrict]);
+  }, [selectedDistrict, selectedDate]);
 
   const selectedData = selectedDistrict ? districtData[selectedDistrict] : null;
 
@@ -266,7 +300,7 @@ export default function BristolBayMap() {
         >
           Bristol Predict 🐟
         </h1>
-        <p style={{ color: "#bfdbfe", margin: 0 }}>
+        <p style={{ color: "#bfdbfe", margin: "0 0 16px 0" }}>
           Bristol Bay Sockeye Salmon Run Interactive Display
           {lastUpdated && (
             <span
@@ -276,6 +310,12 @@ export default function BristolBayMap() {
             </span>
           )}
         </p>
+
+        {/* NEW: DatePicker Component */}
+        <DatePicker
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+        />
       </div>
 
       {/* Main Content */}
@@ -401,7 +441,7 @@ export default function BristolBayMap() {
                 <span style={{ color: "#60a5fa" }}>- - -</span> Section Lines
               </li>
               <li>🐟 District Markers (click for data)</li>
-              <li>Live data from ADF&G</li>
+              <li>Historical data from ADF&G</li>
             </ul>
             {error && (
               <div
@@ -587,7 +627,7 @@ export default function BristolBayMap() {
                     fontSize: "16px",
                   }}
                 >
-                  Season Overview
+                  {selectedDate ? "Data for Selected Date" : "Season Overview"}
                 </h4>
                 {summaryData ? (
                   <div style={{ fontSize: "12px", color: "#cbd5e1" }}>
@@ -614,13 +654,15 @@ export default function BristolBayMap() {
                           color: "#fbbf24",
                         }}
                       >
-                        ℹ️ Fishery is currently closed for the season
+                        ℹ️ No fishing activity on this date
                       </div>
                     )}
                   </div>
                 ) : (
                   <p style={{ fontSize: "12px", color: "#94a3b8", margin: 0 }}>
-                    Loading season data...
+                    {selectedDate
+                      ? "Loading data..."
+                      : "Select a date to view data"}
                   </p>
                 )}
               </div>
@@ -730,10 +772,9 @@ export default function BristolBayMap() {
             marginRight: "12px",
           }}
         >
-          Phase 2: Live Data
+          Phase 3: Historical Data
         </span>
-        Real-time ADF&G data • District boundaries • GeoJSON layers •
-        Auto-refresh every 5min
+        ADF&G historical data • Date selection • SQLite database • 2025 season
       </div>
     </div>
   );

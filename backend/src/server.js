@@ -4,12 +4,22 @@ require("dotenv").config();
 const {
   scrapeHarvestData,
   getSummaryStats,
+  formatDateForURL,
 } = require("./scrapers/harvestScraper");
+const {
+  initDatabase,
+  saveScrapedData,
+  getDataByDate,
+  getAvailableDates,
+} = require("./database");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Cache for scraped data
+// Database instance
+let db = null;
+
+// Cache for current/latest data
 let cachedData = null;
 let lastScraped = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -18,30 +28,78 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 app.use(cors());
 app.use(express.json());
 
-// Function to get fresh data (with caching)
-async function getFreshData() {
-  const now = Date.now();
-
-  // Return cached data if it's still fresh
-  if (cachedData && lastScraped && now - lastScraped < CACHE_DURATION) {
-    console.log("📦 Returning cached data");
-    return cachedData;
-  }
-
-  // Fetch fresh data
-  console.log("🔄 Fetching fresh data from ADF&G...");
+// Initialize database on startup
+async function initializeServer() {
   try {
-    const data = await scrapeHarvestData();
-    cachedData = data;
-    lastScraped = now;
+    console.log("📂 Initializing database...");
+    db = await initDatabase();
+    console.log("✅ Database ready");
+  } catch (error) {
+    console.error("❌ Failed to initialize database:", error);
+    process.exit(1);
+  }
+}
+
+/**
+ * Get fresh data for a specific date (with caching for current date)
+ */
+async function getFreshData(runDate = null) {
+  try {
+    // If no date specified, use today
+    const requestedDate = runDate ? new Date(runDate) : new Date();
+    const dateStr = formatDateForURL(requestedDate);
+
+    // Check if we're requesting today's data and have a fresh cache
+    const isToday = dateStr === formatDateForURL(new Date());
+    const now = Date.now();
+
+    if (
+      isToday &&
+      cachedData &&
+      lastScraped &&
+      now - lastScraped < CACHE_DURATION
+    ) {
+      console.log("📦 Returning cached data for today");
+      return cachedData;
+    }
+
+    // Try to get from database first
+    console.log(`🔍 Checking database for ${dateStr}...`);
+    const dbData = await getDataByDate(db, dateStr);
+
+    if (dbData) {
+      console.log(`✅ Found ${dateStr} in database`);
+      if (isToday) {
+        cachedData = dbData;
+        lastScraped = now;
+      }
+      return dbData;
+    }
+
+    // If not in database, scrape it
+    console.log(`🔄 Scraping fresh data for ${dateStr}...`);
+    const data = await scrapeHarvestData(requestedDate);
+
+    // Save to database
+    await saveScrapedData(db, data);
+    console.log(`💾 Saved ${dateStr} to database`);
+
+    // Cache if today
+    if (isToday) {
+      cachedData = data;
+      lastScraped = now;
+    }
+
     return data;
   } catch (error) {
     console.error("❌ Error fetching data:", error);
+
     // Return cached data if available, even if stale
-    if (cachedData) {
+    if (cachedData && !runDate) {
       console.log("⚠️  Returning stale cached data due to error");
       return cachedData;
     }
+
     throw error;
   }
 }
@@ -51,7 +109,8 @@ app.get("/", (req, res) => {
   res.json({
     message: "Bristol Predict API Server",
     status: "running",
-    version: "1.0.0",
+    version: "2.0.0",
+    features: ["historical-data", "date-selection", "sqlite-database"],
     lastScraped: lastScraped ? new Date(lastScraped).toISOString() : null,
   });
 });
@@ -61,15 +120,41 @@ app.get("/health", (req, res) => {
   res.json({
     status: "healthy",
     timestamp: new Date().toISOString(),
+    database: db ? "connected" : "disconnected",
     cacheStatus: cachedData ? "populated" : "empty",
     lastScraped: lastScraped ? new Date(lastScraped).toISOString() : null,
   });
 });
 
+// Get all available dates
+app.get("/api/dates", async (req, res) => {
+  try {
+    const dates = await getAvailableDates(db);
+    res.json({
+      count: dates.length,
+      dates: dates.map((d) => d.run_date),
+      dateRanges:
+        dates.length > 0
+          ? {
+              earliest: dates[dates.length - 1].run_date,
+              latest: dates[0].run_date,
+            }
+          : null,
+    });
+  } catch (error) {
+    console.error("Error in /api/dates:", error);
+    res.status(500).json({
+      error: "Failed to fetch available dates",
+      message: error.message,
+    });
+  }
+});
+
 // Districts endpoint - returns array of districts with current data
 app.get("/api/districts", async (req, res) => {
   try {
-    const data = await getFreshData();
+    const date = req.query.date;
+    const data = await getFreshData(date);
     res.json(data.districts);
   } catch (error) {
     console.error("Error in /api/districts:", error);
@@ -83,11 +168,13 @@ app.get("/api/districts", async (req, res) => {
 // Daily summary endpoint - returns full scraped data
 app.get("/api/daily", async (req, res) => {
   try {
-    const data = await getFreshData();
+    const date = req.query.date;
+    const data = await getFreshData(date);
     const summary = getSummaryStats(data);
 
     res.json({
       scrapedAt: data.scrapedAt,
+      runDate: data.runDate,
       season: data.season,
       summary: {
         totalCatch: summary.totalCatch,
@@ -112,7 +199,8 @@ app.get("/api/daily", async (req, res) => {
 // Specific district endpoint
 app.get("/api/districts/:id", async (req, res) => {
   try {
-    const data = await getFreshData();
+    const date = req.query.date;
+    const data = await getFreshData(date);
     const district = data.districts.find((d) => d.id === req.params.id);
 
     if (!district) {
@@ -130,6 +218,7 @@ app.get("/api/districts/:id", async (req, res) => {
     res.json({
       ...district,
       rivers: districtRivers,
+      runDate: data.runDate,
     });
   } catch (error) {
     console.error(`Error in /api/districts/${req.params.id}:`, error);
@@ -152,6 +241,7 @@ app.post("/api/refresh", async (req, res) => {
     res.json({
       message: "Data refreshed successfully",
       scrapedAt: data.scrapedAt,
+      runDate: data.runDate,
       summary,
     });
   } catch (error) {
@@ -172,19 +262,28 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server and do initial data fetch
-app.listen(PORT, async () => {
-  console.log(`🐟 Bristol Predict API running on port ${PORT}`);
-  console.log(`📍 http://localhost:${PORT}`);
-  console.log("🔄 Fetching initial data...");
+// Start server
+async function startServer() {
+  await initializeServer();
 
-  try {
-    await getFreshData();
-    console.log("✅ Initial data loaded successfully");
-  } catch (error) {
-    console.error("⚠️  Failed to load initial data:", error.message);
-    console.log("📌 Server will retry on first request");
-  }
+  app.listen(PORT, async () => {
+    console.log(`🐟 Bristol Predict API running on port ${PORT}`);
+    console.log(`📍 http://localhost:${PORT}`);
+    console.log("🔄 Fetching initial data...");
+
+    try {
+      await getFreshData();
+      console.log("✅ Initial data loaded successfully");
+    } catch (error) {
+      console.error("⚠️  Failed to load initial data:", error.message);
+      console.log("📌 Server will retry on first request");
+    }
+  });
+}
+
+startServer().catch((error) => {
+  console.error("💥 Failed to start server:", error);
+  process.exit(1);
 });
 
 module.exports = app;

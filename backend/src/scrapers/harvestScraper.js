@@ -1,7 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 
-// URL for Bristol Bay harvest data
+// URL for Bristol Bay harvest data (with date parameter)
 const HARVEST_URL =
   "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.harvestsummary";
 
@@ -15,19 +15,37 @@ const DISTRICT_MAP = {
 };
 
 /**
- * Scrapes the current harvest data from ADF&G website
+ * Format date for ADF&G URL (MM-DD-YYYY)
+ * @param {Date} date - JavaScript Date object
+ * @returns {string} Formatted date string
+ */
+function formatDateForURL(date) {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}-${day}-${year}`;
+}
+
+/**
+ * Scrapes harvest data from ADF&G website for a specific date
+ * @param {Date|string} runDate - Date to scrape (defaults to today)
  * @returns {Promise<Object>} Harvest data by district
  */
-async function scrapeHarvestData() {
+async function scrapeHarvestData(runDate = new Date()) {
   try {
-    console.log("🎣 Starting harvest data scrape from ADF&G...");
+    // Convert string to Date if needed
+    const date = typeof runDate === "string" ? new Date(runDate) : runDate;
+    const dateStr = formatDateForURL(date);
+
+    console.log(`🎣 Scraping harvest data for ${dateStr}...`);
     console.log(`📍 URL: ${HARVEST_URL}`);
 
-    // Fetch the page
-    const response = await axios.get(HARVEST_URL, {
+    // Fetch the page with date parameter
+    const response = await axios.post(HARVEST_URL, `rundate=${dateStr}`, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       timeout: 10000,
     });
@@ -37,21 +55,41 @@ async function scrapeHarvestData() {
 
     const result = {
       scrapedAt: new Date().toISOString(),
-      season: new Date().getFullYear(),
+      runDate: dateStr,
+      season: date.getFullYear(),
       totalRun: {},
       districts: [],
       rivers: [],
-      "sockeye PerDelivery": {},
+      sockeyePerDelivery: {},
     };
 
     // Parse Total Run Summary table
     console.log("📊 Parsing Total Run Summary...");
-    const totalRunTable = $('h3:contains("Total Run Summary")').next("table");
+    const totalRunTable = $(
+      'h2:contains("Total Run Summary"), h3:contains("Total Run Summary")'
+    ).next("table");
+
+    if (!totalRunTable.length) {
+      console.log("⚠️  Could not find Total Run Summary table");
+      console.log(
+        "Available headers:",
+        $("h2, h3")
+          .map((i, el) => $(el).text().trim())
+          .get()
+      );
+    } else {
+      console.log(
+        `✅ Found Total Run Summary table with ${totalRunTable.find("tbody tr").length} rows`
+      );
+    }
+
     if (totalRunTable.length) {
-      totalRunTable.find("tbody tr").each((i, row) => {
+      totalRunTable.find("tbody tr, tr").each((i, row) => {
         const cells = $(row).find("td");
         if (cells.length >= 7) {
           const districtName = $(cells[0]).text().trim();
+
+          console.log(`  Row ${i}: "${districtName}" - ${cells.length} cells`);
 
           // Skip the totals row
           if (districtName.toLowerCase().includes("total")) {
@@ -63,6 +101,7 @@ async function scrapeHarvestData() {
               inRiverEstimate: parseNumber($(cells[5]).text()),
               totalRun: parseNumber($(cells[6]).text()),
             };
+            console.log(`  ✅ Found totals row:`, result.totalRun);
           } else if (districtName) {
             const districtId =
               DISTRICT_MAP[districtName] || districtName.toLowerCase();
@@ -76,6 +115,7 @@ async function scrapeHarvestData() {
               inRiverEstimate: parseNumber($(cells[5]).text()),
               totalRun: parseNumber($(cells[6]).text()),
             });
+            console.log(`  ✅ Added district: ${districtName} (${districtId})`);
           }
         }
       });
@@ -83,11 +123,14 @@ async function scrapeHarvestData() {
 
     // Parse Individual River Estimates
     console.log("🏞️  Parsing Individual River Estimates...");
-    const riverTable = $('h3:contains("Individual River Estimates")').next(
-      "table"
-    );
+    const riverTable = $(
+      'h2:contains("Individual River Estimates"), h3:contains("Individual River Estimates")'
+    ).next("table");
     if (riverTable.length) {
-      riverTable.find("tbody tr").each((i, row) => {
+      console.log(
+        `✅ Found river table with ${riverTable.find("tbody tr, tr").length} rows`
+      );
+      riverTable.find("tbody tr, tr").each((i, row) => {
         const cells = $(row).find("td");
         if (cells.length >= 3) {
           const riverName = $(cells[0]).text().trim();
@@ -101,15 +144,17 @@ async function scrapeHarvestData() {
           }
         }
       });
+    } else {
+      console.log("⚠️  Could not find Individual River Estimates table");
     }
 
     // Parse Sockeye per Drift Delivery
     console.log("🐟 Parsing Sockeye per Delivery...");
-    const deliveryTable = $('h3:contains("Sockeye per Drift Delivery")').next(
-      "table"
-    );
+    const deliveryTable = $(
+      'h2:contains("Sockeye per Drift Delivery"), h3:contains("Sockeye per Drift Delivery")'
+    ).next("table");
     if (deliveryTable.length) {
-      deliveryTable.find("tbody tr").each((i, row) => {
+      deliveryTable.find("tbody tr, tr").each((i, row) => {
         const cells = $(row).find("td");
         if (cells.length >= 2) {
           const districtName = $(cells[0]).text().trim();
@@ -122,6 +167,8 @@ async function scrapeHarvestData() {
           }
         }
       });
+    } else {
+      console.log("⚠️  Could not find Sockeye per Delivery table");
     }
 
     console.log("✅ Scraping completed successfully");
@@ -181,6 +228,24 @@ function getSummaryStats(data) {
 }
 
 /**
+ * Generate array of dates for the fishing season
+ * @param {Date} startDate - Start of season
+ * @param {Date} endDate - End of season
+ * @returns {Array<Date>} Array of dates
+ */
+function getSeasonDates(startDate, endDate) {
+  const dates = [];
+  const current = new Date(startDate);
+
+  while (current <= endDate) {
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates;
+}
+
+/**
  * Test the scraper with detailed output
  */
 async function testScraper() {
@@ -188,62 +253,34 @@ async function testScraper() {
   console.log("=".repeat(60));
 
   try {
-    const data = await scrapeHarvestData();
-    const stats = getSummaryStats(data);
+    // Test with today's date
+    console.log("\n📅 Testing with today's date:");
+    const todayData = await scrapeHarvestData();
+    const todayStats = getSummaryStats(todayData);
 
     console.log("\n📊 SUMMARY STATISTICS:");
     console.log("=".repeat(60));
+    console.log(`Run Date:                      ${todayData.runDate}`);
     console.log(
-      `Total Catch (Cumulative):     ${stats.totalCatch.toLocaleString()} fish`
+      `Total Catch (Cumulative):      ${todayStats.totalCatch.toLocaleString()} fish`
     );
     console.log(
-      `Total Escapement (Cumulative): ${stats.totalEscapement.toLocaleString()} fish`
+      `Total Escapement (Cumulative): ${todayStats.totalEscapement.toLocaleString()} fish`
     );
     console.log(
-      `Total Run:                     ${stats.totalRun.toLocaleString()} fish`
+      `Total Run:                     ${todayStats.totalRun.toLocaleString()} fish`
     );
-    console.log(`Number of Districts:           ${stats.districtCount}`);
-    console.log(`Number of Rivers:              ${stats.riverCount}`);
 
-    if (stats.topDistrict) {
-      console.log(`\n🏆 Top Producing District:     ${stats.topDistrict.name}`);
-      console.log(
-        `   Catch:                       ${stats.topDistrict.catchCumulative.toLocaleString()} fish`
-      );
-    }
+    // Test with a historical date (July 15, 2025)
+    console.log("\n\n📅 Testing with historical date (07-15-2025):");
+    const historicalData = await scrapeHarvestData(new Date("2025-07-15"));
+    const historicalStats = getSummaryStats(historicalData);
 
-    console.log("\n🎣 DISTRICT BREAKDOWN:");
-    console.log("=".repeat(60));
-    data.districts.forEach((district) => {
-      console.log(`\n${district.name} (${district.id}):`);
-      console.log(
-        `  Daily Catch:        ${district.catchDaily.toLocaleString()}`
-      );
-      console.log(
-        `  Cumulative Catch:   ${district.catchCumulative.toLocaleString()}`
-      );
-      console.log(
-        `  Daily Escapement:   ${district.escapementDaily.toLocaleString()}`
-      );
-      console.log(
-        `  Cumulative Escape:  ${district.escapementCumulative.toLocaleString()}`
-      );
-      console.log(
-        `  Total Run:          ${district.totalRun.toLocaleString()}`
-      );
-    });
+    console.log(
+      `Total Catch on 07-15-2025:     ${historicalStats.totalCatch.toLocaleString()} fish`
+    );
 
-    console.log("\n🏞️  RIVER ESCAPEMENT:");
-    console.log("=".repeat(60));
-    data.rivers.forEach((river) => {
-      console.log(
-        `${river.name.padEnd(20)} ${river.escapementCumulative.toLocaleString().padStart(12)} fish`
-      );
-    });
-
-    console.log("\n💾 Full JSON Data:");
-    console.log("=".repeat(60));
-    console.log(JSON.stringify(data, null, 2));
+    console.log("\n✅ All tests passed!");
   } catch (error) {
     console.error("\n❌ Test failed:", error.message);
     process.exit(1);
@@ -259,4 +296,6 @@ module.exports = {
   scrapeHarvestData,
   getSummaryStats,
   parseNumber,
+  formatDateForURL,
+  getSeasonDates,
 };
