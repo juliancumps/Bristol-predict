@@ -1,8 +1,17 @@
 import { useState, useEffect } from "react";
+import "../styles/DatePicker.css";
 
-export default function DatePicker({ selectedDate, onDateChange }) {
+export default function DatePicker({
+  selectedDate,
+  onDateChange,
+  dateRangeMode = false,
+  selectedDateRange,
+  onDateRangeChange,
+}) {
   const [availableDates, setAvailableDates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [rangeStart, setRangeStart] = useState(null);
+  const [rangeEnd, setRangeEnd] = useState(null);
 
   useEffect(() => {
     console.log("📅 DatePicker: Fetching available dates...");
@@ -22,6 +31,16 @@ export default function DatePicker({ selectedDate, onDateChange }) {
           );
           onDateChange(data.dates[0]);
         }
+
+        // Initialize range with most recent date
+        if (
+          dateRangeMode &&
+          !rangeEnd &&
+          data.dates &&
+          data.dates.length > 0
+        ) {
+          setRangeEnd(data.dates[0]);
+        }
       })
       .catch((err) => {
         console.error("❌ DatePicker: Error fetching dates:", err);
@@ -30,102 +49,136 @@ export default function DatePicker({ selectedDate, onDateChange }) {
   }, []);
 
   const formatDisplayDate = (dateStr) => {
+    if (!dateStr) return "";
     const [month, day, year] = dateStr.split("-");
     const date = new Date(year, month - 1, day);
     return date.toLocaleDateString("en-US", {
       weekday: "short",
-      month: "long",
+      month: "short",
       day: "numeric",
-      year: "numeric",
     });
+  };
+
+  const handleRangeStartChange = (e) => {
+    const newStart = e.target.value;
+    setRangeStart(newStart);
+    if (rangeEnd && newStart <= rangeEnd) {
+      onDateRangeChange(newStart, rangeEnd);
+    }
+  };
+
+  const handleRangeEndChange = (e) => {
+    const newEnd = e.target.value;
+    setRangeEnd(newEnd);
+    if (rangeStart && rangeStart <= newEnd) {
+      onDateRangeChange(rangeStart, newEnd);
+    } else if (!rangeStart) {
+      setRangeStart(newEnd);
+      onDateRangeChange(newEnd, newEnd);
+    }
+  };
+
+  const getDateIndex = (dateStr) => availableDates.indexOf(dateStr);
+
+  const getDaysBetween = () => {
+    if (!rangeStart || !rangeEnd) return 0;
+    return Math.abs(getDateIndex(rangeStart) - getDateIndex(rangeEnd)) + 1;
   };
 
   if (loading) {
     return (
-      <div
-        style={{
-          backgroundColor: "rgba(30, 41, 59, 0.95)",
-          padding: "16px",
-          borderRadius: "8px",
-          border: "1px solid #3b82f6",
-          color: "#94a3b8",
-          fontSize: "14px",
-        }}
-      >
-        ⏳ Loading dates...
+      <div className="datepicker-container">
+        <div className="datepicker-loading">
+          ⏳ Loading dates...
+        </div>
       </div>
     );
   }
 
   if (availableDates.length === 0) {
     return (
-      <div
-        style={{
-          backgroundColor: "rgba(30, 41, 59, 0.95)",
-          padding: "16px",
-          borderRadius: "8px",
-          border: "1px solid #f59e0b",
-          color: "#fbbf24",
-          fontSize: "14px",
-        }}
-      >
-        ⚠️ No historical data available. Run the backfill script first.
+      <div className="datepicker-container">
+        <div className="datepicker-warning">
+          ⚠️ No historical data available. Run the backfill script first.
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        backgroundColor: "rgba(30, 41, 59, 0.95)",
-        padding: "16px",
-        borderRadius: "8px",
-        border: "1px solid #3b82f6",
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-      }}
-    >
-      <label
-        style={{
-          color: "#60a5fa",
-          fontSize: "14px",
-          fontWeight: "bold",
-          whiteSpace: "nowrap",
-        }}
-      >
-        📅 Select Date:
-      </label>
-      <select
-        value={selectedDate || ""}
-        onChange={(e) => onDateChange(e.target.value)}
-        style={{
-          flex: 1,
-          backgroundColor: "#1e293b",
-          color: "white",
-          border: "1px solid #475569",
-          borderRadius: "4px",
-          padding: "8px 12px",
-          fontSize: "14px",
-          cursor: "pointer",
-          minWidth: "250px",
-        }}
-      >
-        {availableDates.map((date) => (
-          <option key={date} value={date}>
-            {formatDisplayDate(date)}
-          </option>
-        ))}
-      </select>
-      <div
-        style={{
-          fontSize: "12px",
-          color: "#94a3b8",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {availableDates.length} days available
-      </div>
+    <div className="datepicker-container">
+      {!dateRangeMode ? (
+        // Single Date Mode
+        <div className="datepicker-single">
+          <label>Select Date:</label>
+          <select
+            value={selectedDate || ""}
+            onChange={(e) => onDateChange(e.target.value)}
+            className="date-select"
+          >
+            <option value="">-- Choose a date --</option>
+            {availableDates.map((date) => (
+              <option key={date} value={date}>
+                {formatDisplayDate(date)}
+              </option>
+            ))}
+          </select>
+          {selectedDate && (
+            <span className="selected-date-display">
+              📅 {formatDisplayDate(selectedDate)}
+            </span>
+          )}
+        </div>
+      ) : (
+        // Date Range Mode
+        <div className="datepicker-range">
+          <label>Select Date Range:</label>
+          <div className="range-inputs">
+            <div className="range-field">
+              <label className="range-label">From:</label>
+              <select
+                value={rangeStart || ""}
+                onChange={handleRangeStartChange}
+                className="date-select"
+              >
+                <option value="">-- Start date --</option>
+                {availableDates.map((date) => (
+                  <option key={`start-${date}`} value={date}>
+                    {formatDisplayDate(date)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="range-field">
+              <label className="range-label">To:</label>
+              <select
+                value={rangeEnd || ""}
+                onChange={handleRangeEndChange}
+                className="date-select"
+              >
+                <option value="">-- End date --</option>
+                {availableDates.map((date) => (
+                  <option key={`end-${date}`} value={date}>
+                    {formatDisplayDate(date)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {rangeStart && rangeEnd && (
+            <div className="range-summary">
+              <span className="range-dates">
+                📅 {formatDisplayDate(rangeStart)} → {formatDisplayDate(rangeEnd)}
+              </span>
+              <span className="range-days">
+                ({getDaysBetween()} day{getDaysBetween() !== 1 ? "s" : ""})
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

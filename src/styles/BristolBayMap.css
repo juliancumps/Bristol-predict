@@ -1,0 +1,451 @@
+.bristol-bay-map-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #0f172a;
+  color: #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Header */
+.header-section {
+  background: linear-gradient(to right, #1e3a8a, #1e40af);
+  padding: 20px 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow-y: auto;
+  max-height: 30vh;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.header-section h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: bold;
+  color: white;
+}
+
+.header-section p {
+  margin: 0 0 8px 0;
+  color: #bfdbfe;
+  font-size: 14px;
+}
+
+.last-updated {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 12px;
+  color: #93c5fd;
+  opacity: 0.8;
+}
+
+/* Mode Toggle */
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.toggle-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #3b82f6;
+  background-color: transparent;
+  color: #60a5fa;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.toggle-btn.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.map-section {
+  flex: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid #3b82f6;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Summary Box */
+.summary-box {
+  padding: 16px;
+  background-color: rgba(15, 23, 42, 0.8);
+  border-radius: 8px;
+  border: 1px solid #3b82f6;
+}
+
+.summary-box h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #60a5fa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.summary-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background-color: rgba(30, 41, 59, 0.6);
+  border-radius: 4px;
+  border: 1px solid #334155;
+}
+
+.summary-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #10b981;
+}
+
+/* Chart Toggle */
+.chart-toggle {
+  padding: 12px;
+  background-color: rgba(15, 23, 42, 0.8);
+  border-radius: 8px;
+  border: 1px solid #3b82f6;
+}
+
+.chart-toggle h4 {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #60a5fa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chart-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.chart-btn {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #475569;
+  background-color: transparent;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chart-btn:hover {
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.chart-btn.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Districts List */
+.districts-list {
+  padding: 12px;
+  background-color: rgba(15, 23, 42, 0.8);
+  border-radius: 8px;
+  border: 1px solid #3b82f6;
+}
+
+.districts-list h3 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #60a5fa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.district-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: transparent;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.district-item:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+.district-item.selected {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+}
+
+.district-emoji {
+  font-size: 18px;
+}
+
+.district-name-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.district-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.district-catch {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.catch-percentage {
+  margin-left: 6px;
+  color: #10b981;
+  font-weight: 600;
+  padding: 0 4px;
+  background-color: rgba(16, 185, 129, 0.1);
+  border-radius: 2px;
+}
+
+/* Charts Section */
+.charts-section {
+  padding: 16px;
+  background-color: rgba(15, 23, 42, 0.6);
+  border-top: 2px solid #3b82f6;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.charts-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.charts-section::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.charts-section::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+/* Error Box */
+.error-box {
+  padding: 12px 16px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  border-radius: 6px;
+  margin: 8px 16px;
+  font-size: 13px;
+}
+
+/* Marker Popup */
+.marker-popup {
+  font-size: 12px;
+  min-width: 200px;
+}
+
+.marker-popup h3 {
+  margin: 0 0 8px 0;
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.popup-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #1e293b;
+}
+
+.popup-stats div {
+  font-size: 11px;
+}
+
+.popup-stats strong {
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 1440px) {
+  .sidebar {
+    width: 280px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  .map-section {
+    flex: 0 1 40%;
+    min-height: 300px;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow-y: visible;
+  }
+
+  .summary-box,
+  .chart-toggle,
+  .districts-list {
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .charts-section {
+    max-height: 30vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .bristol-bay-map-container {
+    height: 100%;
+  }
+
+  .header-section {
+    padding: 16px;
+    max-height: 20vh;
+  }
+
+  .header-section h1 {
+    font-size: 20px;
+  }
+
+  .main-content {
+    flex-direction: column;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .map-section {
+    flex: 0 1 30vh;
+  }
+
+  .sidebar {
+    flex-direction: column;
+  }
+
+  .summary-box,
+  .chart-toggle,
+  .districts-list {
+    min-width: auto;
+  }
+
+  .mode-toggle {
+    flex-wrap: wrap;
+  }
+
+  .chart-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-section {
+    max-height: 25vh;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bristol-bay-map-container {
+    height: 100%;
+  }
+
+  .header-section {
+    padding: 12px;
+  }
+
+  .header-section h1 {
+    font-size: 18px;
+  }
+
+  .header-section p {
+    font-size: 12px;
+  }
+
+  .sidebar {
+    padding-right: 0;
+  }
+
+  .map-section {
+    flex: 0 1 25vh;
+    border-radius: 4px;
+  }
+
+  .chart-buttons {
+    grid-template-columns: 1fr;
+  }
+}

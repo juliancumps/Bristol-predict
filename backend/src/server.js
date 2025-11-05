@@ -40,6 +40,25 @@ async function initializeServer() {
   }
 }
 
+async function getDataByDateRange(db, startDate, endDate) {
+  // Query all data between two dates
+  // startDate and endDate in MM-DD-YYYY format
+  return db.query(
+    "SELECT * FROM harvest_data WHERE run_date >= ? AND run_date <= ? ORDER BY run_date DESC",
+    [startDate, endDate]
+  );
+}
+
+async function getHistoricalData(db, days) {
+  // Query last N days of data
+  return db.query(
+    "SELECT * FROM harvest_data ORDER BY run_date DESC LIMIT ?",
+    [days]
+  );
+}
+
+
+
 /**
  * Get fresh data for a specific date (with caching for current date)
  */
@@ -195,6 +214,32 @@ app.get("/api/daily", async (req, res) => {
     });
   }
 });
+
+//Date range endpoint
+app.get("/api/range", async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    // Query database for data between dates
+    // Return array of daily data objects
+    const data = await getDataByDateRange(db, startDate, endDate);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//Historical Data endpoint
+app.get("/api/historical", async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 30;
+    const data = await getHistoricalData(db, days);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 
 // Specific district endpoint
 app.get("/api/districts/:id", async (req, res) => {
