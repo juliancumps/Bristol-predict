@@ -266,14 +266,16 @@ app.get("/api/districts/:id", async (req, res) => {
       r.name.toLowerCase().includes(district.name.toLowerCase().split("-")[0])
     );
 
-    //include per delivery stat
-    const districts = data.districts.map(d => ({
-      ...d,
-      sockeyePerDelivery: data.sockeyePerDelivery?.[d.id] || 0
-    }));
+    //  Add sockeye per delivery data to the district object
+    const sockeyePerDelivery = data.sockeyePerDelivery?.[district.id] || 0;
+
+    //console.log("🔍 DEBUG - data.sockeyePerDelivery:", data.sockeyePerDelivery);
+    //console.log("🔍 DEBUG - district.id:", district.id);
+    //console.log("🔍 DEBUG - value for this district:", data.sockeyePerDelivery?.[district.id]); 
 
     res.json({
       ...district,
+      sockeyePerDelivery: data.sockeyePerDelivery?.[district.id] || 0,
       rivers: districtRivers,
       runDate: data.runDate,
     });

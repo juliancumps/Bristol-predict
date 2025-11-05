@@ -305,6 +305,25 @@ export default function BristolBayMap() {
     fetchHistorical();
   }, []);
 
+  // Fetch specific district data when selected
+useEffect(() => {
+  if (!selectedDistrict || dateRangeMode) return;
+
+  async function fetchDistrictData() {
+    try {
+      const data = await getDistrict(selectedDistrict, selectedDate);
+      setDistrictData(prev => ({
+        ...prev,
+        [selectedDistrict]: data
+      }));
+    } catch (err) {
+      console.error("Error fetching district:", err);
+    }
+  }
+
+  fetchDistrictData();
+}, [selectedDistrict, selectedDate, dateRangeMode]);
+
   const currentData = dateRangeMode ? rangeData : { districts: districtData, rivers: riversData, summary: summaryData };
   const totalCatch = currentData?.summary?.totalCatch || summaryData?.summary?.totalCatch || 0;
   const selectedDistrictData = selectedDistrict ? districtData[selectedDistrict] : null;
@@ -314,7 +333,7 @@ export default function BristolBayMap() {
       {/* Compact Header */}
       <div className="header-compact">
         <div className="header-left">
-          <h1>Bristol Predict 🐟</h1>
+          <h1>Bristol Predict 🐟 beta.v1.1</h1>
         </div>
         
         <div className="header-center">

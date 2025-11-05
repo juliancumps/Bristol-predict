@@ -38,16 +38,6 @@ export default function DistrictStats({
           <span className="stat-percentage">{dailyCatchPercentage}</span>
         </div>
 
-      {districtData.sockeyePerDelivery && (
-      <div className="stat-box">
-        <span className="stat-label">Sockeye per Delivery</span>
-        <span className="stat-value">{formatNumber(districtData.sockeyePerDelivery)}</span>
-        <span className="stat-note" style={{ fontSize: "10px", color: "#94a3b8", marginTop: "4px" }}>
-          (Lower = more boats; Higher = fewer boats)
-        </span>
-      </div>
-        )}
-
         <div className="stat-box">
           <span className="stat-label">Cumulative Catch</span>
           <span className="stat-value">{formatNumber(districtData.catchCumulative)}</span>
@@ -68,19 +58,19 @@ export default function DistrictStats({
           <span className="stat-value">{formatNumber(districtData.totalRun)}</span>
         </div>
 
-        {districtData.inRiverEstimate && (
+        {/* {districtData.inRiverEstimate && (
           <div className="stat-box">
             <span className="stat-label">In-River Estimate</span>
             <span className="stat-value">{formatNumber(districtData.inRiverEstimate)}</span>
           </div>
-        )}
+        )} */}
 
         {districtData.sockeyePerDelivery && (
           <div className="stat-box">
             <span className="stat-label">Sockeye per Delivery</span>
             <span className="stat-value">{formatNumber(districtData.sockeyePerDelivery)}</span>
             <span className="stat-note">
-              (Lower = more boats working harder; Higher = fewer boats catching more)
+              (District-wide average for this date)
             </span>
           </div>
         )}
