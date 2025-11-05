@@ -1,23 +1,12 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-
-// URL for Bristol Bay harvest data (with date parameter)
+const puppeteer = require("puppeteer");
 const HARVEST_URL =
   "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.harvestsummary";
 
-// District mapping to match our frontend
-const DISTRICT_MAP = {
-  Ugashik: "ugashik",
-  Egegik: "egegik",
-  "Naknek-Kvichak": "naknek",
-  Nushagak: "nushagak",
-  Togiak: "togiak",
-};
+const DATE_SELECTOR = 'select#dateDropdown';
+const BUTTON_SELECTOR = '#maincontentarticle > form > input[type=submit]';
 
 /**
- * Format date for ADF&G URL (MM-DD-YYYY)
- * @param {Date} date - JavaScript Date object
- * @returns {string} Formatted date string
+ * Format date for ADF&G dropdown (MM-DD-YYYY)
  */
 function formatDateForURL(date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -27,275 +16,240 @@ function formatDateForURL(date) {
 }
 
 /**
- * Scrapes harvest data from ADF&G website for a specific date
- * @param {Date|string} runDate - Date to scrape (defaults to today)
- * @returns {Promise<Object>} Harvest data by district
- */
-async function scrapeHarvestData(runDate = new Date()) {
-  try {
-    // Convert string to Date if needed
-    const date = typeof runDate === "string" ? new Date(runDate) : runDate;
-    const dateStr = formatDateForURL(date);
-
-    console.log(`🎣 Scraping harvest data for ${dateStr}...`);
-    console.log(`📍 URL: ${HARVEST_URL}`);
-
-    // Fetch the page with date parameter
-    const response = await axios.post(HARVEST_URL, `rundate=${dateStr}`, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      timeout: 10000,
-    });
-
-    const html = response.data;
-    const $ = cheerio.load(html);
-
-    const result = {
-      scrapedAt: new Date().toISOString(),
-      runDate: dateStr,
-      season: date.getFullYear(),
-      totalRun: {},
-      districts: [],
-      rivers: [],
-      sockeyePerDelivery: {},
-    };
-
-    // Parse Total Run Summary table
-    console.log("📊 Parsing Total Run Summary...");
-    const totalRunTable = $(
-      'h2:contains("Total Run Summary"), h3:contains("Total Run Summary")'
-    ).next("table");
-
-    if (!totalRunTable.length) {
-      console.log("⚠️  Could not find Total Run Summary table");
-      console.log(
-        "Available headers:",
-        $("h2, h3")
-          .map((i, el) => $(el).text().trim())
-          .get()
-      );
-    } else {
-      console.log(
-        `✅ Found Total Run Summary table with ${totalRunTable.find("tbody tr").length} rows`
-      );
-    }
-
-    if (totalRunTable.length) {
-      totalRunTable.find("tbody tr, tr").each((i, row) => {
-        const cells = $(row).find("td");
-        if (cells.length >= 7) {
-          const districtName = $(cells[0]).text().trim();
-
-          console.log(`  Row ${i}: "${districtName}" - ${cells.length} cells`);
-
-          // Skip the totals row
-          if (districtName.toLowerCase().includes("total")) {
-            result.totalRun = {
-              catchDaily: parseNumber($(cells[1]).text()),
-              catchCumulative: parseNumber($(cells[2]).text()),
-              escapementDaily: parseNumber($(cells[3]).text()),
-              escapementCumulative: parseNumber($(cells[4]).text()),
-              inRiverEstimate: parseNumber($(cells[5]).text()),
-              totalRun: parseNumber($(cells[6]).text()),
-            };
-            console.log(`  ✅ Found totals row:`, result.totalRun);
-          } else if (districtName) {
-            const districtId =
-              DISTRICT_MAP[districtName] || districtName.toLowerCase();
-            result.districts.push({
-              id: districtId,
-              name: districtName,
-              catchDaily: parseNumber($(cells[1]).text()),
-              catchCumulative: parseNumber($(cells[2]).text()),
-              escapementDaily: parseNumber($(cells[3]).text()),
-              escapementCumulative: parseNumber($(cells[4]).text()),
-              inRiverEstimate: parseNumber($(cells[5]).text()),
-              totalRun: parseNumber($(cells[6]).text()),
-            });
-            console.log(`  ✅ Added district: ${districtName} (${districtId})`);
-          }
-        }
-      });
-    }
-
-    // Parse Individual River Estimates
-    console.log("🏞️  Parsing Individual River Estimates...");
-    const riverTable = $(
-      'h2:contains("Individual River Estimates"), h3:contains("Individual River Estimates")'
-    ).next("table");
-    if (riverTable.length) {
-      console.log(
-        `✅ Found river table with ${riverTable.find("tbody tr, tr").length} rows`
-      );
-      riverTable.find("tbody tr, tr").each((i, row) => {
-        const cells = $(row).find("td");
-        if (cells.length >= 3) {
-          const riverName = $(cells[0]).text().trim();
-          if (riverName && !riverName.toLowerCase().includes("district")) {
-            result.rivers.push({
-              name: riverName,
-              escapementDaily: parseNumber($(cells[1]).text()),
-              escapementCumulative: parseNumber($(cells[2]).text()),
-              inRiverEstimate: parseNumber($(cells[3]).text()),
-            });
-          }
-        }
-      });
-    } else {
-      console.log("⚠️  Could not find Individual River Estimates table");
-    }
-
-    // Parse Sockeye per Drift Delivery
-    console.log("🐟 Parsing Sockeye per Delivery...");
-    const deliveryTable = $(
-      'h2:contains("Sockeye per Drift Delivery"), h3:contains("Sockeye per Drift Delivery")'
-    ).next("table");
-    if (deliveryTable.length) {
-      deliveryTable.find("tbody tr, tr").each((i, row) => {
-        const cells = $(row).find("td");
-        if (cells.length >= 2) {
-          const districtName = $(cells[0]).text().trim();
-          const districtId =
-            DISTRICT_MAP[districtName] || districtName.toLowerCase();
-          const sockeye = parseNumber($(cells[1]).text());
-
-          if (districtName && districtId) {
-            result.sockeyePerDelivery[districtId] = sockeye;
-          }
-        }
-      });
-    } else {
-      console.log("⚠️  Could not find Sockeye per Delivery table");
-    }
-
-    console.log("✅ Scraping completed successfully");
-    console.log(
-      `📈 Found ${result.districts.length} districts, ${result.rivers.length} rivers`
-    );
-
-    return result;
-  } catch (error) {
-    console.error("❌ Error scraping harvest data:", error.message);
-    if (error.response) {
-      console.error("HTTP Status:", error.response.status);
-    }
-    throw error;
-  }
-}
-
-/**
- * Helper function to parse numbers from text (handles commas)
- * @param {string} text - Text containing a number
- * @returns {number} Parsed number
+ * Parse number safely
  */
 function parseNumber(text) {
   if (!text) return 0;
-  const cleaned = text.trim().replace(/,/g, "");
+  const cleaned = text
+    .trim()
+    .replace(/,/g, "")
+    .replace(/[^0-9.-]/g, "");
   const num = parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
 }
 
 /**
- * Get summary statistics from scraped data
- * @param {Object} data - Scraped harvest data
- * @returns {Object} Summary statistics
+ * Wait for an element with retry and debug logging
  */
-function getSummaryStats(data) {
-  const totalCatch = data.districts.reduce(
-    (sum, d) => sum + d.catchCumulative,
-    0
-  );
-  const totalEscapement = data.districts.reduce(
-    (sum, d) => sum + d.escapementCumulative,
-    0
-  );
-  const totalRun = totalCatch + totalEscapement;
-
-  return {
-    totalCatch,
-    totalEscapement,
-    totalRun,
-    districtCount: data.districts.length,
-    riverCount: data.rivers.length,
-    topDistrict: data.districts.reduce(
-      (max, d) => (d.catchCumulative > (max?.catchCumulative || 0) ? d : max),
-      null
-    ),
-  };
+async function waitForElement(page, selector, timeout = 3000) {
+  try {
+    await page.waitForSelector(selector, { timeout });
+    return true;
+  } catch (err) {
+    return false;
+  }
 }
 
 /**
  * Generate array of dates for the fishing season
- * @param {Date} startDate - Start of season
- * @param {Date} endDate - End of season
- * @returns {Array<Date>} Array of dates
+ * @param {Date} startDate
+ * @param {Date} endDate
+ * @returns {Date[]} Array of dates
  */
 function getSeasonDates(startDate, endDate) {
   const dates = [];
   const current = new Date(startDate);
-
   while (current <= endDate) {
     dates.push(new Date(current));
     current.setDate(current.getDate() + 1);
   }
-
   return dates;
 }
 
 /**
- * Test the scraper with detailed output
+ * Scrape harvest data for a single date using an optional existing page
  */
-async function testScraper() {
-  console.log("🧪 Testing Bristol Bay Harvest Scraper\n");
-  console.log("=".repeat(60));
-
+async function scrapeHarvestDataSingleBrowser(runDate, page = null) {
+  let browserLaunchedHere = false;
   try {
-    // Test with today's date
-    console.log("\n📅 Testing with today's date:");
-    const todayData = await scrapeHarvestData();
-    const todayStats = getSummaryStats(todayData);
+    const date = typeof runDate === "string" ? new Date(runDate) : runDate;
+    const dateStr = formatDateForURL(date);
 
-    console.log("\n📊 SUMMARY STATISTICS:");
-    console.log("=".repeat(60));
-    console.log(`Run Date:                      ${todayData.runDate}`);
-    console.log(
-      `Total Catch (Cumulative):      ${todayStats.totalCatch.toLocaleString()} fish`
-    );
-    console.log(
-      `Total Escapement (Cumulative): ${todayStats.totalEscapement.toLocaleString()} fish`
-    );
-    console.log(
-      `Total Run:                     ${todayStats.totalRun.toLocaleString()} fish`
-    );
+    if (!page) {
+      browserLaunchedHere = true;
+      const browser = await puppeteer.launch({
+        headless: false,
+        //args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        slowMo: 0,
+        defaultViewport: null,
+      });
+      page = await browser.newPage();
+      await page.setViewport({ width: 1280, height: 800 });
+      page._browser = browser;
+    }
 
-    // Test with a historical date (July 15, 2025)
-    console.log("\n\n📅 Testing with historical date (07-15-2025):");
-    const historicalData = await scrapeHarvestData(new Date("2025-07-15"));
-    const historicalStats = getSummaryStats(historicalData);
+    await page.goto(HARVEST_URL, { waitUntil: "networkidle0", timeout: 60000 });
 
-    console.log(
-      `Total Catch on 07-15-2025:     ${historicalStats.totalCatch.toLocaleString()} fish`
-    );
+    const found = await waitForElement(page, DATE_SELECTOR, 15000);
+    if (!found) throw new Error("Date dropdown not found");
 
-    console.log("\n✅ All tests passed!");
-  } catch (error) {
-    console.error("\n❌ Test failed:", error.message);
-    process.exit(1);
+    await page.select(DATE_SELECTOR, dateStr);
+    await new Promise((r) => setTimeout(r, 5000));
+
+    const goButton = await page.$(BUTTON_SELECTOR);
+    if (!goButton) throw new Error("Go button not found");
+
+    await Promise.all([
+      goButton.click(),
+      page.waitForNetworkIdle({ timeout: 30000 }),
+    ]);
+
+    await new Promise((r) => setTimeout(r, 3000));
+
+    const result = await page.evaluate(() => {
+      const data = {
+        scrapedAt: new Date().toISOString(),
+        runDate: "",
+        season: 0,
+        totalRun: {},
+        districts: [],
+        rivers: [],
+        sockeyePerDelivery: {},
+      };
+
+      function parseNum(text) {
+        if (!text) return 0;
+        const cleaned = text
+          .trim()
+          .replace(/,/g, "")
+          .replace(/[^0-9.-]/g, "");
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? 0 : num;
+      }
+
+      const dateSelect = document.querySelector('select#dateDropdown');
+      if (dateSelect) {
+        data.runDate = dateSelect.value;
+        data.season =
+          parseInt(dateSelect.value.split("-")[2]) || new Date().getFullYear();
+      }
+
+      const tables = document.querySelectorAll("table");
+
+      // --- parse Total Run table ---
+      for (let table of tables) {
+        const headerText = table.textContent;
+        if (
+          headerText.includes("District") &&
+          headerText.includes("Catch") &&
+          headerText.includes("Escapement")
+        ) {
+          const rows = table.querySelectorAll("tr");
+          rows.forEach((row) => {
+            const cells = row.querySelectorAll("td");
+            if (cells.length >= 7) {
+              const firstCell = cells[0].textContent.trim();
+              if (firstCell.toLowerCase().includes("total")) {
+                data.totalRun = {
+                  catchDaily: parseNum(cells[1].textContent),
+                  catchCumulative: parseNum(cells[2].textContent),
+                  escapementDaily: parseNum(cells[3].textContent),
+                  escapementCumulative: parseNum(cells[4].textContent),
+                  inRiverEstimate: parseNum(cells[5].textContent),
+                  totalRun: parseNum(cells[6].textContent),
+                };
+              } else if (firstCell && !firstCell.includes("District")) {
+                let districtId = firstCell.toLowerCase().replace(/[^a-z]/g, "");
+                data.districts.push({
+                  id: districtId,
+                  name: firstCell,
+                  catchDaily: parseNum(cells[1].textContent),
+                  catchCumulative: parseNum(cells[2].textContent),
+                  escapementDaily: parseNum(cells[3].textContent),
+                  escapementCumulative: parseNum(cells[4].textContent),
+                  inRiverEstimate: parseNum(cells[5].textContent),
+                  totalRun: parseNum(cells[6].textContent),
+                });
+              }
+            }
+          });
+          if (data.districts.length > 0) break;
+        }
+      }
+
+      // --- parse River table ---
+      for (let table of tables) {
+        const headerText = table.textContent;
+        if (
+          headerText.includes("River") &&
+          headerText.includes("Escapement") &&
+          !headerText.includes("District")
+        ) {
+          const rows = table.querySelectorAll("tr");
+          rows.forEach((row) => {
+            const cells = row.querySelectorAll("td");
+            if (cells.length >= 3) {
+              const riverName = cells[0].textContent.trim();
+              if (riverName && riverName.length > 2) {
+                data.rivers.push({
+                  name: riverName,
+                  escapementDaily: parseNum(cells[1].textContent),
+                  escapementCumulative: parseNum(cells[2].textContent),
+                  inRiverEstimate: cells[3]
+                    ? parseNum(cells[3].textContent)
+                    : 0,
+                });
+              }
+            }
+          });
+          if (data.rivers.length > 0) break;
+        }
+      }
+
+      return data;
+    });
+
+    result.runDate = dateStr;
+    result.season = date.getFullYear();
+    return result;
+  } finally {
+    if (browserLaunchedHere && page && page._browser) {
+      await page._browser.close();
+    }
   }
 }
 
-// Run test if this file is executed directly
-if (require.main === module) {
-  testScraper();
+/**
+ * Scrape entire season with a single browser
+ */
+async function scrapeEntireSeasonSingleBrowser(startDate, endDate) {
+  const browser = await puppeteer.launch({
+    headless: false,
+    //args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    slowMo: 0,
+    defaultViewport: null,
+  });
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1280, height: 800 });
+
+  const dates = getSeasonDates(startDate, endDate);
+  const seasonData = [];
+
+  for (let i = 0; i < dates.length; i++) {
+    const date = dates[i];
+    try {
+      console.log(
+        `[${i + 1}/${dates.length}] Scraping ${date.toDateString()}...`
+      );
+      const dailyData = await scrapeHarvestDataSingleBrowser(date, page);
+      seasonData.push(dailyData);
+    } catch (err) {
+      console.error(
+        `❌ Failed to scrape ${date.toDateString()}: ${err.message}`
+      );
+    }
+  }
+
+  await browser.close();
+  return seasonData;
 }
 
 module.exports = {
-  scrapeHarvestData,
-  getSummaryStats,
+  scrapeHarvestData: scrapeHarvestDataSingleBrowser,
+  scrapeHarvestDataSingleBrowser,
+  scrapeEntireSeasonSingleBrowser,
+  getSeasonDates,
   parseNumber,
   formatDateForURL,
-  getSeasonDates,
+  waitForElement,
 };

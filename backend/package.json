@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test:scraper": "node src/scrapers/harvestScraper.js"
+    "test:scraper": "node src/scrapers/harvestScraper.js",
+    "backfill": "node src/backfill.js"
   },
   "keywords": [
     "bristol-bay",
@@ -25,6 +26,7 @@
     "node-cron": "^3.0.3",
     "pdf-parse": "^1.1.1",
     "pg": "^8.11.3",
+    "puppeteer": "^21.0.0",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {

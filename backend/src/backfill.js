@@ -7,7 +7,7 @@ const fs = require("fs");
 const path = require("path");
 
 // 2025 Bristol Bay Salmon Season dates
-const SEASON_START = new Date("2025-06-03");
+const SEASON_START = new Date("2025-06-27");
 const SEASON_END = new Date("2025-08-29");
 
 // Delay between requests (to be nice to ADF&G servers)
