@@ -151,7 +151,9 @@ async function scrapeHarvestDataSingleBrowser(runDate, page = null) {
 
       const tables = document.querySelectorAll("table");
 
+      // ============================================
       // --- parse Total Run table ---
+      // ============================================
       for (let table of tables) {
         const headerText = table.textContent;
         if (
@@ -174,17 +176,48 @@ async function scrapeHarvestDataSingleBrowser(runDate, page = null) {
                   totalRun: parseNum(cells[6].textContent),
                 };
               } else if (firstCell && !firstCell.includes("District")) {
-                let districtId = firstCell.toLowerCase().replace(/[^a-z]/g, "");
-                data.districts.push({
-                  id: districtId,
-                  name: firstCell,
-                  catchDaily: parseNum(cells[1].textContent),
-                  catchCumulative: parseNum(cells[2].textContent),
-                  escapementDaily: parseNum(cells[3].textContent),
-                  escapementCumulative: parseNum(cells[4].textContent),
-                  inRiverEstimate: parseNum(cells[5].textContent),
-                  totalRun: parseNum(cells[6].textContent),
-                });
+                // ✅ FIXED: Use proper district mapping instead of auto-generating IDs
+                const districtMap = {
+                  "Ugashik": "ugashik",
+                  "Egegik": "egegik",
+                  "Naknek-Kvichak": "naknek",
+                  "Naknek/Kvichak": "naknek",
+                  "Nushagak": "nushagak",
+                  "Togiak": "togiak",
+                };
+
+                let districtId = null;
+                let districtName = firstCell.trim();
+
+                // Try exact match first
+                if (districtMap[districtName]) {
+                  districtId = districtMap[districtName];
+                } else {
+                  // Try partial match
+                  for (let [key, value] of Object.entries(districtMap)) {
+                    if (
+                      firstCell.includes(key.split("-")[0]) ||
+                      firstCell.includes(key.split("/")[0])
+                    ) {
+                      districtId = value;
+                      districtName = key;
+                      break;
+                    }
+                  }
+                }
+
+                if (districtId) {
+                  data.districts.push({
+                    id: districtId,
+                    name: districtName,
+                    catchDaily: parseNum(cells[1].textContent),
+                    catchCumulative: parseNum(cells[2].textContent),
+                    escapementDaily: parseNum(cells[3].textContent),
+                    escapementCumulative: parseNum(cells[4].textContent),
+                    inRiverEstimate: parseNum(cells[5].textContent),
+                    totalRun: parseNum(cells[6].textContent),
+                  });
+                }
               }
             }
           });
@@ -192,7 +225,9 @@ async function scrapeHarvestDataSingleBrowser(runDate, page = null) {
         }
       }
 
+      // ============================================
       // --- parse River table ---
+      // ============================================
       for (let table of tables) {
         const headerText = table.textContent;
         if (
@@ -221,11 +256,69 @@ async function scrapeHarvestDataSingleBrowser(runDate, page = null) {
         }
       }
 
+      // ============================================
+      // --- parse Sockeye per Drift Delivery table ---
+      // ============================================
+      for (let table of tables) {
+        const headerText = table.textContent;
+        if (
+          headerText.includes("Sockeye") &&
+          headerText.includes("Delivery")
+        ) {
+          const rows = table.querySelectorAll("tr");
+          rows.forEach((row) => {
+            const cells = row.querySelectorAll("td");
+            if (cells.length >= 2) {
+              const districtName = cells[0].textContent.trim();
+              const sockeye = parseNum(cells[1].textContent);
+
+              const districtMap = {
+                "Ugashik": "ugashik",
+                "Egegik": "egegik",
+                "Naknek-Kvichak": "naknek",
+                "Naknek/Kvichak": "naknek",
+                "Nushagak": "nushagak",
+                "Togiak": "togiak",
+              };
+
+              let districtId = null;
+
+              // Try exact match first
+              if (districtMap[districtName]) {
+                districtId = districtMap[districtName];
+              } else {
+                // Try partial match
+                for (let [key, value] of Object.entries(districtMap)) {
+                  if (
+                    districtName.includes(key.split("-")[0]) ||
+                    districtName.includes(key.split("/")[0])
+                  ) {
+                    districtId = value;
+                    break;
+                  }
+                }
+              }
+
+              if (districtId) {
+                data.sockeyePerDelivery[districtId] = sockeye;
+              }
+            }
+          });
+
+          if (Object.keys(data.sockeyePerDelivery).length > 0) break;
+        }
+      }
+
       return data;
     });
 
     result.runDate = dateStr;
     result.season = date.getFullYear();
+
+    console.log("✅ Scraping completed successfully");
+    console.log(`📊 Sockeye per Delivery:`, result.sockeyePerDelivery);
+    console.log(`📈 Found ${result.districts.length} districts, ${result.rivers.length} rivers`);
+
     return result;
   } finally {
     if (browserLaunchedHere && page && page._browser) {
