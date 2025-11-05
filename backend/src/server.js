@@ -25,7 +25,13 @@ let lastScraped = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://bristol-predict.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173"
+  ]
+}));
 app.use(express.json());
 
 // Initialize database on startup
