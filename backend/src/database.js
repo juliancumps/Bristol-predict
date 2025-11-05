@@ -96,6 +96,34 @@ function initDatabase() {
         }
       );
 
+      // per delivery data table
+      db.run(
+        `
+        CREATE TABLE IF NOT EXISTS sockeye_per_delivery (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          run_date TEXT NOT NULL,
+          district_id TEXT NOT NULL,
+          district_name TEXT NOT NULL,
+          sockeye_per_delivery REAL NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(run_date, district_id)
+        )
+        `,
+        (err) => {
+          if (err) {
+            console.error("❌ Error creating sockeye_per_delivery table:", err);
+            reject(err);
+            return;
+          }
+          console.log("✅ sockeye_per_delivery table ready");
+        }
+      );
+
+// Add index for faster queries
+db.run(
+  `CREATE INDEX IF NOT EXISTS idx_sockeye_date ON sockeye_per_delivery(run_date)`
+);
+
       // Create indexes for faster queries
       db.run(
         `CREATE INDEX IF NOT EXISTS idx_run_date ON daily_summaries(run_date)`
@@ -181,6 +209,36 @@ function saveScrapedData(db, data) {
           );
         });
         riverStmt.finalize();
+
+        // After saving river data, add this:
+
+// Save sockeye per delivery data
+const sockeeyeStmt = db.prepare(`
+  INSERT OR REPLACE INTO sockeye_per_delivery 
+  (run_date, district_id, district_name, sockeye_per_delivery)
+  VALUES (?, ?, ?, ?)
+`);
+
+// Map district IDs back to names for sockeye data
+const districtIdToName = {
+  'ugashik': 'Ugashik',
+  'egegik': 'Egegik',
+  'naknek': 'Naknek-Kvichak',
+  'nushagak': 'Nushagak',
+  'togiak': 'Togiak',
+};
+
+Object.entries(data.sockeyePerDelivery).forEach(([districtId, sockeye]) => {
+  const districtName = districtIdToName[districtId] || districtId;
+  sockeeyeStmt.run(
+    data.runDate,
+    districtId,
+    districtName,
+    sockeye
+  );
+});
+sockeeyeStmt.finalize();
+
 
         // Commit transaction
         db.run("COMMIT", (err) => {

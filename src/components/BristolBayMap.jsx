@@ -390,6 +390,9 @@ export default function BristolBayMap() {
                             <strong>Percentage:</strong> {calculatePercentage(data.catchDaily, totalCatch)}
                           </div>
                           <div>
+                            <strong>Sockeye Per Delivery:</strong> {formatNumber(data.sockeyePerDelivery)}
+                          </div>
+                          <div>
                             <strong>Cumulative:</strong> {formatNumber(data.catchCumulative)}
                           </div>
                           <div>

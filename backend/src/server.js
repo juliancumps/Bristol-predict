@@ -210,6 +210,7 @@ app.get("/api/daily", async (req, res) => {
       districts: data.districts,  // Return full district data with all fields
       rivers: data.rivers,        // Return full river data
       totalRun: data.totalRun,    // Return all the run data
+      sockeyePerDelivery: data.sockeyePerDelivery,
     });
   } catch (error) {
     console.error("Error in /api/daily:", error);

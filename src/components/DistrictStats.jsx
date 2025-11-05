@@ -64,6 +64,17 @@ export default function DistrictStats({
             <span className="stat-value">{formatNumber(districtData.inRiverEstimate)}</span>
           </div>
         )}
+
+        {districtData.sockeyePerDelivery && (
+          <div className="stat-box">
+            <span className="stat-label">Sockeye per Delivery</span>
+            <span className="stat-value">{formatNumber(districtData.sockeyePerDelivery)}</span>
+            <span className="stat-note">
+              (Lower = more boats working harder; Higher = fewer boats catching more)
+            </span>
+          </div>
+        )}
+
       </div>
 
       {/* River Breakdown */}

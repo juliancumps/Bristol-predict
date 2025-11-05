@@ -197,6 +197,19 @@ export function getRiverDistrict(riverName) {
 }
 
 /**
+ * Calculate catch per delivery (efficiency metric)
+ * @param {number} catchDaily - Total daily catch
+ * @param {number} sockeyePerDelivery - Sockeye per delivery
+ * @returns {string} Formatted catch efficiency
+ */
+export function calculateCatchEfficiency(catchDaily, sockeyePerDelivery) {
+  if (!sockeyePerDelivery || sockeyePerDelivery === 0) return "N/A";
+  const efficiency = catchDaily / sockeyePerDelivery;
+  return efficiency.toFixed(2);
+}
+
+
+/**
  * NEW: Get all rivers for a district
  */
 export function getDistrictRivers(districtId) {
