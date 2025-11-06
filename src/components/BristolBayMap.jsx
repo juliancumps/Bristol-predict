@@ -54,31 +54,31 @@ const DISTRICTS = {
     name: "Naknek-Kvichak",
     center: [58.7, -157.1755],
     color: "#3b82f6",
-    icon: "🐟",
+    icon: "🅝🅚",
   },
   egegik: {
     name: "Egegik",
     center: [58.222, -157.525],
     color: "#8b5cf6",
-    icon: "🐠",
+    icon: "🅔",
   },
   ugashik: {
     name: "Ugashik",
     center: [57.6, -157.75],
     color: "#ec4899",
-    icon: "🎣",
+    icon: "🅤",
   },
   nushagak: {
     name: "Nushagak",
     center: [58.72, -158.54],
     color: "#10b981",
-    icon: "🐡",
+    icon: "🅝",
   },
   togiak: {
     name: "Togiak",
     center: [58.83, -160.45],
     color: "#f59e0b",
-    icon: "🦈",
+    icon: "🅣",
   },
 };
 
@@ -183,6 +183,11 @@ function GeoJSONLayers() {
     </>
   );
 }
+
+// Helper function to check if a value is effectively zero
+  const isZeroOrMissing = (value) => {
+    return value === 0 || value === "0" || !value || value === null || value === undefined;
+  };
 
 export default function BristolBayMap() {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
@@ -336,7 +341,7 @@ useEffect(() => {
       {/* Compact Header */}
       <div className="header-compact">
         <div className="header-left">
-          <h1>Bristol Predict 🐟 beta.v1.1</h1>
+          <h1>Bristol Predict 🐟 beta.v1.2</h1>
         </div>
         
         <div className="header-center">
@@ -359,14 +364,14 @@ useEffect(() => {
             onClick={() => setDateRangeMode(false)}
             title="Single Date Mode"
           >
-            📅
+            📅 Single Date Mode
           </button>
           <button
             className={`toggle-btn ${dateRangeMode ? "active" : ""}`}
             onClick={() => setDateRangeMode(true)}
             title="Date Range Mode"
           >
-            📊
+            🗓️ Date Range Mode
           </button>
           <button
             className="sidebar-toggle"
@@ -461,18 +466,27 @@ useEffect(() => {
                     <span className="summary-value">
                       {formatNumber(totalCatch)}
                     </span>
+                    {isZeroOrMissing(totalCatch) && (
+                      <span className="summary-note">&nbsp;&nbsp;&nbsp;**ADF&G did not collect this data on &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;selected date</span>
+                    )}
                   </div>
                   <div className="summary-stat">
                     <span className="summary-label">Daily Escapement</span>
                     <span className="summary-value">
                       {formatNumber(summaryData.summary?.totalEscapement || 0)}
                     </span>
+                    {isZeroOrMissing(totalCatch) && (
+                      <span className="summary-note">&nbsp;&nbsp;&nbsp;**ADF&G did not collect this data on &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;selected date</span>
+                    )}
                   </div>
                   <div className="summary-stat">
                     <span className="summary-label">Total Run</span>
                     <span className="summary-value">
                       {formatNumber(summaryData.summary?.totalRun || 0)}
                     </span>
+                    {isZeroOrMissing(totalCatch) && (
+                      <span className="summary-note">&nbsp;&nbsp;&nbsp;**ADF&G did not collect this data on &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;selected date</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -491,38 +505,38 @@ useEffect(() => {
 
             {/* Chart Toggle */}
             <div className="chart-toggle">
-              <h4>Chart Views</h4>
+              <h4>Charts</h4>
               <div className="chart-buttons">
                 <button
                   className={`chart-btn ${chartMode === "single" ? "active" : ""}`}
                   onClick={() => setChartMode("single")}
                 >
-                  📈
+                  Bay-Wide Daily Catch Trend 
                 </button>
                 <button
                   className={`chart-btn ${chartMode === "comparison" ? "active" : ""}`}
                   onClick={() => setChartMode("comparison")}
                 >
-                  📊
+                  District Comparison for Selected Date
                 </button>
                 <button
                   className={`chart-btn ${chartMode === "distribution" ? "active" : ""}`}
                   onClick={() => setChartMode("distribution")}
                 >
-                  🥧
+                  Daily Catch Distribution by District
                 </button>
                 <button
                   className={`chart-btn ${chartMode === "multitrend" ? "active" : ""}`}
                   onClick={() => setChartMode("multitrend")}
                 >
-                  📉
+                  Daily Catch Trends for all Districts
                 </button>
                 <button
                   className={`chart-btn ${chartMode === "sockeyetrend" ? "active" : ""}`}
                   onClick={() => setChartMode("sockeyetrend")}
                   title="Sockeye Per Delivery"
                 >
-                  🐟
+                  Sockeye Per Delivery Trend
                 </button>
               </div>
             </div>

@@ -21,6 +21,11 @@ export default function DistrictStats({
     (r) => r.district === district.id
   );
 
+  // Helper function to check if a value is effectively zero
+  const isZeroOrMissing = (value) => {
+    return value === 0 || value === "0" || !value || value === null || value === undefined;
+  };
+
   return (
     <div className="district-stats-container">
       <div className="stats-header">
@@ -35,46 +40,56 @@ export default function DistrictStats({
         <div className="stat-box">
           <span className="stat-label">Daily Catch</span>
           <span className="stat-value">{formatNumber(districtData.catchDaily)}</span>
+          {isZeroOrMissing(districtData.catchDaily) && (
+            <span className="stat-note">**ADF&G did not collect this data on the selected date</span>
+          )}
           <span className="stat-percentage">{dailyCatchPercentage}</span>
         </div>
 
         <div className="stat-box">
           <span className="stat-label">Cumulative Catch</span>
           <span className="stat-value">{formatNumber(districtData.catchCumulative)}</span>
+          {isZeroOrMissing(districtData.catchCumulative) && (
+            <span className="stat-note">**ADF&G did not collect this data on the selected date</span>
+          )}
         </div>
 
         <div className="stat-box">
           <span className="stat-label">Daily Escapement</span>
           <span className="stat-value">{formatNumber(districtData.escapementDaily)}</span>
+          {isZeroOrMissing(districtData.escapementDaily) && (
+            <span className="stat-note">**ADF&G did not collect this data on the selected date</span>
+          )}
         </div>
 
         <div className="stat-box">
           <span className="stat-label">Cumulative Escapement</span>
           <span className="stat-value">{formatNumber(districtData.escapementCumulative)}</span>
+          {isZeroOrMissing(districtData.escapementCumulative) && (
+            <span className="stat-note">**ADF&G did not collect this data on the selected date</span>
+          )}
         </div>
 
         <div className="stat-box">
           <span className="stat-label">Total Run</span>
           <span className="stat-value">{formatNumber(districtData.totalRun)}</span>
+          {isZeroOrMissing(districtData.totalRun) && (
+            <span className="stat-note">**ADF&G did not collect this data on the selected date</span>
+          )}
         </div>
-
-        {/* {districtData.inRiverEstimate && (
-          <div className="stat-box">
-            <span className="stat-label">In-River Estimate</span>
-            <span className="stat-value">{formatNumber(districtData.inRiverEstimate)}</span>
-          </div>
-        )} */}
 
         {districtData.sockeyePerDelivery && (
           <div className="stat-box">
             <span className="stat-label">Sockeye per Delivery</span>
             <span className="stat-value">{formatNumber(districtData.sockeyePerDelivery)}</span>
-            <span className="stat-note">
+            {isZeroOrMissing(districtData.sockeyePerDelivery) && (
+              <span className="stat-note">**ADF&G did not collect this data on the selected date</span>
+            )}
+            <span className="stat-note1">
               (District-wide average for this date)
             </span>
           </div>
         )}
-
       </div>
 
       {/* River Breakdown */}

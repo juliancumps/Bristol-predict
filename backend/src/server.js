@@ -212,11 +212,62 @@ app.get("/api/dates", async (req, res) => {
 });
 
 // Districts endpoint - returns array of districts with current data
+// ALWAYS returns all 5 districts, even if they have zero values
 app.get("/api/districts", async (req, res) => {
   try {
     const date = req.query.date;
     const data = await getFreshData(date);
-    res.json(data.districts);
+    
+    // Define all districts that should always be present
+    const allDistricts = [
+      { id: "naknek", name: "Naknek-Kvichak" },
+      { id: "egegik", name: "Egegik" },
+      { id: "ugashik", name: "Ugashik" },
+      { id: "nushagak", name: "Nushagak" },
+      { id: "togiak", name: "Togiak" },
+    ];
+    
+    // If no districts in data, create zero-value districts
+    if (!data.districts || data.districts.length === 0) {
+      console.log(`⚠️ No district data found for ${date || 'today'}, returning zero-value districts`);
+      const zeroDistricts = allDistricts.map(d => ({
+        ...d,
+        catchDaily: 0,
+        catchCumulative: 0,
+        escapementDaily: 0,
+        escapementCumulative: 0,
+        sockeyePerDelivery: 0,
+        totalRun: 0,
+        inRiverEstimate: 0,
+      }));
+      res.json(zeroDistricts);
+    } else {
+      // If we have data, make sure all districts are present (fill in missing ones with zeros)
+      const districtMap = {};
+      data.districts.forEach(d => {
+        districtMap[d.id] = d;
+      });
+      
+      const completeDistricts = allDistricts.map(d => {
+        if (districtMap[d.id]) {
+          return districtMap[d.id];
+        } else {
+          // Fill in missing district with zeros
+          return {
+            ...d,
+            catchDaily: 0,
+            catchCumulative: 0,
+            escapementDaily: 0,
+            escapementCumulative: 0,
+            sockeyePerDelivery: 0,
+            totalRun: 0,
+            inRiverEstimate: 0,
+          };
+        }
+      });
+      
+      res.json(completeDistricts);
+    }
   } catch (error) {
     console.error("Error in /api/districts:", error);
     res.status(500).json({

@@ -170,7 +170,7 @@ export default function DatePicker({
           </select>
           {selectedDate && (
             <span className="selected-date-display">
-              📅 {formatDisplayDate(selectedDate)}
+              {formatDisplayDate(selectedDate)}
             </span>
           )}
         </div>
