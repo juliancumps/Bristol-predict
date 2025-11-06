@@ -21,8 +21,11 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict 
     );
   }
 
+  // Reverse data so oldest dates are first (left side of chart)
+  const reversedData = [...historicalData].reverse();
+
   // Prepare data for line chart
-  const chartData = historicalData.map((day) => {
+  const chartData = reversedData.map((day) => {
     const dataPoint = {
       date: day.runDate,
     };
@@ -49,7 +52,7 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict 
             dataKey="date"
             stroke="#94a3b8"
             tick={{ fontSize: 12 }}
-            interval={Math.floor(chartData.length / 7) || 0}
+            interval={2}
           />
           <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
           <Tooltip
@@ -193,6 +196,74 @@ export function PieChart_CatchDistribution({ districtData, districtNames }) {
   );
 }
 
+export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, districts }) {
+  if (!historicalData || historicalData.length === 0) {
+    return (
+      <div className="chart-placeholder">
+        <p>📊 No historical data available</p>
+      </div>
+    );
+  }
+
+  // Reverse data so oldest dates are first (left side of chart)
+  const reversedData = [...historicalData].reverse();
+
+  const chartData = reversedData.map((day) => {
+    const dataPoint = {
+      date: day.runDate,
+    };
+
+    // Get sockeye per delivery for each district
+    if (day.sockeyePerDelivery && typeof day.sockeyePerDelivery === "object") {
+      Object.entries(day.sockeyePerDelivery).forEach(([districtId, sockeyeValue]) => {
+        dataPoint[districtId] = sockeyeValue;
+      });
+    }
+
+    return dataPoint;
+  });
+
+  return (
+    <div className="chart-container">
+      <h3 className="chart-title">🐟 Sockeye Per Delivery Trend</h3>
+      <ResponsiveContainer width="100%" height={350}>
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <XAxis
+            dataKey="date"
+            stroke="#94a3b8"
+            tick={{ fontSize: 12 }}
+            interval={2}
+          />
+          <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "#0f172a",
+              border: "1px solid #3b82f6",
+              borderRadius: "6px",
+              color: "#e2e8f0",
+            }}
+            formatter={(value) => formatNumber(value)}
+            labelStyle={{ color: "#94a3b8" }}
+          />
+          <Legend wrapperStyle={{ color: "#cbd5e1" }} />
+          {Object.entries(districts).map(([districtId, district]) => (
+            <Line
+              key={districtId}
+              type="monotone"
+              dataKey={districtId}
+              stroke={DISTRICT_COLORS[districtId] || "#3b82f6"}
+              dot={false}
+              strokeWidth={2}
+              name={`${district.name} (Sockeye/Delivery)`}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 export function LineChart_MultiDistrict({ historicalData, districts }) {
   if (!historicalData || historicalData.length === 0) {
     return (
@@ -202,7 +273,10 @@ export function LineChart_MultiDistrict({ historicalData, districts }) {
     );
   }
 
-  const chartData = historicalData.map((day) => {
+  // Reverse data so oldest dates are first (left side of chart)
+  const reversedData = [...historicalData].reverse();
+
+  const chartData = reversedData.map((day) => {
     const dataPoint = {
       date: day.runDate,
     };
@@ -224,7 +298,7 @@ export function LineChart_MultiDistrict({ historicalData, districts }) {
             dataKey="date"
             stroke="#94a3b8"
             tick={{ fontSize: 12 }}
-            interval={Math.floor(chartData.length / 7) || 0}
+            interval={2}
           />
           <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
           <Tooltip

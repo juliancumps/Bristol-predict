@@ -46,21 +46,36 @@ async function initializeServer() {
   }
 }
 
-async function getDataByDateRange(db, startDate, endDate) {
-  // Query all data between two dates
-  // startDate and endDate in MM-DD-YYYY format
-  return db.query(
-    "SELECT * FROM harvest_data WHERE run_date >= ? AND run_date <= ? ORDER BY run_date DESC",
-    [startDate, endDate]
-  );
-}
-
+/**
+ * Get historical data from database
+ */
 async function getHistoricalData(db, days) {
-  // Query last N days of data
-  return db.query(
-    "SELECT * FROM harvest_data ORDER BY run_date DESC LIMIT ?",
-    [days]
-  );
+  return new Promise((resolve, reject) => {
+    db.all(
+      `SELECT * FROM daily_summaries ORDER BY run_date DESC LIMIT ?`,
+      [days],
+      (err, rows) => {
+        if (err) {
+          console.error("Error querying historical data:", err);
+          reject(err);
+          return;
+        }
+        
+        // Parse JSON data from each row
+        const historicalData = rows.map(row => {
+          try {
+            return JSON.parse(row.data_json);
+          } catch (e) {
+            console.warn(`⚠️  Could not parse data for ${row.run_date}`);
+            return null;
+          }
+        }).filter(Boolean);
+
+        console.log(`✅ Retrieved ${historicalData.length} days of historical data`);
+        resolve(historicalData);
+      }
+    );
+  });
 }
 
 
@@ -251,14 +266,29 @@ app.get("/api/daily", async (req, res) => {
   }
 });
 
-//Historical Data endpoint
+// Historical Data endpoint - get last N days
 app.get("/api/historical", async (req, res) => {
   try {
-    const days = parseInt(req.query.days) || 30;
-    const data = await getHistoricalData(db, days);
-    res.json(data);
+    const days = Math.min(parseInt(req.query.days) || 30, 90); // Max 90 days
+    
+    console.log(`📊 Fetching last ${days} days of data`);
+
+    const historicalData = await getHistoricalData(db, days);
+    
+    if (historicalData.length === 0) {
+      return res.status(404).json({
+        error: "No historical data available",
+        message: "Run backfill script to populate the database"
+      });
+    }
+
+    res.json(historicalData);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error in /api/historical:", error);
+    res.status(500).json({
+      error: "Failed to fetch historical data",
+      message: error.message,
+    });
   }
 });
 
@@ -346,83 +376,34 @@ app.get("/api/range", async (req, res) => {
 
     // Fetch data for each date
     const rangeData = [];
-for (const date of datesInRange) {
-  try {
-    const data = await getDataFromDatabaseOnly(date);  // ✅ No scraping
-    if (data) {
-      rangeData.push(data);
+    for (const date of datesInRange) {
+      try {
+        const data = await getDataFromDatabaseOnly(date);
+        if (data) {
+          rangeData.push(data);
+        }
+      } catch (error) {
+        console.warn(`⚠️  Error querying ${date}:`, error.message);
+      }
     }
-  } catch (error) {
-    console.warn(`⚠️  Error querying ${date}:`, error.message);
-  }
-}
-
-if (rangeData.length === 0) {
-  return res.status(404).json({
-    error: "No data found for date range in database",
-    startDate,
-    endDate,
-    message: "The requested date range has no available data. Run backfill script to populate dates."
-  });
-}
 
     if (rangeData.length === 0) {
       return res.status(404).json({
-        error: "Same date selected for start and end dates.",
+        error: "No data found for date range in database",
         startDate,
-        endDate
+        endDate,
+        message: "The requested date range has no available data. Run backfill script to populate dates."
       });
     }
 
     console.log(`✅ Retrieved ${rangeData.length} days of data`);
 
+    // Return raw array - let frontend handle aggregation
     res.json(rangeData);
   } catch (error) {
     console.error("Error in /api/range:", error);
     res.status(500).json({
       error: "Failed to fetch date range data",
-      message: error.message
-    });
-  }
-});
-
-// Optional: Add historical endpoint for last N days
-app.get("/api/historical", async (req, res) => {
-  try {
-    const days = Math.min(parseInt(req.query.days) || 30, 90); // Max 90 days
-    
-    console.log(`📊 Fetching last ${days} days of data`);
-
-    // Get all available dates
-    const availableDates = await getAvailableDates(db);
-    
-    if (availableDates.length === 0) {
-      return res.status(404).json({
-        error: "No data available",
-      });
-    }
-
-    // Take the last N dates
-    const datesToFetch = availableDates.slice(0, days).map(d => d.run_date);
-    
-    // Fetch data for each date
-    const historicalData = [];
-    for (const date of datesToFetch) {
-      try {
-        const data = await getFreshData(date);
-        historicalData.push(data);
-      } catch (error) {
-        console.warn(`⚠️  No data for ${date}`);
-      }
-    }
-
-    console.log(`✅ Retrieved ${historicalData.length} days of historical data`);
-
-    res.json(historicalData);
-  } catch (error) {
-    console.error("Error in /api/historical:", error);
-    res.status(500).json({
-      error: "Failed to fetch historical data",
       message: error.message
     });
   }

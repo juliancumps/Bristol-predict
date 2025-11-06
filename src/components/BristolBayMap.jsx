@@ -16,6 +16,7 @@ import {
   BarChart_DistrictComparison,
   PieChart_CatchDistribution,
   LineChart_MultiDistrict,
+  LineChart_MultiDistrict_SockeyePerDelivery,
 } from "./Charts";
 import {
   getDistricts,
@@ -512,6 +513,13 @@ useEffect(() => {
                 >
                   📉
                 </button>
+                <button
+                  className={`chart-btn ${chartMode === "sockeyetrend" ? "active" : ""}`}
+                  onClick={() => setChartMode("sockeyetrend")}
+                  title="Sockeye Per Delivery"
+                >
+                  🐟
+                </button>
               </div>
             </div>
 
@@ -562,6 +570,9 @@ useEffect(() => {
         )}
         {chartMode === "multitrend" && (
           <LineChart_MultiDistrict historicalData={historicalData} districts={DISTRICTS} />
+        )}
+        {chartMode === "sockeyetrend" && (
+          <LineChart_MultiDistrict_SockeyePerDelivery historicalData={historicalData} districts={DISTRICTS} />
         )}
       </div>
 
