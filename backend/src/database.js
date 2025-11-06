@@ -96,7 +96,7 @@ function initDatabase() {
         }
       );
 
-      // per delivery data table
+      // Sockeye per delivery data table
       db.run(
         `
         CREATE TABLE IF NOT EXISTS sockeye_per_delivery (
@@ -119,20 +119,21 @@ function initDatabase() {
         }
       );
 
-// Add index for faster queries
-db.run(
-  `CREATE INDEX IF NOT EXISTS idx_sockeye_date ON sockeye_per_delivery(run_date)`
-);
-
       // Create indexes for faster queries
       db.run(
         `CREATE INDEX IF NOT EXISTS idx_run_date ON daily_summaries(run_date)`
+      );
+      db.run(
+        `CREATE INDEX IF NOT EXISTS idx_season ON daily_summaries(season)`
       );
       db.run(
         `CREATE INDEX IF NOT EXISTS idx_district_date ON district_data(run_date, district_id)`
       );
       db.run(
         `CREATE INDEX IF NOT EXISTS idx_river_date ON river_data(run_date)`
+      );
+      db.run(
+        `CREATE INDEX IF NOT EXISTS idx_sockeye_date ON sockeye_per_delivery(run_date)`
       );
 
       console.log("✅ Database initialized successfully");
@@ -210,35 +211,32 @@ function saveScrapedData(db, data) {
         });
         riverStmt.finalize();
 
-        // After saving river data, add this:
+        // Save sockeye per delivery data
+        const sockeyeStmt = db.prepare(`
+          INSERT OR REPLACE INTO sockeye_per_delivery 
+          (run_date, district_id, district_name, sockeye_per_delivery)
+          VALUES (?, ?, ?, ?)
+        `);
 
-// Save sockeye per delivery data
-const sockeyeStmt = db.prepare(`
-  INSERT OR REPLACE INTO sockeye_per_delivery 
-  (run_date, district_id, district_name, sockeye_per_delivery)
-  VALUES (?, ?, ?, ?)
-`);
+        // Map district IDs back to names for sockeye data
+        const districtIdToName = {
+          'ugashik': 'Ugashik',
+          'egegik': 'Egegik',
+          'naknek': 'Naknek-Kvichak',
+          'nushagak': 'Nushagak',
+          'togiak': 'Togiak',
+        };
 
-// Map district IDs back to names for sockeye data
-const districtIdToName = {
-  'ugashik': 'Ugashik',
-  'egegik': 'Egegik',
-  'naknek': 'Naknek-Kvichak',
-  'nushagak': 'Nushagak',
-  'togiak': 'Togiak',
-};
-
-Object.entries(data.sockeyePerDelivery).forEach(([districtId, sockeye]) => {
-  const districtName = districtIdToName[districtId] || districtId;
-  sockeyeStmt.run(
-    data.runDate,
-    districtId,
-    districtName,
-    sockeye
-  );
-});
-sockeyeStmt.finalize();
-
+        Object.entries(data.sockeyePerDelivery).forEach(([districtId, sockeye]) => {
+          const districtName = districtIdToName[districtId] || districtId;
+          sockeyeStmt.run(
+            data.runDate,
+            districtId,
+            districtName,
+            sockeye
+          );
+        });
+        sockeyeStmt.finalize();
 
         // Commit transaction
         db.run("COMMIT", (err) => {
@@ -318,6 +316,43 @@ function getAvailableDates(db) {
   });
 }
 
+/**
+ * Get available dates for a specific season
+ */
+function getAvailableDatesBySeason(db, season) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      "SELECT run_date, season, total_run FROM daily_summaries WHERE season = ? ORDER BY run_date DESC",
+      [season],
+      (err, rows) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(rows);
+      }
+    );
+  });
+}
+
+/**
+ * Get all unique seasons in the database
+ */
+function getAvailableSeasons(db) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      "SELECT DISTINCT season FROM daily_summaries ORDER BY season DESC",
+      [],
+      (err, rows) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(rows.map(r => r.season));
+      }
+    );
+  });
+}
 
 /**
  * Get sockeye per delivery data for a date
@@ -378,6 +413,8 @@ module.exports = {
   saveScrapedData,
   getDataByDate,
   getAvailableDates,
+  getAvailableDatesBySeason,
+  getAvailableSeasons,
   getSeasonDateRange,
   getSockeyePerDeliveryByDate,
   DB_PATH,

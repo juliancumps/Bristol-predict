@@ -11,6 +11,7 @@ const {
   saveScrapedData,
   getDataByDate,
   getAvailableDates,
+  getAvailableDatesBySeason,
 } = require("./database");
 
 const app = express();
@@ -78,7 +79,32 @@ async function getHistoricalData(db, days) {
   });
 }
 
-
+/**
+ * Get data from database only (no scraping)
+ */
+async function getDataFromDatabaseOnly(db, runDate) {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT * FROM daily_summaries WHERE run_date = ?`,
+      [runDate],
+      async (err, row) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (!row) {
+          resolve(null);
+          return;
+        }
+        try {
+          resolve(JSON.parse(row.data_json));
+        } catch (e) {
+          reject(e);
+        }
+      }
+    );
+  });
+}
 
 /**
  * Get fresh data for a specific date (with caching for current date)
@@ -89,114 +115,85 @@ async function getFreshData(runDate = null) {
     const requestedDate = runDate ? new Date(runDate) : new Date();
     const dateStr = formatDateForURL(requestedDate);
 
-    // Check if we're requesting today's data and have a fresh cache
-    const isToday = dateStr === formatDateForURL(new Date());
-    const now = Date.now();
-
+    // Check if we have cached data and it's for today
     if (
-      isToday &&
       cachedData &&
-      lastScraped &&
-      now - lastScraped < CACHE_DURATION
+      cachedData.runDate === dateStr &&
+      Date.now() - lastScraped < CACHE_DURATION
     ) {
-      console.log("📦 Returning cached data for today");
+      console.log("📦 Using cached data");
       return cachedData;
     }
 
     // Try to get from database first
-    console.log(`🔍 Checking database for ${dateStr}...`);
-    const dbData = await getDataByDate(db, dateStr);
-
+    const dbData = await getDataFromDatabaseOnly(db, dateStr);
     if (dbData) {
-      console.log(`✅ Found ${dateStr} in database`);
-      if (isToday) {
+      console.log("✅ Retrieved data from database");
+      if (!runDate) {
         cachedData = dbData;
-        lastScraped = now;
+        lastScraped = Date.now();
       }
       return dbData;
     }
 
-    // If not in database, scrape it
-    console.log(`🔄 Scraping fresh data for ${dateStr}...`);
-    const data = await scrapeHarvestData(requestedDate);
-
-    // Save to database
-    await saveScrapedData(db, data);
-    console.log(`💾 Saved ${dateStr} to database`);
-
-    // Cache if today
-    if (isToday) {
-      cachedData = data;
-      lastScraped = now;
+    // If no database data and a specific date was requested, throw error
+    if (runDate) {
+      throw new Error(`No data available for date ${dateStr}. Run backfill script to populate the database.`);
     }
 
-    return data;
+    // For today with no database data, try to scrape fresh
+    console.log("🌐 Scraping fresh data from ADF&G...");
+    const freshData = await scrapeHarvestData(requestedDate);
+    await saveScrapedData(db, freshData);
+
+    cachedData = freshData;
+    lastScraped = Date.now();
+
+    return freshData;
   } catch (error) {
-    console.error("❌ Error fetching data:", error);
-
-    // Return cached data if available, even if stale
-    if (cachedData && !runDate) {
-      console.log("⚠️  Returning stale cached data due to error");
-      return cachedData;
-    }
-
+    console.error("Error fetching fresh data:", error);
     throw error;
   }
 }
 
-
-/**
- * Get data from database only - NO SCRAPING
- * Used for date ranges to avoid triggering fresh scrapes
- */
-async function getDataFromDatabaseOnly(dateStr) {
-  try {
-    console.log(`🔍 Querying database for ${dateStr}...`);
-    const dbData = await getDataByDate(db, dateStr);
-    
-    if (dbData) {
-      console.log(`✅ Found ${dateStr} in database`);
-      return dbData;
-    } else {
-      console.log(`⚠️  No data for ${dateStr} in database`);
-      return null;
-    }
-  } catch (error) {
-    console.error(`Error querying ${dateStr}:`, error);
-    throw error;
-  }
-}
-
-
-// Basic route to test server
-app.get("/", (req, res) => {
-  res.json({
-    message: "Bristol Predict API Server",
-    status: "running",
-    version: "2.0.0",
-    features: ["historical-data", "date-selection", "sqlite-database"],
-    lastScraped: lastScraped ? new Date(lastScraped).toISOString() : null,
-  });
-});
+// ====== API ENDPOINTS ======
 
 // Health check endpoint
-app.get("/health", (req, res) => {
+app.get("/api/health", (req, res) => {
   res.json({
-    status: "healthy",
-    timestamp: new Date().toISOString(),
-    database: db ? "connected" : "disconnected",
+    status: "online",
+    database:
+      db !== null
+        ? "connected"
+        : "disconnected",
     cacheStatus: cachedData ? "populated" : "empty",
     lastScraped: lastScraped ? new Date(lastScraped).toISOString() : null,
   });
 });
 
-// Get all available dates
+// Get all available dates (optionally filtered by season)
 app.get("/api/dates", async (req, res) => {
   try {
-    const dates = await getAvailableDates(db);
+    const season = req.query.season ? parseInt(req.query.season) : null;
+    let dates;
+
+    if (season) {
+      // Get dates for specific season
+      dates = await getAvailableDatesBySeason(db, season);
+      console.log(`📅 Retrieved ${dates.length} dates for season ${season}`);
+    } else {
+      // Get all dates
+      dates = await getAvailableDates(db);
+      console.log(`📅 Retrieved ${dates.length} total dates`);
+    }
+
+    // Extract unique seasons from the data
+    const seasons = [...new Set(dates.map(d => d.season))].sort((a, b) => a - b);
+
     res.json({
       count: dates.length,
       dates: dates.map((d) => d.run_date),
+      seasons: seasons,
       dateRanges:
         dates.length > 0
           ? {
@@ -266,14 +263,41 @@ app.get("/api/daily", async (req, res) => {
   }
 });
 
-// Historical Data endpoint - get last N days
+// Historical Data endpoint - get last N days (optionally filtered by season)
 app.get("/api/historical", async (req, res) => {
   try {
     const days = Math.min(parseInt(req.query.days) || 30, 90); // Max 90 days
+    const season = req.query.season ? parseInt(req.query.season) : null;
     
-    console.log(`📊 Fetching last ${days} days of data`);
+    console.log(`📊 Fetching last ${days} days of data${season ? ` for season ${season}` : ""}`);
 
-    const historicalData = await getHistoricalData(db, days);
+    let query = `SELECT * FROM daily_summaries ORDER BY run_date DESC LIMIT ?`;
+    let params = [days];
+
+    if (season) {
+      query = `SELECT * FROM daily_summaries WHERE season = ? ORDER BY run_date DESC LIMIT ?`;
+      params = [season, days];
+    }
+
+    const historicalData = await new Promise((resolve, reject) => {
+      db.all(query, params, (err, rows) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        
+        const data = rows.map(row => {
+          try {
+            return JSON.parse(row.data_json);
+          } catch (e) {
+            console.warn(`⚠️  Could not parse data for ${row.run_date}`);
+            return null;
+          }
+        }).filter(Boolean);
+
+        resolve(data);
+      });
+    });
     
     if (historicalData.length === 0) {
       return res.status(404).json({
@@ -291,8 +315,6 @@ app.get("/api/historical", async (req, res) => {
     });
   }
 });
-
-
 
 // Specific district endpoint
 app.get("/api/districts/:id", async (req, res) => {
@@ -316,10 +338,6 @@ app.get("/api/districts/:id", async (req, res) => {
     //  Add sockeye per delivery data to the district object
     const sockeyePerDelivery = data.sockeyePerDelivery?.[district.id] || 0;
 
-    //console.log("🔍 DEBUG - data.sockeyePerDelivery:", data.sockeyePerDelivery);
-    //console.log("🔍 DEBUG - district.id:", district.id);
-    //console.log("🔍 DEBUG - value for this district:", data.sockeyePerDelivery?.[district.id]); 
-
     res.json({
       ...district,
       sockeyePerDelivery: data.sockeyePerDelivery?.[district.id] || 0,
@@ -334,7 +352,6 @@ app.get("/api/districts/:id", async (req, res) => {
     });
   }
 });
-
 
 // Date range endpoint - fetches multiple days and returns as array
 app.get("/api/range", async (req, res) => {
@@ -378,7 +395,7 @@ app.get("/api/range", async (req, res) => {
     const rangeData = [];
     for (const date of datesInRange) {
       try {
-        const data = await getDataFromDatabaseOnly(date);
+        const data = await getDataFromDatabaseOnly(db, date);
         if (data) {
           rangeData.push(data);
         }

@@ -192,6 +192,8 @@ export default function BristolBayMap() {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
+
+  const [selectedSeason, setSelectedSeason] = useState(null);
   
   // Date range support
   const [dateRangeMode, setDateRangeMode] = useState(false);
@@ -341,6 +343,8 @@ useEffect(() => {
           <DatePicker
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
+            selectedSeason={selectedSeason}
+            onSeasonChange={setSelectedSeason}
             dateRangeMode={dateRangeMode}
             selectedDateRange={selectedDateRange}
             onDateRangeChange={(start, end) =>

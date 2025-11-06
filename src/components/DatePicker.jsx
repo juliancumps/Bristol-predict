@@ -4,11 +4,14 @@ import "../styles/DatePicker.css";
 export default function DatePicker({
   selectedDate,
   onDateChange,
+  selectedSeason,
+  onSeasonChange,
   dateRangeMode = false,
   selectedDateRange,
   onDateRangeChange,
 }) {
   const [availableDates, setAvailableDates] = useState([]);
+  const [availableSeasons, setAvailableSeasons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [rangeStart, setRangeStart] = useState(null);
   const [rangeEnd, setRangeEnd] = useState(null);
@@ -16,29 +19,30 @@ export default function DatePicker({
   useEffect(() => {
     console.log("📅 DatePicker: Fetching available dates...");
 
-    // Fetch available dates from API
     fetch("http://localhost:3001/api/dates")
       .then((res) => res.json())
       .then((data) => {
         console.log("📅 DatePicker: Received dates:", data);
+        
+        // Set available seasons
+        if (data.seasons && data.seasons.length > 0) {
+          setAvailableSeasons(data.seasons);
+          console.log("📅 Available seasons:", data.seasons);
+          
+          if (!selectedSeason) {
+            onSeasonChange(data.seasons[data.seasons.length - 1]);
+          }
+        }
+
         setAvailableDates(data.dates || []);
         setLoading(false);
 
-        // If no date selected yet, select the most recent
         if (!selectedDate && data.dates && data.dates.length > 0) {
-          console.log(
-            `📅 DatePicker: Auto-selecting most recent date: ${data.dates[0]}`
-          );
+          console.log(`📅 DatePicker: Auto-selecting most recent date: ${data.dates[0]}`);
           onDateChange(data.dates[0]);
         }
 
-        // Initialize range with most recent date
-        if (
-          dateRangeMode &&
-          !rangeEnd &&
-          data.dates &&
-          data.dates.length > 0
-        ) {
+        if (dateRangeMode && !rangeEnd && data.dates && data.dates.length > 0) {
           setRangeEnd(data.dates[0]);
         }
       })
@@ -47,6 +51,29 @@ export default function DatePicker({
         setLoading(false);
       });
   }, []);
+
+  // Fetch dates when season changes
+  useEffect(() => {
+    if (!selectedSeason) return;
+
+    console.log(`📅 DatePicker: Fetching dates for season ${selectedSeason}...`);
+
+    fetch(`http://localhost:3001/api/dates?season=${selectedSeason}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(`📅 DatePicker: Retrieved ${data.dates.length} dates for season ${selectedSeason}`);
+        setAvailableDates(data.dates || []);
+        
+        if (data.dates && data.dates.length > 0) {
+          onDateChange(data.dates[0]);
+          setRangeStart(null);
+          setRangeEnd(data.dates[0]);
+        }
+      })
+      .catch((err) => {
+        console.error("❌ DatePicker: Error fetching season dates:", err);
+      });
+  }, [selectedSeason]);
 
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return "";
@@ -107,6 +134,24 @@ export default function DatePicker({
 
   return (
     <div className="datepicker-container">
+      {/* Season Selector */}
+      {availableSeasons.length > 0 && (
+        <div className="season-selector">
+          <label>Season:</label>
+          <div className="season-buttons">
+            {availableSeasons.map((season) => (
+              <button
+                key={season}
+                className={`season-btn ${selectedSeason === season ? "active" : ""}`}
+                onClick={() => onSeasonChange(season)}
+              >
+                {season}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {!dateRangeMode ? (
         // Single Date Mode
         <div className="datepicker-single">
