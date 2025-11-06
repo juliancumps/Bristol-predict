@@ -155,11 +155,12 @@ async function backfillAllSeasons() {
   });
 }
 
+
 /**
- * Backfill test - scrape first 3 dates from each season to verify it works
+ * Backfill test - scrape specific dates to fix missing/incomplete data
  */
 async function backfillTest() {
-  console.log("🧪 Bristol Bay Data Backfill TEST - First 3 dates per season");
+  console.log("🧪 Bristol Bay Data Backfill TEST - Scraping specific dates");
   console.log("=".repeat(60));
 
   // Create data directory if it doesn't exist
@@ -176,78 +177,65 @@ async function backfillTest() {
   let totalSuccessCount = 0;
   let totalErrorCount = 0;
 
-  // Test first 3 dates from each season
-  console.log("\n🚀 Starting test backfill (first 3 dates per season)...\n");
+  // Specific dates to scrape (MM-DD-YYYY format)
+  const datesToScrape = [
+    "07-23-2025",
+    "07-21-2025",
+    "07-19-2025",
+    "07-18-2025",
+    "07-20-2024",
+    "07-19-2024",
+    "07-12-2023"
+  ];
 
-  for (const season of SEASONS) {
-    console.log(`📅 SEASON ${season.year}`);
-    console.log("-".repeat(60));
-    
-    // Get all dates for the season
-    const allDates = getSeasonDates(season.start, season.end);
-    // Take only first 3 dates
-    const testDates = allDates.slice(0, 3);
-    
-    console.log(`Found ${allDates.length} total days, testing first ${testDates.length} days\n`);
+  console.log("\n🚀 Starting backfill for specific dates...\n");
 
-    let seasonSuccessCount = 0;
-    let seasonErrorCount = 0;
+  for (let i = 0; i < datesToScrape.length; i++) {
+    const dateStr = datesToScrape[i];
+    const [month, day, year] = dateStr.split("-");
+    const date = new Date(year, month - 1, day);
 
-    for (let i = 0; i < testDates.length; i++) {
-      const date = testDates[i];
-      const dateStr = date.toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-      });
+    try {
+      console.log(`[${i + 1}/${datesToScrape.length}] Scraping ${dateStr}...`);
 
-      try {
-        console.log(`  [${i + 1}/${testDates.length}] Scraping ${dateStr}...`);
+      // Scrape data for this date
+      const data = await scrapeHarvestData(date);
 
-        // Scrape data for this date
-        const data = await scrapeHarvestData(date);
+      // Save to database (will replace if exists)
+      await saveScrapedData(db, data);
 
-        // Save to database
-        await saveScrapedData(db, data);
+      totalSuccessCount++;
 
-        seasonSuccessCount++;
-        totalSuccessCount++;
+      // Log some stats
+      const totalRun = data.totalRun.totalRun || 0;
+      if (totalRun > 0) {
+        console.log(`       ✅ ${totalRun.toLocaleString()} total run`);
+      } else {
+        console.log(`       ✅ (No fishing activity)`);
+      }
 
-        // Log some stats
-        const totalRun = data.totalRun.totalRun || 0;
-        if (totalRun > 0) {
-          console.log(`       ✅ ${totalRun.toLocaleString()} total run`);
-        } else {
-          console.log(`       ✅ (No fishing activity)`);
-        }
-
-        if (i < testDates.length - 1) {
-          await sleep(DELAY_MS);
-        }
-      } catch (error) {
-        seasonErrorCount++;
-        totalErrorCount++;
-        console.error(`       ❌ Error: ${error.message}`);
+      if (i < datesToScrape.length - 1) {
         await sleep(DELAY_MS);
       }
+    } catch (error) {
+      totalErrorCount++;
+      console.error(`       ❌ Error: ${error.message}`);
+      await sleep(DELAY_MS);
     }
-
-    console.log(`✅ Season ${season.year}: ${seasonSuccessCount}/${testDates.length} successful\n`);
   }
 
   // Test summary
-  console.log("=".repeat(60));
+  console.log("\n" + "=".repeat(60));
   console.log("🧪 TEST SUMMARY");
   console.log("=".repeat(60));
-  console.log(`✅ Total successfully scraped: ${totalSuccessCount} days`);
-  console.log(`❌ Total failed: ${totalErrorCount} days`);
-  console.log(`Expected: 9 days (3 per season × 3 seasons)`);
+  console.log(`✅ Total successfully scraped: ${totalSuccessCount} dates`);
+  console.log(`❌ Total failed: ${totalErrorCount} dates`);
+  console.log(`Expected: ${datesToScrape.length} dates`);
 
-  if (totalSuccessCount === 9) {
-    console.log("\n✨ TEST PASSED! All 9 dates loaded successfully.");
-    console.log("You can now run 'npm run backfill' to load all dates.");
+  if (totalSuccessCount === datesToScrape.length) {
+    console.log(`\n✨ TEST PASSED! All ${datesToScrape.length} dates loaded successfully.`);
   } else if (totalSuccessCount > 0) {
-    console.log(`\n⚠️  TEST PARTIAL - ${totalSuccessCount}/9 dates loaded. Check errors above.`);
+    console.log(`\n⚠️  TEST PARTIAL - ${totalSuccessCount}/${datesToScrape.length} dates loaded. Check errors above.`);
   } else {
     console.log("\n❌ TEST FAILED - No dates loaded. Check errors above.");
   }
