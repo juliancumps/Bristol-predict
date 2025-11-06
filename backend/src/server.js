@@ -129,6 +129,30 @@ async function getFreshData(runDate = null) {
   }
 }
 
+
+/**
+ * Get data from database only - NO SCRAPING
+ * Used for date ranges to avoid triggering fresh scrapes
+ */
+async function getDataFromDatabaseOnly(dateStr) {
+  try {
+    console.log(`🔍 Querying database for ${dateStr}...`);
+    const dbData = await getDataByDate(db, dateStr);
+    
+    if (dbData) {
+      console.log(`✅ Found ${dateStr} in database`);
+      return dbData;
+    } else {
+      console.log(`⚠️  No data for ${dateStr} in database`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error querying ${dateStr}:`, error);
+    throw error;
+  }
+}
+
+
 // Basic route to test server
 app.get("/", (req, res) => {
   res.json({
@@ -227,19 +251,6 @@ app.get("/api/daily", async (req, res) => {
   }
 });
 
-//Date range endpoint
-app.get("/api/range", async (req, res) => {
-  try {
-    const { startDate, endDate } = req.query;
-    // Query database for data between dates
-    // Return array of daily data objects
-    const data = await getDataByDateRange(db, startDate, endDate);
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 //Historical Data endpoint
 app.get("/api/historical", async (req, res) => {
   try {
@@ -335,18 +346,29 @@ app.get("/api/range", async (req, res) => {
 
     // Fetch data for each date
     const rangeData = [];
-    for (const date of datesInRange) {
-      try {
-        const data = await getFreshData(date);
-        rangeData.push(data);
-      } catch (error) {
-        console.warn(`⚠️  No data for ${date}:`, error.message);
-      }
+for (const date of datesInRange) {
+  try {
+    const data = await getDataFromDatabaseOnly(date);  // ✅ No scraping
+    if (data) {
+      rangeData.push(data);
     }
+  } catch (error) {
+    console.warn(`⚠️  Error querying ${date}:`, error.message);
+  }
+}
+
+if (rangeData.length === 0) {
+  return res.status(404).json({
+    error: "No data found for date range in database",
+    startDate,
+    endDate,
+    message: "The requested date range has no available data. Run backfill script to populate dates."
+  });
+}
 
     if (rangeData.length === 0) {
       return res.status(404).json({
-        error: "No data found for date range",
+        error: "Same date selected for start and end dates.",
         startDate,
         endDate
       });
