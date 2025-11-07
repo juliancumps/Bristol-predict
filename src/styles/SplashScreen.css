@@ -1,0 +1,165 @@
+.splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Top Banner Bar */
+.splash-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.5) 0%, rgba(59, 130, 246, 0.3) 100%);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(96, 165, 250, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 20px;
+  z-index: 10000;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+
+.splash-banner-icon {
+  height: 35px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.0));
+}
+
+.splash-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #0f172a;
+}
+
+.splash-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.75) 0%, rgba(30, 58, 138, 0.65) 50%, rgba(15, 23, 42, 0.75) 100%);
+  z-index: 1;
+}
+
+.splash-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  animation: slideUp 0.8s ease-out;
+}
+
+.splash-title-group {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.splash-title {
+  font-size: 4.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
+  letter-spacing: -2px;
+}
+
+.splash-subtitle {
+  font-size: 1.4rem;
+  color: #60a5fa;
+  margin: 16px 0 0 0;
+  font-weight: 500;
+  text-shadow: 0 3px 15px rgba(0, 0, 0, 0.5);
+  letter-spacing: 1.5px;
+}
+
+.splash-icon {
+  height: 120px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.0));
+  animation: fadeIn 0.8s ease-out 0.3s backwards;
+}
+
+.splash-continue-btn {
+  padding: 14px 40px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.08) 100%);
+  border: 2px solid #3b82f6;
+  color: #60a5fa;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.8s ease-out 0.2s backwards;
+}
+
+.splash-continue-btn:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%);
+  border-color: #93c5fd;
+  color: #93c5fd;
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.splash-continue-btn:active {
+  transform: scale(0.97);
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .splash-title {
+    font-size: 2.8rem;
+  }
+
+  .splash-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .splash-continue-btn {
+    padding: 12px 32px;
+    font-size: 1rem;
+  }
+
+  .splash-content {
+    gap: 40px;
+  }
+}
