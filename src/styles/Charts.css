@@ -66,6 +66,15 @@
   color: #94a3b8;
 }
 
+/* X-Axis label rotation support */
+.recharts-xaxis .recharts-cartesian-axis-tick {
+  transform-origin: center;
+}
+
+.recharts-xaxis .recharts-cartesian-axis-tick-value {
+  transform-origin: 0% 0%;
+}
+
 .recharts-legend-wrapper {
   padding-top: 12px !important;
 }
@@ -124,6 +133,17 @@
   color: #e2e8f0 !important;
 }
 
+/* Y-Axis label styling */
+.recharts-yaxis .recharts-cartesian-axis-tick-value {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.recharts-yaxis-left .recharts-cartesian-axis-label {
+  fill: #94a3b8;
+  font-size: 13px;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .chart-container {
@@ -133,6 +153,10 @@
 
   .chart-title {
     font-size: 14px;
+  }
+
+  .recharts-cartesian-axis-tick-value {
+    font-size: 10px;
   }
 }
 
@@ -148,10 +172,15 @@
   }
 
   .recharts-cartesian-axis-tick-value {
-    font-size: 11px;
+    font-size: 9px;
   }
 
   .recharts-legend-item-text {
-    font-size: 12px;
+    font-size: 11px;
+  }
+
+  /* Make charts smaller on mobile to accommodate rotated labels */
+  .recharts-wrapper {
+    font-size: 11px;
   }
 }

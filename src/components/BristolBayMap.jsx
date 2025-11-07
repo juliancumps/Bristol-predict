@@ -299,19 +299,33 @@ export default function BristolBayMap() {
     fetchRangeData();
   }, [selectedDateRange, dateRangeMode]);
 
-  // Fetch historical data for charts
-  useEffect(() => {
-    async function fetchHistorical() {
-      try {
-        const data = await getHistoricalData(30);
-        setHistoricalData(data);
-      } catch (err) {
-        console.error("❌ Error fetching historical data:", err);
+  // Fetch historical data for charts - refetch when season changes
+useEffect(() => {
+  async function fetchHistorical() {
+    try {
+      // If a season is selected, fetch data for entire season
+      // Otherwise fetch last 90 days
+      let data;
+      
+      if (selectedSeason) {
+        // Fetch from API with season parameter
+        const response = await fetch(
+          `http://localhost:3001/api/historical?season=${selectedSeason}`
+        );
+        data = await response.json();
+      } else {
+        // Fallback to last 90 days if no season selected
+        data = await getHistoricalData(90);
       }
+      
+      setHistoricalData(data);
+    } catch (err) {
+      console.error("❌ Error fetching historical data:", err);
     }
+  }
 
-    fetchHistorical();
-  }, []);
+  fetchHistorical();
+}, [selectedSeason]); // Re-fetch when season changes
 
   // Fetch specific district data when selected
 useEffect(() => {
@@ -341,7 +355,7 @@ useEffect(() => {
       {/* Compact Header */}
       <div className="header-compact">
         <div className="header-left">
-          <h1>Bristol Predict 🐟 beta.v1.2</h1>
+          <h1>Bristol Predict 🐟 beta.v1.5</h1>
         </div>
         
         <div className="header-center">
@@ -578,6 +592,7 @@ useEffect(() => {
           <LineChart_DayToDayComparison
             historicalData={historicalData}
             selectedDistrict={selectedDistrict}
+            selectedSeason={selectedSeason}
           />
         )}
         {chartMode === "comparison" && (
@@ -587,10 +602,10 @@ useEffect(() => {
           <PieChart_CatchDistribution districtData={districtData} districtNames={DISTRICTS} />
         )}
         {chartMode === "multitrend" && (
-          <LineChart_MultiDistrict historicalData={historicalData} districts={DISTRICTS} />
+          <LineChart_MultiDistrict historicalData={historicalData} districts={DISTRICTS} selectedSeason={selectedSeason}/>
         )}
         {chartMode === "sockeyetrend" && (
-          <LineChart_MultiDistrict_SockeyePerDelivery historicalData={historicalData} districts={DISTRICTS} />
+          <LineChart_MultiDistrict_SockeyePerDelivery historicalData={historicalData} districts={DISTRICTS} selectedSeason={selectedSeason}/>
         )}
       </div>
 

@@ -1,6 +1,7 @@
 .datepicker-container {
-  background-color: rgba(30, 41, 59, 0.95);
+  background-color: rgba(30, 41, 59, 0.75);
   padding: 16px;
+  margin-top: 95px;
   border-radius: 8px;
   border: 1px solid #3b82f6;
   color: #94a3b8;

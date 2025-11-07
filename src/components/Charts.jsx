@@ -10,9 +10,53 @@ const DISTRICT_COLORS = {
   togiak: "#f59e0b",
 };
 
+const CHART_NOTES = {
+  "07-18-2025": "ADF&G did not collect data on this date :(",
+  "07-19-2025": "ADF&G did not collect data on this date :(",
+  "07-21-2025": "ADF&G did not collect data on this date :(",
+  "07-23-2025": "ADF&G did not collect data on this date :(",
+
+  "07-20-2024": "ADF&G did not collect data on this date :(",
+  "07-19-2024": "ADF&G did not collect data on this date :(",
+  "07-26-2024": "ADF&G did not collect data on/after this date :(",
+
+  "07-21-2023": "ADF&G did not collect data on/after this date :(",
+};
+
 const PIE_COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b"];
 
-export function LineChart_DayToDayComparison({ historicalData, selectedDistrict }) {
+// Custom Tooltip Component for charts with notes
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div
+        style={{
+          backgroundColor: "#0f172a",
+          border: "1px solid #3b82f6",
+          borderRadius: "6px",
+          padding: "8px 12px",
+          color: "#e2e8f0",
+        }}
+      >
+        <p style={{ margin: "0 0 4px 0", color: "#60a5fa" }}>{data.date}</p>
+        {payload.map((entry, index) => (
+          <p key={index} style={{ margin: "2px 0", color: entry.color }}>
+            {entry.name}: {formatNumber(entry.value)}
+          </p>
+        ))}
+        {data.note && (
+          <p style={{ margin: "4px 0 0 0", color: "#fbbf24", fontSize: "12px", fontStyle: "italic" }}>
+            📝 {data.note}
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
+export function LineChart_DayToDayComparison({ historicalData, selectedDistrict, selectedSeason }) {
   if (!historicalData || historicalData.length === 0) {
     return (
       <div className="chart-placeholder">
@@ -21,8 +65,21 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict 
     );
   }
 
+  // Filter data by selected season
+  const filteredData = selectedSeason
+    ? historicalData.filter((day) => day.season === selectedSeason)
+    : historicalData;
+
+  if (filteredData.length === 0) {
+    return (
+      <div className="chart-placeholder">
+        <p>📊 No data available for {selectedSeason} season</p>
+      </div>
+    );
+  }
+
   // Reverse data so oldest dates are first (left side of chart)
-  const reversedData = [...historicalData].reverse();
+  const reversedData = [...filteredData].reverse();
 
   // Prepare data for line chart
   const chartData = reversedData.map((day) => {
@@ -39,32 +96,39 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict 
       dataPoint.totalCatch = day.totalRun?.catchDaily;
     }
 
+
+    //NOTES
+    if (CHART_NOTES[day.runDate]) {
+      dataPoint.note = CHART_NOTES[day.runDate];
+    }
+
+
     return dataPoint;
   });
 
+  const interval = Math.max(0, Math.floor(chartData.length / 20));
+
   return (
     <div className="chart-container">
-      <h3 className="chart-title">📈 Daily Catch Trend</h3>
+      <h3 className="chart-title">📈 Bay-Wide Catch Per Day</h3>
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis
             dataKey="date"
             stroke="#94a3b8"
             tick={{ fontSize: 12 }}
-            interval={2}
+            angle={-45}
+            textAnchor="end"
+            height={80}
+            interval={interval}
           />
-          <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#0f172a",
-              border: "1px solid #3b82f6",
-              borderRadius: "6px",
-              color: "#e2e8f0",
-            }}
-            formatter={(value) => formatNumber(value)}
-            labelStyle={{ color: "#94a3b8" }}
+          <YAxis 
+            stroke="#94a3b8" 
+            tick={{ fontSize: 12 }}
+            label={{ value: "# of Sockeye", angle: -90, position: "outsideRight", offset: -5, dx: -44 }}
           />
+          <Tooltip content={<CustomTooltip />} />
           <Legend wrapperStyle={{ color: "#cbd5e1" }} />
           {selectedDistrict ? (
             <Line
@@ -110,10 +174,14 @@ export function BarChart_DistrictComparison({ data, districtNames }) {
     <div className="chart-container">
       <h3 className="chart-title">📊 District Comparison (Daily)</h3>
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+        <BarChart data={chartData} margin={{ top: 5, right: 30, left: 10, bottom: -5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-          <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
+          <YAxis 
+            stroke="#94a3b8" 
+            tick={{ fontSize: 12 }}
+            label={{ value: "# of Sockeye", angle: -90, position: "outsideRight", offset: 10, dx: -34.5 }}
+          />
           <Tooltip
             contentStyle={{
               backgroundColor: "#0f172a",
@@ -196,7 +264,7 @@ export function PieChart_CatchDistribution({ districtData, districtNames }) {
   );
 }
 
-export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, districts }) {
+export function LineChart_MultiDistrict({ historicalData, districts, selectedSeason }) {
   if (!historicalData || historicalData.length === 0) {
     return (
       <div className="chart-placeholder">
@@ -205,8 +273,100 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
     );
   }
 
+  // Filter data by selected season
+  const filteredData = selectedSeason
+    ? historicalData.filter((day) => day.season === selectedSeason)
+    : historicalData;
+
+  if (filteredData.length === 0) {
+    return (
+      <div className="chart-placeholder">
+        <p>📊 No data available for {selectedSeason} season</p>
+      </div>
+    );
+  }
+
   // Reverse data so oldest dates are first (left side of chart)
-  const reversedData = [...historicalData].reverse();
+  const reversedData = [...filteredData].reverse();
+
+  const chartData = reversedData.map((day) => {
+    const dataPoint = {
+      date: day.runDate,
+    };
+
+    day.districts?.forEach((district) => {
+      dataPoint[district.id] = district.catchDaily;
+    });
+
+    return dataPoint;
+  });
+
+  // Calculate interval to show reasonable number of ticks (roughly 15-20 labels)
+  const interval = Math.max(0, Math.floor(chartData.length / 20));
+
+  return (
+    <div className="chart-container">
+      <h3 className="chart-title">📈 Daily Catch Trend Per District</h3>
+      <ResponsiveContainer width="100%" height={350}>
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 12, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <XAxis
+            dataKey="date"
+            stroke="#94a3b8"
+            tick={{ fontSize: 12 }}
+            angle={-45}
+            textAnchor="end"
+            height={80}
+            interval={interval}
+          />
+          <YAxis 
+            stroke="#94a3b8" 
+            tick={{ fontSize: 12 }}
+            label={{ value: "# of Sockeye", angle: -90, position: "outsideRight", offset: 10, dx: -36 }}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend wrapperStyle={{ color: "#cbd5e1" }} />
+          {Object.entries(districts).map(([districtId, district]) => (
+            <Line
+              key={districtId}
+              type="monotone"
+              dataKey={districtId}
+              stroke={DISTRICT_COLORS[districtId] || "#3b82f6"}
+              dot={false}
+              strokeWidth={2}
+              name={district.name}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, districts, selectedSeason }) {
+  if (!historicalData || historicalData.length === 0) {
+    return (
+      <div className="chart-placeholder">
+        <p>📊 No historical data available</p>
+      </div>
+    );
+  }
+
+  // Filter data by selected season
+  const filteredData = selectedSeason
+    ? historicalData.filter((day) => day.season === selectedSeason)
+    : historicalData;
+
+  if (filteredData.length === 0) {
+    return (
+      <div className="chart-placeholder">
+        <p>📊 No data available for {selectedSeason} season</p>
+      </div>
+    );
+  }
+
+  // Reverse data so oldest dates are first (left side of chart)
+  const reversedData = [...filteredData].reverse();
 
   const chartData = reversedData.map((day) => {
     const dataPoint = {
@@ -223,29 +383,30 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
     return dataPoint;
   });
 
+  // Calculate interval to show reasonable number of ticks (roughly 15-20 labels)
+  const interval = Math.max(0, Math.floor(chartData.length / 30));
+
   return (
     <div className="chart-container">
-      <h3 className="chart-title">🐟 Sockeye Per Delivery Trend</h3>
+      <h3 className="chart-title">🐟 Sockeye Per Delivery Trends</h3>
       <ResponsiveContainer width="100%" height={350}>
-        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 5, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis
             dataKey="date"
             stroke="#94a3b8"
             tick={{ fontSize: 12 }}
-            interval={2}
+            angle={-45}
+            textAnchor="end"
+            height={80}
+            interval={interval}
           />
-          <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#0f172a",
-              border: "1px solid #3b82f6",
-              borderRadius: "6px",
-              color: "#e2e8f0",
-            }}
-            formatter={(value) => formatNumber(value)}
-            labelStyle={{ color: "#94a3b8" }}
+          <YAxis 
+            stroke="#94a3b8" 
+            tick={{ fontSize: 12 }}
+            label={{ value: "# of Sockeye", angle: -90, position: "outsideRight", offset: 10, dx: -20 }}
           />
+          <Tooltip content={<CustomTooltip />} />
           <Legend wrapperStyle={{ color: "#cbd5e1" }} />
           {Object.entries(districts).map(([districtId, district]) => (
             <Line
@@ -255,72 +416,7 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
               stroke={DISTRICT_COLORS[districtId] || "#3b82f6"}
               dot={false}
               strokeWidth={2}
-              name={`${district.name} (Sockeye/Delivery)`}
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
-export function LineChart_MultiDistrict({ historicalData, districts }) {
-  if (!historicalData || historicalData.length === 0) {
-    return (
-      <div className="chart-placeholder">
-        <p>📊 No historical data available</p>
-      </div>
-    );
-  }
-
-  // Reverse data so oldest dates are first (left side of chart)
-  const reversedData = [...historicalData].reverse();
-
-  const chartData = reversedData.map((day) => {
-    const dataPoint = {
-      date: day.runDate,
-    };
-
-    day.districts?.forEach((district) => {
-      dataPoint[district.id] = district.catchDaily;
-    });
-
-    return dataPoint;
-  });
-
-  return (
-    <div className="chart-container">
-      <h3 className="chart-title">📈 Multi-District Trend</h3>
-      <ResponsiveContainer width="100%" height={350}>
-        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-          <XAxis
-            dataKey="date"
-            stroke="#94a3b8"
-            tick={{ fontSize: 12 }}
-            interval={2}
-          />
-          <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#0f172a",
-              border: "1px solid #3b82f6",
-              borderRadius: "6px",
-              color: "#e2e8f0",
-            }}
-            formatter={(value) => formatNumber(value)}
-            labelStyle={{ color: "#94a3b8" }}
-          />
-          <Legend wrapperStyle={{ color: "#cbd5e1" }} />
-          {Object.entries(districts).map(([districtId, district]) => (
-            <Line
-              key={districtId}
-              type="monotone"
-              dataKey={districtId}
-              stroke={DISTRICT_COLORS[districtId] || "#3b82f6"}
-              dot={false}
-              strokeWidth={2}
-              name={district.name}
+              name={`${district.name}`}
             />
           ))}
         </LineChart>

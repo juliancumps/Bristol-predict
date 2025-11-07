@@ -65,9 +65,9 @@ export default function DatePicker({
         setAvailableDates(data.dates || []);
         
         if (data.dates && data.dates.length > 0) {
-          onDateChange(data.dates[0]);
-          setRangeStart(null);
-          setRangeEnd(data.dates[0]);
+          onDateChange(data.dates[data.dates.length - 1]);
+          setRangeStart(data.dates[data.dates.length - 1]);
+          setRangeEnd(null);
         }
       })
       .catch((err) => {
