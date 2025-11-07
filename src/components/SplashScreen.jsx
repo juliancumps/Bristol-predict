@@ -18,7 +18,7 @@ export default function SplashScreen({ onComplete }) {
     <>
       {/* Top Banner Bar */}
       <div className="splash-banner">
-        <img src="/icon.png" alt="Bristol Predict" className="splash-banner-icon" />
+        <img src="/icon-512.png" alt="Bristol Predict" className="splash-banner-icon" />
       </div>
 
       <div className="splash-screen">
@@ -42,7 +42,7 @@ export default function SplashScreen({ onComplete }) {
           <p className="splash-subtitle">Alaska Salmon Forecast</p>
         </div>
 
-        <img src="/icon.png" alt="Bristol Predict Icon" className="splash-icon" />
+        <img src="/icon-512.png" alt="Bristol Predict Icon" className="splash-icon" />
 
         <button className="splash-continue-btn" onClick={handleContinue}>
           Continue
