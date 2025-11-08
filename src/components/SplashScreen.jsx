@@ -1,67 +1,57 @@
 import { useState, useEffect } from "react";
-import MetallicPaint, { parseLogoImage } from "./MetallicPaint";
+import MetallicPaint, { parseLogoImage } from "./MetallicPaint"
 import "../styles/SplashScreen.css";
-
-// SVG string for "Bristol Predict" title - black text for metallic mask
-const BRISTOL_PREDICT_SVG = `
-<svg viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg" width="1200" height="300">
-  <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@800&display=swap');
-    </style>
-  </defs>
-  <text 
-    x="600" 
-    y="200" 
-    font-family="Inter, sans-serif" 
-    font-size="180" 
-    font-weight="800" 
-    text-anchor="middle" 
-    fill="black" 
-    letter-spacing="-5"
-  >
-    Bristol Predict
-  </text>
-</svg>
-`;
+import bristolPredictLogo from "../assets/bristol-predict-title.svg";
 
 function MetallicTitle() {
+  console.log("🎭 MetallicTitle rendered");
   const [imageData, setImageData] = useState(null);
-
+  
   useEffect(() => {
     async function loadTitleImage() {
       try {
-        // Convert SVG string to blob and parse it
-        const blob = new Blob([BRISTOL_PREDICT_SVG], { type: "image/svg+xml" });
+        console.log("📌 useEffect running - starting fetch");
+        const response = await fetch(bristolPredictLogo);
+        console.log("✅ Fetch complete, got blob");
+        const blob = await response.blob();
         const file = new File([blob], "bristol-predict.svg", { type: blob.type });
+        
+        console.log("🔄 Calling parseLogoImage...");
         const parsedData = await parseLogoImage(file);
+        console.log("✅ parseLogoImage returned:", parsedData);
+        
         setImageData(parsedData?.imageData ?? null);
+        console.log("📊 setImageData called");
       } catch (err) {
-        console.error("Error loading title image:", err);
+        console.error("❌ Error:", err);
       }
     }
-
     loadTitleImage();
   }, []);
 
+  console.log("🖼️ Current imageData state:", imageData);
+
   if (!imageData) {
-    // Fallback while loading
+    console.log("📝 Showing fallback SVG (no imageData yet)");
     return (
-      <h1 className="splash-title">Bristol Predict</h1>
+      <div className="metallic-title-container">
+        <img src={bristolPredictLogo} alt="Bristol Predict" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+      </div>
     );
   }
 
+  console.log("🎨 Rendering MetallicPaint with imageData");
   return (
     <div className="metallic-title-container">
       <MetallicPaint 
         imageData={imageData}
         params={{ 
-          edge: 2, 
-          patternBlur: 0.005, 
-          patternScale: 2.5, 
-          refraction: 0.015, 
-          speed: 0.35, 
-          liquid: 0.08 
+        patternScale: 10,
+        refraction: 0.0015,
+        edge: 0.8,
+        patternBlur: 0.005,
+        liquid: 0.07,  
+        speed: 0.3 
         }} 
       />
     </div>
