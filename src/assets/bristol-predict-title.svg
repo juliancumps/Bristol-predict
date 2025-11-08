@@ -1,0 +1,14 @@
+<svg viewBox="0 0 1400 300" xmlns="http://www.w3.org/2000/svg" width="1200" height="300">
+  <text 
+    x="700" 
+    y="220" 
+    font-family="Arial, sans-serif" 
+    font-size="200" 
+    font-weight="900" 
+    text-anchor="middle" 
+    fill="black" 
+    letter-spacing="-8"
+  >
+    Bristol Predict
+  </text>
+</svg>
