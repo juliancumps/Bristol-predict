@@ -6,11 +6,11 @@ import { useEffect, useRef, useState } from 'react';
 import './MetallicPaint.css';
 
 const defaultParams = {
-  patternScale: 1,
-  refraction: 0.0015,
-  edge: 0.8,
-  patternBlur: 0.0000005,
-  liquid: 0.07,  
+  patternScale: 2,
+  refraction: 0.015,
+  edge: 1,
+  patternBlur: 0.005,
+  liquid: 0.07,
   speed: 0.3
 };
 
@@ -27,7 +27,12 @@ export function parseLogoImage(file) {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = function () {
-      const MAX_SIZE = 1000;
+      if (file.type === 'image/svg+xml') {
+        img.width = 2000;
+        img.height = 400;
+      }
+
+      const MAX_SIZE = 2000;
       const MIN_SIZE = 500;
       let width = img.naturalWidth;
       let height = img.naturalHeight;
@@ -377,10 +382,8 @@ export default function MetallicPaint({ imageData, params = defaultParams }) {
         alpha: true
       });
       if (!canvas || !gl) {
-        console.error("❌ Canvas or WebGL context is null!");
         return;
       }
-      console.log("✅ WebGL context created successfully");
 
       function createShader(gl, sourceCode, type) {
         const shader = gl.createShader(type);
@@ -490,8 +493,7 @@ export default function MetallicPaint({ imageData, params = defaultParams }) {
       canvasEl.width = side * devicePixelRatio;
       canvasEl.height = side * devicePixelRatio;
       gl.viewport(0, 0, canvasEl.width, canvasEl.height);
-      const ratio = canvasEl.width / canvasEl.height;
-      gl.uniform1f(uniforms.u_ratio, ratio);
+      gl.uniform1f(uniforms.u_ratio, canvasEl.width / canvasEl.height);
       gl.uniform1f(uniforms.u_img_ratio, imgRatio);
     }
 
@@ -547,5 +549,5 @@ export default function MetallicPaint({ imageData, params = defaultParams }) {
     };
   }, [gl, uniforms, imageData]);
 
-  return <canvas ref={canvasRef} className="paint-container" style={{ display: 'block', width: '100%', height: '100%' }} />;
+  return <canvas ref={canvasRef} className="paint-container" />;
 }

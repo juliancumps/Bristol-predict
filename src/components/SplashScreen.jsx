@@ -1,59 +1,10 @@
-import { useState, useEffect } from "react";
-import MetallicPaint, { parseLogoImage } from "./MetallicPaint"
+import { useState } from "react";
 import "../styles/SplashScreen.css";
-import bristolPredictLogo from "../assets/bristol-predict-title.svg";
 
 function MetallicTitle() {
-  console.log("🎭 MetallicTitle rendered");
-  const [imageData, setImageData] = useState(null);
-  
-  useEffect(() => {
-    async function loadTitleImage() {
-      try {
-        console.log("📌 useEffect running - starting fetch");
-        const response = await fetch(bristolPredictLogo);
-        console.log("✅ Fetch complete, got blob");
-        const blob = await response.blob();
-        const file = new File([blob], "bristol-predict.svg", { type: blob.type });
-        
-        console.log("🔄 Calling parseLogoImage...");
-        const parsedData = await parseLogoImage(file);
-        console.log("✅ parseLogoImage returned:", parsedData);
-        
-        setImageData(parsedData?.imageData ?? null);
-        console.log("📊 setImageData called");
-      } catch (err) {
-        console.error("❌ Error:", err);
-      }
-    }
-    loadTitleImage();
-  }, []);
-
-  console.log("🖼️ Current imageData state:", imageData);
-
-  if (!imageData) {
-    console.log("📝 Showing fallback SVG (no imageData yet)");
-    return (
-      <div className="metallic-title-container">
-        <img src={bristolPredictLogo} alt="Bristol Predict" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-      </div>
-    );
-  }
-
-  console.log("🎨 Rendering MetallicPaint with imageData");
   return (
     <div className="metallic-title-container">
-      <MetallicPaint 
-        imageData={imageData}
-        params={{ 
-        patternScale: 10,
-        refraction: 0.0015,
-        edge: 0.8,
-        patternBlur: 0.005,
-        liquid: 0.07,  
-        speed: 0.3 
-        }} 
-      />
+      <h1 className="splash-title">Bristol Predict</h1>
     </div>
   );
 }
@@ -85,9 +36,6 @@ export default function SplashScreen({ onComplete }) {
             backgroundPosition: "center",
           }}
         />
-
-        {/* Dark overlay */}
-        <div className="splash-overlay" />
 
         {/* Content container */}
         <div className="splash-content">
