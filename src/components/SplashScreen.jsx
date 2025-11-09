@@ -1,13 +1,6 @@
 import { useState } from "react";
+import PixelBlast from './PixelBlast.jsx';
 import "../styles/SplashScreen.css";
-
-function MetallicTitle() {
-  return (
-    <div className="metallic-title-container">
-      <h1 className="splash-title">Bristol Predict</h1>
-    </div>
-  );
-}
 
 export default function SplashScreen({ onComplete }) {
   const [showSplash, setShowSplash] = useState(true);
@@ -21,13 +14,13 @@ export default function SplashScreen({ onComplete }) {
 
   return (
     <>
-      {/* Top Banner Bar */}
       <div className="splash-banner">
         <img src="/icon-512.png" alt="Bristol Predict" className="splash-banner-icon" />
       </div>
 
       <div className="splash-screen">
-        {/* Background with Bristol Bay image */}
+        
+        {/* Background */}
         <div
           className="splash-background"
           style={{
@@ -37,10 +30,32 @@ export default function SplashScreen({ onComplete }) {
           }}
         />
 
-        {/* Content container */}
+        {/* Pixel Blast - clicks will work now */}
+        <PixelBlast
+          variant="diamond"
+          pixelSize={6}
+          color="#000000"
+          patternScale={3}
+          patternDensity={1.2}
+          pixelSizeJitter={0.5}
+          enableRipples
+          rippleSpeed={0.4}
+          rippleThickness={0.12}
+          rippleIntensityScale={1.5}
+          liquid
+          liquidStrength={0.12}
+          liquidRadius={1.2}
+          liquidWobbleSpeed={5}
+          speed={0.6}
+          edgeFade={0.25}
+          transparent
+          className="splash-pixel-overlay"
+        />
+        
+        {/* Content */}
         <div className="splash-content">
           <div className="splash-title-group">
-            <MetallicTitle />
+            <h1 className="splash-title">Bristol Predict</h1>
             <p className="splash-subtitle">Alaska Salmon Forecast</p>
           </div>
 

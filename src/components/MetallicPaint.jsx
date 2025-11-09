@@ -3,7 +3,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import './MetallicPaint.css';
+import '../styles/ReactBits.css';
 
 const defaultParams = {
   patternScale: 2,
