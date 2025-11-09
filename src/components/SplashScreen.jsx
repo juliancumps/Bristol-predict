@@ -33,21 +33,21 @@ export default function SplashScreen({ onComplete }) {
         {/* Pixel Blast - clicks will work now */}
         <PixelBlast
           variant="diamond"
-          pixelSize={6}
-          color="#000000"
+          pixelSize={2}
+          color="#FF6666"
           patternScale={3}
-          patternDensity={1.2}
-          pixelSizeJitter={0.5}
+          patternDensity={1.25}
+          pixelSizeJitter={0}
           enableRipples
           rippleSpeed={0.4}
           rippleThickness={0.12}
           rippleIntensityScale={1.5}
           liquid
-          liquidStrength={0.12}
-          liquidRadius={1.2}
-          liquidWobbleSpeed={5}
-          speed={0.6}
-          edgeFade={0.25}
+          liquidStrength={0}
+          liquidRadius={0}
+          liquidWobbleSpeed={0}
+          speed={2.6}
+          edgeFade={0}
           transparent
           className="splash-pixel-overlay"
         />
