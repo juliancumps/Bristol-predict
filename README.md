@@ -1,4 +1,4 @@
-# Bristol Predict 🐟
+# Bristol Predict BETA 2.0🐟
 
 Bristol Bay Sockeye Salmon Run Interactive Display
 
@@ -6,18 +6,16 @@ Bristol Bay Sockeye Salmon Run Interactive Display
 
 1. Clone the repository
 2. Install dependencies: `npm install`
-3. Create `.env` file with your Mapbox token:
+3. Create `.env` file with your Leaflet token:
 
-```
-   VITE_MAPBOX_TOKEN=your_mapbox_token_here
-```
+
 
 4. Run dev server: `npm run dev`
 
 ## Tech Stack
 
 - React + Vite
-- Mapbox GL JS
+- Leaflet
 - Future: Node.js backend, PostgreSQL, ML models
 
 ## Data Sources
@@ -29,7 +27,7 @@ Bristol Bay Sockeye Salmon Run Interactive Display
 ## Roadmap
 
 - [x] Phase 1: Basic map visualization
-- [ ] Phase 2: Data scraping and integration
-- [ ] Phase 3: Time-series visualization
+- [x] Phase 2: Data scraping and integration
+- [x] Phase 3: Time-series visualization
 - [ ] Phase 4: ML predictions
 - [ ] Phase 5: Deployment and monetization
