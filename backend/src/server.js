@@ -25,6 +25,22 @@ let cachedData = null;
 let lastScraped = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+
+/**
+ * Check if current date is within Bristol Bay fishing season
+ * Approx June 16 to July 26, but we can change this if needed. 
+ */
+function isInFishingSeason(date = new Date()) {
+  const month = date.getMonth(); // 0-indexed (0 = January)
+  const day = date.getDate();
+  
+  // June 16 - July 26
+  if (month === 5 && day >= 16) return true; // June (month 5)
+  if (month === 6 && day <= 26) return true; // July (month 6)
+  
+  return false;
+}
+
 // Middleware
 app.use(cors({
   origin: [
@@ -522,15 +538,23 @@ async function startServer() {
   app.listen(PORT, async () => {
     console.log(`🐟 Bristol Predict API running on port ${PORT}`);
     console.log(`📍 http://localhost:${PORT}`);
-    console.log("🔄 Fetching initial data...");
-
-    try {
-      await getFreshData();
-      console.log("✅ Initial data loaded successfully");
-    } catch (error) {
-      console.error("⚠️  Failed to load initial data:", error.message);
-      console.log("📌 Server will retry on first request");
+    
+    // ======= CONDITIONAL FRESH DATA CHECK =======
+    // Only check for fresh data during fishing season
+    if (isInFishingSeason()) {
+      console.log("🔄 Fetching initial data (in season)...");
+      try {
+        await getFreshData();
+        console.log("✅ Initial data loaded successfully");
+      } catch (error) {
+        console.error("⚠️  Failed to load initial data:", error.message);
+        console.log("📌 Server will retry on first request");
+      }
+    } else {
+      console.log("🏖️  Outside fishing season - skipping fresh data check");
+      console.log("📌 Using database records only");
     }
+    // ============================================
   });
 }
 

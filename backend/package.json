@@ -8,7 +8,8 @@
     "postinstall": "npm run build --prefix=. 2>/dev/null || true",
     "dev": "nodemon src/server.js",
     "test:scraper": "node src/scrapers/harvestScraper.js",
-    "backfill": "node src/backfill.js"
+    "backfill": "node src/backfill.js",
+    "clean:november": "node src/scrapers/cleanNovemberData.js"
   },
   "keywords": [
     "bristol-bay",
