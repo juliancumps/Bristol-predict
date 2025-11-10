@@ -224,12 +224,7 @@ export function getDistrictRivers(districtId) {
   return riversByDistrict[districtId] || [];
 }
 
-/**
- * NEW: Aggregate data for date range
- * - Daily metrics = SUM across days
- * - Cumulative metrics = use LATEST value
- * - Sockeye per delivery = AVERAGE (it's a ratio)
- */
+
 export function aggregateDateRangeData(dataArray) {
   if (!dataArray || dataArray.length === 0) {
     return {
@@ -238,6 +233,7 @@ export function aggregateDateRangeData(dataArray) {
       rivers: [],
       totalRun: {},
       sockeyePerDelivery: {},
+      dateRange: { startDate: null, endDate: null, dayCount: 0 },
     };
   }
 
@@ -250,15 +246,13 @@ export function aggregateDateRangeData(dataArray) {
       totalEscapement: 0,
       totalRun: 0,
       districtCount: 0,
-      riverCount: 0,
     },
     districts: {},
+    districtsSorted: [], // NEW: Sorted by catch
     rivers: {},
     totalRun: {
       catchDaily: 0,
-      catchCumulative: 0,
       escapementDaily: 0,
-      escapementCumulative: 0,
       totalRun: 0,
     },
     sockeyePerDelivery: {},
@@ -266,20 +260,12 @@ export function aggregateDateRangeData(dataArray) {
 
   const districtIds = new Set();
   const riverNames = new Set();
-  const sockeyeAverages = {};
 
-  // Process each day
-  dataArray.forEach((dayData, index) => {
-    // Sum daily totals
+  // Process each day in the range
+  dataArray.forEach((dayData) => {
+    // Sum daily totals across all days
     aggregated.summary.totalCatch += dayData.totalRun?.catchDaily || 0;
     aggregated.summary.totalEscapement += dayData.totalRun?.escapementDaily || 0;
-    aggregated.summary.totalRun += dayData.totalRun?.totalRun || 0;
-
-    // Use LATEST cumulative (from the most recent day = index 0)
-    if (index === 0) {
-      aggregated.totalRun.catchCumulative = dayData.totalRun?.catchCumulative || 0;
-      aggregated.totalRun.escapementCumulative = dayData.totalRun?.escapementCumulative || 0;
-    }
 
     // Process districts
     if (Array.isArray(dayData.districts)) {
@@ -290,25 +276,29 @@ export function aggregateDateRangeData(dataArray) {
           aggregated.districts[district.id] = {
             id: district.id,
             name: district.name,
+            icon: district.icon || "🎣",
+            color: district.color,
             catchDaily: 0,
             escapementDaily: 0,
             catchCumulative: 0,
             escapementCumulative: 0,
-            inRiverEstimate: 0,
-            totalRun: 0,
+            sockeyePerDeliverySum: 0, 
+            dayCount: 0, 
           };
         }
 
-        // SUM daily values
+        // SUM daily values across all days
         aggregated.districts[district.id].catchDaily += district.catchDaily || 0;
         aggregated.districts[district.id].escapementDaily += district.escapementDaily || 0;
+        aggregated.districts[district.id].sockeyePerDeliverySum += district.sockeyePerDelivery || 0;  
+        aggregated.districts[district.id].dayCount += 1;  
 
-        // Use LATEST cumulative
-        if (index === 0) {
+        // Use LATEST cumulative (from most recent day)
+        if (dayData === dataArray[0]) {
           aggregated.districts[district.id].catchCumulative = district.catchCumulative || 0;
           aggregated.districts[district.id].escapementCumulative = district.escapementCumulative || 0;
-          aggregated.districts[district.id].totalRun = district.totalRun || 0;
         }
+        
       });
     }
 
@@ -322,45 +312,42 @@ export function aggregateDateRangeData(dataArray) {
             name: river.name,
             escapementDaily: 0,
             escapementCumulative: 0,
-            inRiverEstimate: 0,
           };
         }
 
-        // SUM daily escapement
+        // SUM daily escapement across all days
         aggregated.rivers[river.name].escapementDaily += river.escapementDaily || 0;
 
         // Use LATEST cumulative
-        if (index === 0) {
+        if (dayData === dataArray[0]) {
           aggregated.rivers[river.name].escapementCumulative = river.escapementCumulative || 0;
-          aggregated.rivers[river.name].inRiverEstimate = river.inRiverEstimate || 0;
         }
-      });
-    }
-
-    // Handle sockeye per delivery (AVERAGE, not sum)
-    if (dayData.sockeyePerDelivery && typeof dayData.sockeyePerDelivery === "object") {
-      Object.entries(dayData.sockeyePerDelivery).forEach(([districtId, value]) => {
-        if (!sockeyeAverages[districtId]) {
-          sockeyeAverages[districtId] = { sum: 0, count: 0 };
-        }
-        sockeyeAverages[districtId].sum += value || 0;
-        sockeyeAverages[districtId].count += 1;
       });
     }
   });
 
-  // Convert sockeye to averages
-  Object.entries(sockeyeAverages).forEach(([districtId, data]) => {
-    aggregated.sockeyePerDelivery[districtId] = Math.round((data.sum / data.count) * 100) / 100;
+  // Calculate percentages for each district and convert to sorted array
+  const bayTotalCatch = aggregated.summary.totalCatch || 1; // Avoid division by zero
+  
+  Object.entries(aggregated.districts).forEach(([districtId, district]) => {
+    // Calculate percentage of total bay catch
+    const percentage = (district.catchDaily / bayTotalCatch) * 100;
+    district.percentage = Math.max(0, percentage);
+    
+    // Add to sorted array
+    aggregated.districtsSorted.push(district);
   });
 
-  // Convert to arrays and attach sockeye data
-  aggregated.districts = Object.values(aggregated.districts).map((district) => ({
-    ...district,
-    sockeyePerDelivery: aggregated.sockeyePerDelivery[district.id] || 0,
-  }));
+  Object.values(aggregated.districts).forEach((district) => {
+          if (district.dayCount > 0) {
+            district.sockeyePerDelivery = Math.round(district.sockeyePerDeliverySum / district.dayCount);
+          } else {
+            district.sockeyePerDelivery = 0;
+          }
+  });
+  // Sort districts by catch (highest first)
+  aggregated.districtsSorted.sort((a, b) => b.catchDaily - a.catchDaily);
 
-  aggregated.rivers = Object.values(aggregated.rivers);
   aggregated.summary.districtCount = districtIds.size;
   aggregated.summary.riverCount = riverNames.size;
 

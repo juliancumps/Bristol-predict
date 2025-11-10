@@ -418,9 +418,14 @@ app.get("/api/range", async (req, res) => {
 
     console.log(`📅 Fetching date range: ${startDate} to ${endDate}`);
 
-    // Convert dates for comparison
-    const start = new Date(startDate.split('-').reverse().join('-'));
-    const end = new Date(endDate.split('-').reverse().join('-'));
+    // Parse dates in local time (MM-DD-YYYY format) without timezone conversion
+    const parseDate = (dateStr) => {
+      const [month, day, year] = dateStr.split('-');
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    };
+
+    const start = parseDate(startDate);
+    const end = parseDate(endDate);
     
     if (start > end) {
       return res.status(400).json({

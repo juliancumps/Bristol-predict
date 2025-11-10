@@ -36,6 +36,7 @@ export default function DistrictStats({
       </div>
 
       {/* Main Stats */}
+      
       <div className="stats-grid">
         <div className="stat-box">
           <span className="stat-label">Daily Catch</span>
@@ -91,6 +92,7 @@ export default function DistrictStats({
           </div>
         )}
       </div>
+      
 
       {/* River Breakdown */}
       {districtRivers.length > 0 && (

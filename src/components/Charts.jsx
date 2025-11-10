@@ -424,3 +424,83 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
     </div>
   );
 }
+
+/**
+ * NEW: Line Chart for Date Range Mode
+ * Shows daily catch trends for all 5 districts across the selected date range
+ */
+export function LineChart_DateRange({ rangeData, districts }) {
+  if (!rangeData || !Array.isArray(rangeData) || rangeData.length === 0) {
+    return (
+      <div className="chart-placeholder">
+        <p>📊 No data available for selected date range</p>
+      </div>
+    );
+  }
+
+  // Build chart data from the array of daily data
+  const chartData = rangeData.map((dayData) => {
+    const dataPoint = {
+      date: dayData.runDate,
+    };
+
+    // Add daily catch for each district
+    if (Array.isArray(dayData.districts)) {
+      dayData.districts.forEach((district) => {
+        dataPoint[district.id] = district.catchDaily || 0;
+      });
+    }
+
+    return dataPoint;
+  });
+
+  if (chartData.length === 0) {
+    return (
+      <div className="chart-placeholder">
+        <p>📊 No data available for chart</p>
+      </div>
+    );
+  }
+
+  // Calculate interval to show reasonable number of date ticks
+  const interval = Math.max(0, Math.floor(chartData.length / 15));
+
+  return (
+    <div className="chart-container">
+      <h3 className="chart-title">Daily Catch by District Over Selected Date Range</h3>
+      <ResponsiveContainer width="100%" height={400}>
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 12, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <XAxis
+            dataKey="date"
+            stroke="#94a3b8"
+            tick={{ fontSize: 12 }}
+            angle={-45}
+            textAnchor="end"
+            height={80}
+            interval={interval}
+          />
+          <YAxis 
+            stroke="#94a3b8" 
+            tick={{ fontSize: 12 }}
+            label={{ value: "# of Sockeye", angle: -90, position: "outsideRight", offset: 10, dx: -35 }}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend wrapperStyle={{ color: "#cbd5e1" }} />
+          {Object.entries(districts).map(([districtId, district]) => (
+            <Line
+              key={districtId}
+              type="monotone"
+              dataKey={districtId}
+              stroke={DISTRICT_COLORS[districtId] || "#3b82f6"}
+              dot={false}
+              strokeWidth={2.5}
+              name={district.name}
+              isAnimationActive={false}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
