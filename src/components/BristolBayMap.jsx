@@ -190,7 +190,7 @@ function GeoJSONLayers() {
     return value === 0 || value === "0" || !value || value === null || value === undefined;
   };
 
-export default function BristolBayMap() {
+export default function BristolBayMap({ onNavigateToCatchEfficiency }) {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [districtData, setDistrictData] = useState({});
   const [summaryData, setSummaryData] = useState(null);
@@ -396,6 +396,15 @@ useEffect(() => {
           >
             🗓️ Date Range Mode
           </button>
+
+          <button
+            className="toggle-btn"
+            onClick={() => onNavigateToCatchEfficiency && onNavigateToCatchEfficiency()}
+            title="Catch Efficiency Analyzer"
+          >
+            🎣 More Tools
+          </button>
+
           <button
             className="sidebar-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}

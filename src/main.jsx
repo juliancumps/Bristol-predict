@@ -5,6 +5,9 @@ import './styles/BristolBayMap.css'
 import './styles/DatePicker.css'
 import './styles/DistrictStats.css'
 import './styles/Charts.css'
+import './styles/CatchEfficiencyScreen.css'
+import './styles/RunTimingTracker.css'
+
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
