@@ -1,6 +1,6 @@
 /**
- * Script to remove November 2025 entries from the database
- * This cleans up any test/erroneous data scraped outside fishing season
+ * Script to remove specific dates from the database
+ * Removes: July 21, 2023 and July 26, 2024
  */
 
 const sqlite3 = require("sqlite3").verbose();
@@ -20,12 +20,12 @@ function cleanNovemberData() {
     });
 
     db.serialize(() => {
-      console.log("\n🔍 Checking for November 2025 entries...\n");
+      console.log("\n🔍 Checking for specific date entries...\n");
 
       // First, see what we're about to delete
       db.all(
         `SELECT run_date, total_run FROM daily_summaries 
-         WHERE run_date LIKE '11-%2025'
+         WHERE run_date IN ('07-21-2023', '07-26-2024')
          ORDER BY run_date`,
         [],
         (err, rows) => {
@@ -37,18 +37,18 @@ function cleanNovemberData() {
           }
 
           if (rows.length === 0) {
-            console.log("✅ No November 2025 entries found - database is clean!");
+            console.log("✅ No target entries found - database is clean!");
             db.close();
             resolve();
             return;
           }
 
-          console.log(`Found ${rows.length} November 2025 entries to delete:`);
+          console.log(`Found ${rows.length} entries to delete:`);
           rows.forEach(row => {
             console.log(`  - ${row.run_date} (total run: ${row.total_run || 0})`);
           });
 
-          console.log("\n🗑️  Deleting November 2025 data...\n");
+          console.log("\n🗑️  Deleting specified dates...\n");
 
           // Start transaction for safe deletion
           db.run("BEGIN TRANSACTION");
@@ -71,7 +71,7 @@ function cleanNovemberData() {
 
           tables.forEach(table => {
             db.run(
-              `DELETE FROM ${table} WHERE run_date LIKE '11-%2025'`,
+              `DELETE FROM ${table} WHERE run_date IN ('07-21-2023', '07-26-2024')`,
               function(err) {
                 if (err) {
                   console.error(`❌ Error deleting from ${table}:`, err);
@@ -124,7 +124,7 @@ function cleanNovemberData() {
 if (require.main === module) {
   console.log("🧹 Bristol Bay Database Cleanup Script");
   console.log("=".repeat(50));
-  console.log("Removing November 2025 entries...\n");
+  console.log("Removing July 21, 2023 and July 26, 2024...\n");
 
   cleanNovemberData()
     .then(() => {

@@ -53,7 +53,7 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const DISTRICTS = {
   naknek: {
     name: "Naknek-Kvichak",
-    center: [58.7, -157.1755],
+    center: [58.74, -157.2955],
     color: "#3b82f6",
     icon: "🅝🅚",
   },
