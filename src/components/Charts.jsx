@@ -87,14 +87,7 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict,
       date: day.runDate,
     };
 
-    if (selectedDistrict) {
-      const district = day.districts?.find((d) => d.id === selectedDistrict);
-      if (district) {
-        dataPoint.catchDaily = district.catchDaily;
-      }
-    } else {
-      dataPoint.totalCatch = day.totalRun?.catchDaily;
-    }
+    dataPoint.totalCatch = day.totalRun?.catchDaily;
 
 
     //NOTES
@@ -110,7 +103,7 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict,
 
   return (
     <div className="chart-container">
-      <h3 className="chart-title">📈 Bay-Wide Catch Per Day</h3>
+      <h3 className="chart-title">Bay-Wide Catch Per Day</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -130,16 +123,7 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict,
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend wrapperStyle={{ color: "#cbd5e1" }} />
-          {selectedDistrict ? (
-            <Line
-              type="monotone"
-              dataKey="catchDaily"
-              stroke={DISTRICT_COLORS[selectedDistrict] || "#3b82f6"}
-              dot={false}
-              strokeWidth={2}
-              name="Daily Catch"
-            />
-          ) : (
+          
             <Line
               type="monotone"
               dataKey="totalCatch"
@@ -148,7 +132,7 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict,
               strokeWidth={2}
               name="Total Daily Catch"
             />
-          )}
+          
         </LineChart>
       </ResponsiveContainer>
     </div>
@@ -172,7 +156,7 @@ export function BarChart_DistrictComparison({ data, districtNames }) {
 
   return (
     <div className="chart-container">
-      <h3 className="chart-title">📊 District Comparison (Daily)</h3>
+      <h3 className="chart-title">District Comparison (Daily)</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData} margin={{ top: 5, right: 30, left: 10, bottom: -5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -229,7 +213,7 @@ export function PieChart_CatchDistribution({ districtData, districtNames }) {
 
   return (
     <div className="chart-container">
-      <h3 className="chart-title">🥧 Catch Distribution by District</h3>
+      <h3 className="chart-title">Catch Distribution by District</h3>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
@@ -306,7 +290,7 @@ export function LineChart_MultiDistrict({ historicalData, districts, selectedSea
 
   return (
     <div className="chart-container">
-      <h3 className="chart-title">📈 Daily Catch Trend Per District</h3>
+      <h3 className="chart-title">Daily Catch Trend Per District</h3>
       <ResponsiveContainer width="100%" height={350}>
         <LineChart data={chartData} margin={{ top: 5, right: 30, left: 12, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />

@@ -585,8 +585,9 @@ useEffect(() => {
 {/* DATE RANGE MODE: Simplified Districts List - Sorted by catch */}
 {dateRangeMode && rangeData && sidebarOpen && (
   <div className="districts-list">
-    <h4>📊 Districts:</h4>
-    <h5>Data Aggregated over Selected Dates</h5>
+    <h3>📊 Districts:</h3>
+    <h4>Data Aggregated over Selected Dates</h4>
+    <h5># of sockeye caught over date interval, and percentage of total</h5>
     <div className="district-items">
       {rangeData.districtsSorted?.map((district) => (
         <div
