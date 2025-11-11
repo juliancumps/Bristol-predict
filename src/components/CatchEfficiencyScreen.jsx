@@ -291,11 +291,11 @@ setAvailableDates(sortedDates);
                         <div className="comparison-detail">
                           {comp.difference > 0 ? (
                             <span className="better-badge">
-                              ✅ {comp.difference.toFixed(0)} better (+{comp.percentDiff}%)
+                              ✅ You are {comp.difference.toFixed(0)} sockeye above average (+{comp.percentDiff}%)
                             </span>
                           ) : comp.difference < 0 ? (
                             <span className="worse-badge">
-                              ⚠️ {Math.abs(comp.difference).toFixed(0)} worse ({comp.percentDiff}%)
+                              ⚠️ You are {Math.abs(comp.difference).toFixed(0)} sockeye below average ({comp.percentDiff}%)
                             </span>
                           ) : (
                             <span className="equal-badge">= Same as district avg</span>
