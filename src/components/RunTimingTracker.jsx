@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { getHistoricalData, formatNumber } from "../services/api";
 import "../styles/RunTimingTracker.css";
 
@@ -16,6 +17,7 @@ export default function RunTimingTracker({ onBack }) {
   const [error, setError] = useState(null);
   const [availableSeasons, setAvailableSeasons] = useState([]);
   const [selectedSeason, setSelectedSeason] = useState(null);
+  const [seasonStarts, setSeasonStarts] = useState({});
 
   // Load historical data and analyze timing
   useEffect(() => {
@@ -44,6 +46,19 @@ export default function RunTimingTracker({ onBack }) {
         const sortedSeasons = Array.from(seasons).sort((a, b) => b - a);
         setAvailableSeasons(sortedSeasons);
 
+        // Fetch actual season start dates for all seasons
+        const startsMap = {};
+        for (const season of sortedSeasons) {
+          try {
+            const response = await axios.get(`http://localhost:3001/api/season/${season}/start`);
+            startsMap[season] = response.data.seasonStart;
+          } catch (err) {
+            console.warn(`Could not fetch start date for season ${season}:`, err);
+            startsMap[season] = null;
+          }
+        }
+        setSeasonStarts(startsMap);
+
         // Set default to most recent season
         if (sortedSeasons.length > 0) {
           setSelectedSeason(sortedSeasons[0]);
@@ -62,8 +77,19 @@ export default function RunTimingTracker({ onBack }) {
     loadTimingData();
   }, []);
 
-  const analyzeRunTiming = (historicalData, season) => {
+  const analyzeRunTiming = (historicalData, season, actualSeasonStart) => {
     const timing = {};
+
+    // Parse the season start date if it's a string (MM-DD-YYYY format)
+    let seasonStartDate = null;
+    if (actualSeasonStart) {
+      if (typeof actualSeasonStart === 'string') {
+        const [month, day, year] = actualSeasonStart.split('-');
+        seasonStartDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      } else {
+        seasonStartDate = new Date(actualSeasonStart);
+      }
+    }
 
     // Filter data for selected season only
     const seasonData = historicalData.filter((day) => day.season === season);
@@ -104,7 +130,7 @@ export default function RunTimingTracker({ onBack }) {
       // Sort by date
       days.sort((a, b) => a.date - b.date);
 
-      // Find first significant catch day (>100 fish)
+      // Find first significant catch day (>20000 fish)
       const firstSignificantDay = days.find((d) => d.catchDaily > 20000);
 
       // Find peak catch day
@@ -115,14 +141,25 @@ export default function RunTimingTracker({ onBack }) {
         }
       });
 
-      // Calculate day of year for comparison
-      // Calculate day of season (from first data point, not Jan 1)
-    const seasonStart = days[0].date;
-    const firstDayOfSeason = Math.floor(
-    (firstSignificantDay ? firstSignificantDay.date - seasonStart : 0) /
-        (1000 * 60 * 60 * 24)
-    );
-    const peakDayOfSeason = Math.floor((peakDay.date - seasonStart) / (1000 * 60 * 60 * 24));
+      // Calculate day of season from ACTUAL season start date
+      let firstDayOfSeason = 0;
+      let peakDayOfSeason = 0;
+      
+      if (seasonStartDate) {
+        firstDayOfSeason = Math.floor(
+          (firstSignificantDay ? firstSignificantDay.date - seasonStartDate : 0) /
+              (1000 * 60 * 60 * 24)
+        );
+        peakDayOfSeason = Math.floor((peakDay.date - seasonStartDate) / (1000 * 60 * 60 * 24));
+      } else {
+        // Fallback: use first data point if season start is unavailable
+        const fallbackStart = days[0].date;
+        firstDayOfSeason = Math.floor(
+          (firstSignificantDay ? firstSignificantDay.date - fallbackStart : 0) /
+              (1000 * 60 * 60 * 24)
+        );
+        peakDayOfSeason = Math.floor((peakDay.date - fallbackStart) / (1000 * 60 * 60 * 24));
+      }
 
       timing[districtId] = {
         firstSignificantDay: firstSignificantDay ? firstSignificantDay.date : days[0].date,
@@ -146,7 +183,7 @@ export default function RunTimingTracker({ onBack }) {
 
   // Get timing data for selected season
   const currentTimingData = selectedSeason && timingData.allData 
-    ? analyzeRunTiming(timingData.allData, selectedSeason) 
+    ? analyzeRunTiming(timingData.allData, selectedSeason, seasonStarts[selectedSeason]) 
     : {};
 
   return (

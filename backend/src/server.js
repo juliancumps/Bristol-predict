@@ -227,6 +227,33 @@ app.get("/api/dates", async (req, res) => {
   }
 });
 
+// Get the actual start date for a season
+app.get("/api/season/:year/start", async (req, res) => {
+  try {
+    const season = parseInt(req.params.year);
+    
+    const result = await new Promise((resolve, reject) => {
+      db.get(
+        `SELECT MIN(run_date) as start_date FROM daily_summaries WHERE season = ?`,
+        [season],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        }
+      );
+    });
+    
+    if (!result || !result.start_date) {
+      return res.status(404).json({ error: "No data found for this season" });
+    }
+    
+    res.json({ seasonStart: result.start_date });
+  } catch (error) {
+    console.error("Error in /api/season/:year/start:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Districts endpoint - returns array of districts with current data
 // ALWAYS returns all 5 districts, even if they have zero values
 app.get("/api/districts", async (req, res) => {
@@ -333,7 +360,7 @@ app.get("/api/daily", async (req, res) => {
 // Historical Data endpoint - get last N days (optionally filtered by season)
 app.get("/api/historical", async (req, res) => {
   try {
-    const days = Math.min(parseInt(req.query.days) || 30, 90); // Max 90 days
+    const days = Math.min(parseInt(req.query.days) || 40, 90); // Max 90 days
     const season = req.query.season ? parseInt(req.query.season) : null;
     
     console.log(`📊 Fetching last ${days} days of data${season ? ` for season ${season}` : ""}`);
