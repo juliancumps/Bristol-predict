@@ -45,8 +45,7 @@ setAvailableDates(sortedDates);
       
       // Set default to LATEST date (first in array, since they're sorted descending)
       if (data.dates && data.dates.length > 0) {
-        console.log("First date:", data.dates[0]);
-        console.log("All dates sample:", data.dates.slice(0, 5));
+        
         setSelectedDate(data.dates[0]);
       }
     } catch (err) {
@@ -64,6 +63,8 @@ setAvailableDates(sortedDates);
         setError(null);
 
         const summary = await getDailySummary(selectedDate);
+        console.log("Full summary:", summary);
+        console.log("Districts:", summary.districts);
         
         if (!summary || !summary.districts) {
           setError("No data available for this date");
@@ -77,7 +78,7 @@ setAvailableDates(sortedDates);
           summary.districts.forEach((district) => {
             districtMap[district.id] = {
               ...district,
-              sockeyePerDelivery: district.sockeyePerDelivery || 0,
+              sockeyePerDelivery: summary.sockeyePerDelivery?.[district.id] || 0,
             };
           });
         }
@@ -187,7 +188,7 @@ setAvailableDates(sortedDates);
               <input
                 id="avgWeight"
                 type="number"
-                placeholder="e.g., 3.5"
+                placeholder="e.g., 4.5"
                 value={avgWeight}
                 onChange={(e) => setAvgWeight(e.target.value)}
                 step="0.1"

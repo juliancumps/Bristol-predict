@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { getHistoricalData, formatNumber } from "../services/api";
 import "../styles/RunTimingTracker.css";
 
-
 const DISTRICTS = {
   naknek: { name: "Naknek-Kvichak", color: "#3b82f6", icon: "🅝🅚" },
   egegik: { name: "Egegik", color: "#8b5cf6", icon: "🅔" },
@@ -15,8 +14,8 @@ export default function RunTimingTracker({ onBack }) {
   const [timingData, setTimingData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedSeason, setSelectedSeason] = useState(new Date().getFullYear());
   const [availableSeasons, setAvailableSeasons] = useState([]);
+  const [selectedSeason, setSelectedSeason] = useState(null);
 
   // Load historical data and analyze timing
   useEffect(() => {
@@ -25,7 +24,7 @@ export default function RunTimingTracker({ onBack }) {
         setLoading(true);
         setError(null);
 
-        // Fetch historical data for all available seasons
+        // Fetch historical data
         const historicalData = await getHistoricalData(365);
 
         if (!historicalData || historicalData.length === 0) {
@@ -37,18 +36,21 @@ export default function RunTimingTracker({ onBack }) {
         // Extract unique seasons from historical data
         const seasons = new Set();
         historicalData.forEach((day) => {
-          if (day.runDate) {
-            const year = new Date(day.runDate).getFullYear();
-            seasons.add(year);
+          if (day.season) {
+            seasons.add(day.season);
           }
         });
 
         const sortedSeasons = Array.from(seasons).sort((a, b) => b - a);
         setAvailableSeasons(sortedSeasons);
 
-        // Analyze timing data
-        const timingAnalysis = analyzeRunTiming(historicalData);
-        setTimingData(timingAnalysis);
+        // Set default to most recent season
+        if (sortedSeasons.length > 0) {
+          setSelectedSeason(sortedSeasons[0]);
+        }
+
+        // Store all historical data so we can filter by season
+        setTimingData({ allData: historicalData });
       } catch (err) {
         console.error("Error loading timing data:", err);
         setError("Failed to load timing data");
@@ -60,8 +62,11 @@ export default function RunTimingTracker({ onBack }) {
     loadTimingData();
   }, []);
 
-  const analyzeRunTiming = (historicalData) => {
+  const analyzeRunTiming = (historicalData, season) => {
     const timing = {};
+
+    // Filter data for selected season only
+    const seasonData = historicalData.filter((day) => day.season === season);
 
     // Group data by district and date
     const districtDays = {
@@ -72,13 +77,17 @@ export default function RunTimingTracker({ onBack }) {
       togiak: [],
     };
 
-    historicalData.forEach((day) => {
+    seasonData.forEach((day) => {
       if (!day.districts || !Array.isArray(day.districts)) return;
+
+      // Parse MM-DD-YYYY format
+      const [month, dayStr, year] = day.runDate.split('-');
+      const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(dayStr));
 
       day.districts.forEach((district) => {
         if (districtDays[district.id]) {
           districtDays[district.id].push({
-            date: new Date(day.runDate),
+            date: dateObj,
             catchDaily: district.catchDaily || 0,
           });
         }
@@ -96,7 +105,7 @@ export default function RunTimingTracker({ onBack }) {
       days.sort((a, b) => a.date - b.date);
 
       // Find first significant catch day (>100 fish)
-      const firstSignificantDay = days.find((d) => d.catchDaily > 100);
+      const firstSignificantDay = days.find((d) => d.catchDaily > 20000);
 
       // Find peak catch day
       let peakDay = days[0];
@@ -107,18 +116,19 @@ export default function RunTimingTracker({ onBack }) {
       });
 
       // Calculate day of year for comparison
-      const startOfYear = new Date(days[0].date.getFullYear(), 0, 1);
-      const firstDayOfYear = Math.floor(
-        (firstSignificantDay ? firstSignificantDay.date - startOfYear : days[0].date - startOfYear) /
-          (1000 * 60 * 60 * 24)
-      );
-      const peakDayOfYear = Math.floor((peakDay.date - startOfYear) / (1000 * 60 * 60 * 24));
+      // Calculate day of season (from first data point, not Jan 1)
+    const seasonStart = days[0].date;
+    const firstDayOfSeason = Math.floor(
+    (firstSignificantDay ? firstSignificantDay.date - seasonStart : 0) /
+        (1000 * 60 * 60 * 24)
+    );
+    const peakDayOfSeason = Math.floor((peakDay.date - seasonStart) / (1000 * 60 * 60 * 24));
 
       timing[districtId] = {
         firstSignificantDay: firstSignificantDay ? firstSignificantDay.date : days[0].date,
         peakDay: peakDay.date,
-        firstDayOfYear,
-        peakDayOfYear,
+        firstDayOfSeason,
+        peakDayOfSeason,
         totalDays: days.length,
       };
     });
@@ -134,19 +144,10 @@ export default function RunTimingTracker({ onBack }) {
     });
   };
 
-  const getTimingDelta = (currentDate, historicalDate) => {
-    if (!currentDate || !historicalDate) return 0;
-    const diffTime = Math.abs(currentDate - historicalDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const getTimingStatus = (delta, direction) => {
-    if (delta === 0) return "On Schedule";
-    if (direction === "ahead") return `${delta} days ahead`;
-    if (direction === "behind") return `${delta} days behind`;
-    return "N/A";
-  };
+  // Get timing data for selected season
+  const currentTimingData = selectedSeason && timingData.allData 
+    ? analyzeRunTiming(timingData.allData, selectedSeason) 
+    : {};
 
   return (
     <div className="run-timing-tracker">
@@ -171,105 +172,127 @@ export default function RunTimingTracker({ onBack }) {
           <div className="loading-state">
             <p>Loading historical timing data...</p>
           </div>
-        ) : Object.keys(timingData).length > 0 ? (
+        ) : (
           <>
-            {/* Districts Timing Cards */}
-            <div className="timing-grid">
-              {Object.entries(DISTRICTS).map(([districtId, district]) => {
-                const timing = timingData[districtId];
-
-                return (
-                  <div
-                    key={districtId}
-                    className="timing-card"
-                    style={{ borderLeftColor: district.color }}
-                  >
-                    <div className="card-header">
-                      <span className="district-icon">{district.icon}</span>
-                      <span className="district-name">{district.name}</span>
-                    </div>
-
-                    {timing ? (
-                      <div className="card-content">
-                        <div className="timing-metric">
-                          <div className="metric-label">First Significant Run</div>
-                          <div className="metric-value">
-                            {getDateString(timing.firstSignificantDay)}
-                          </div>
-                          <div className="metric-day-of-year">
-                            Day {timing.firstDayOfYear} of season
-                          </div>
-                        </div>
-
-                        <div className="timing-separator"></div>
-
-                        <div className="timing-metric">
-                          <div className="metric-label">Peak Catch Date</div>
-                          <div className="metric-value">{getDateString(timing.peakDay)}</div>
-                          <div className="metric-day-of-year">
-                            Day {timing.peakDayOfYear} of season
-                          </div>
-                        </div>
-
-                        <div className="timing-separator"></div>
-
-                        <div className="timing-metric">
-                          <div className="metric-label">Run Duration</div>
-                          <div className="metric-value">{timing.totalDays} days</div>
-                          <div className="metric-day-of-year">
-                            Historical average span
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="card-placeholder">
-                        <p>No timing data available</p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Information Section */}
-            <div className="info-section">
-              <h3>📊 How to Use This Data</h3>
-              <div className="info-content">
-                <div className="info-item">
-                  <span className="info-icon">🎣</span>
-                  <p>
-                    <strong>First Significant Run:</strong> When salmon catches typically reach
-                    meaningful levels (over 100 fish per day)
-                  </p>
-                </div>
-                <div className="info-item">
-                  <span className="info-icon">📈</span>
-                  <p>
-                    <strong>Peak Catch Date:</strong> The typical date when each district sees its
-                    highest daily catch volumes
-                  </p>
-                </div>
-                <div className="info-item">
-                  <span className="info-icon">⏱️</span>
-                  <p>
-                    <strong>Run Duration:</strong> How many days the fishing season typically lasts
-                    in each district
-                  </p>
+            {/* Season Selector */}
+            {availableSeasons.length > 0 && (
+              <div className="season-selector">
+                <label>Select Season:</label>
+                <div className="season-buttons">
+                  {availableSeasons.map((season) => (
+                    <button
+                      key={season}
+                      className={`season-btn ${selectedSeason === season ? 'active' : ''}`}
+                      onClick={() => setSelectedSeason(season)}
+                    >
+                      {season}
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
+
+            {Object.keys(currentTimingData).length > 0 ? (
+              <>
+                {/* Districts Timing Cards */}
+                <div className="timing-grid">
+                  {Object.entries(DISTRICTS).map(([districtId, district]) => {
+                    const timing = currentTimingData[districtId];
+
+                    return (
+                      <div
+                        key={districtId}
+                        className="timing-card"
+                        style={{ borderLeftColor: district.color }}
+                      >
+                        <div className="card-header">
+                          <span className="district-icon">{district.icon}</span>
+                          <span className="district-name">{district.name}</span>
+                        </div>
+
+                        {timing ? (
+                          <div className="card-content">
+                            <div className="timing-metric">
+                              <div className="metric-label">First Significant Fishing Day</div>
+                              <div className="metric-value">
+                                {getDateString(timing.firstSignificantDay)}
+                              </div>
+                              <div className="metric-day-of-year">
+                                Day {timing.firstDayOfSeason} of season
+                              </div>
+                            </div>
+
+                            <div className="timing-separator"></div>
+
+                            <div className="timing-metric">
+                              <div className="metric-label">Peak Catch Date</div>
+                              <div className="metric-value">{getDateString(timing.peakDay)}</div>
+                              <div className="metric-day-of-year">
+                                Day {timing.peakDayOfSeason} of season
+                              </div>
+                            </div>
+
+                            <div className="timing-separator"></div>
+
+                            <div className="timing-metric">
+                              <div className="metric-label">Run Duration</div>
+                              <div className="metric-value">{timing.totalDays} days</div>
+                              <div className="metric-day-of-year">
+                                Historical average span
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="card-placeholder">
+                            <p>No timing data available</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Information Section */}
+                <div className="info-section">
+                  <h3>📊 How to Use This Data</h3>
+                  <div className="info-content">
+                    <div className="info-item">
+                      <span className="info-icon">🎣</span>
+                      <p>
+                        <strong>First Significant Fishing Day:</strong> When district-wide salmon catches typically reach
+                        meaningful levels (over 20,00 fish per day)
+                      </p>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-icon">📈</span>
+                      <p>
+                        <strong>Peak Catch Date:</strong> The typical date when each district sees its
+                        highest daily catch volumes
+                      </p>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-icon">⏱️</span>
+                      <p>
+                        <strong>Run Duration:</strong> How many days the fishing season typically lasts
+                        in each district
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="empty-state">
+                <p>No timing data available for selected season</p>
+              </div>
+            )}
           </>
-        ) : (
-          <div className="empty-state">
-            <p>No historical timing data available</p>
-          </div>
         )}
       </div>
 
       {/* Footer */}
       <div className="tracker-footer">
         <p className="footer-note">
-          💡 <strong>Pro Tip:</strong> Compare these historical patterns with current season data to
+          💡 <strong>Tip:</strong> Compare these historical patterns with current season data to
           identify early or late runs. Use this to plan your fishing strategy.
         </p>
       </div>
