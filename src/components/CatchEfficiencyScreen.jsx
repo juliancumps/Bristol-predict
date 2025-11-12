@@ -10,7 +10,7 @@ const DISTRICTS = {
   togiak: { name: "Togiak", color: "#f59e0b", icon: "🅣" },
 };
 
-export default function CatchEfficiencyScreen({ onNavigateToRunTracker, onBack }) {
+export default function CatchEfficiencyScreen({ onNavigateToRunTracker, onNavigateToWeather, onBack }) {
   const [pounds, setPounds] = useState("");
   const [avgWeight, setAvgWeight] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
@@ -157,6 +157,15 @@ setAvailableDates(sortedDates);
           >
             📈 Run Timing Tracker
           </button>
+
+          <button
+            className="run-tracker-btn"
+            onClick={onNavigateToWeather}
+            title="View Weather Node"
+          >
+            🌦️ Weather Node
+          </button>
+
         </div>
       </div>
 

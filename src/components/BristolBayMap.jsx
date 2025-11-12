@@ -10,7 +10,9 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import DatePicker from "./DatePicker";
-import DistrictStats from "./DistrictStats";
+import DistrictStats from "./DistrictStats"; 
+
+import "../styles/BristolBayMap.css";
 import {
   LineChart_DayToDayComparison,
   BarChart_DistrictComparison,
@@ -34,7 +36,7 @@ import {
   getRiverDistrict,
   RIVER_DISTRICT_MAP,
 } from "../services/api";
-import "../styles/BristolBayMap.css";
+
 
 // Fix for default marker icons in React-Leaflet
 import icon from "leaflet/dist/images/marker-icon.png";
@@ -149,6 +151,7 @@ function GeoJSONLayers() {
       .then((res) => res.ok ? res.json() : null)
       .then((data) => setSections(data))
       .catch((err) => console.log("Sections GeoJSON not found (optional):", err.message));
+      
   }, []);
 
   if (!sections && !districts) return null;
@@ -190,7 +193,7 @@ function GeoJSONLayers() {
     return value === 0 || value === "0" || !value || value === null || value === undefined;
   };
 
-export default function BristolBayMap({ onNavigateToCatchEfficiency }) {
+export default function BristolBayMap({ onNavigateToCatchEfficiency}) {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [districtData, setDistrictData] = useState({});
   const [summaryData, setSummaryData] = useState(null);
@@ -200,6 +203,7 @@ export default function BristolBayMap({ onNavigateToCatchEfficiency }) {
   const [selectedDate, setSelectedDate] = useState(null);
 
   const [selectedSeason, setSelectedSeason] = useState(null);
+
   
   // Date range support
   const [dateRangeMode, setDateRangeMode] = useState(false);
@@ -308,7 +312,7 @@ export default function BristolBayMap({ onNavigateToCatchEfficiency }) {
     fetchRangeData();
   }, [selectedDateRange, dateRangeMode]);
 
-  // Fetch historical data for charts - refetch when season changes
+// Fetch historical data for charts - refetch when season changes
 useEffect(() => {
   async function fetchHistorical() {
     try {
@@ -336,7 +340,7 @@ useEffect(() => {
   fetchHistorical();
 }, [selectedSeason]); // Re-fetch when season changes
 
-  // Fetch specific district data when selected
+// Fetch specific district data when selected
 useEffect(() => {
   if (!selectedDistrict || dateRangeMode) return;
 
@@ -354,6 +358,8 @@ useEffect(() => {
 
   fetchDistrictData();
 }, [selectedDistrict, selectedDate, dateRangeMode]);
+
+
 
   const currentData = dateRangeMode ? rangeData : { districts: districtData, rivers: riversData, summary: summaryData };
   const totalCatch = currentData?.summary?.totalCatch || summaryData?.summary?.totalCatch || 0;
@@ -428,6 +434,7 @@ useEffect(() => {
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             />
             <GeoJSONLayers />
+
 
             {/* District Markers */}
             {Object.entries(DISTRICTS).map(([key, district]) => {
