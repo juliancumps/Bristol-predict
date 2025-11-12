@@ -402,7 +402,7 @@ useEffect(() => {
             onClick={() => onNavigateToCatchEfficiency && onNavigateToCatchEfficiency()}
             title="Catch Efficiency Analyzer"
           >
-            🎣 More Tools
+            🎣 More Tools...
           </button>
 
           <button
