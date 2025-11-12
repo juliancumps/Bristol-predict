@@ -1,6 +1,6 @@
 # Bristol Predict BETA 2.0🐟
 
-Bristol Bay Sockeye Salmon Run Interactive Display
+Bristol Bay Sockeye Salmon Run Interactive Data Display
 
 ## Setup
 
