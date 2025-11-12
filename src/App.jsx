@@ -25,6 +25,7 @@ function App() {
           {currentView === "efficiency" && (
             <CatchEfficiencyScreen
               onNavigateToRunTracker={() => setCurrentView("runtracker")}
+              onNavigateToWeather={() => setCurrentView("weather")}
               onBack={() => setCurrentView("map")}
             />
           )}

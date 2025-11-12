@@ -2,7 +2,7 @@
 
 .environmental-dashboard {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   padding: 40px 20px;
   overflow-y: auto;
@@ -274,6 +274,25 @@
   margin: 0;
   line-height: 1.5;
 }
+
+/* Scrollbar Styling */
+.tracker-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tracker-content::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.tracker-content::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+.tracker-content::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
