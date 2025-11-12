@@ -15,9 +15,26 @@ import "../styles/EnvironmentalDashboard.css";
 
 /**
  * EnvironmentalDashboard Component
- * Displays mock environmental data with clear disclaimers
- * Designed as a UI preview for future API integration
+ * Displays mock environmental data with district tabs and live Windy embed
+ * Designed as a UI preview for future API integration with NOAA
  */
+
+const DISTRICTS = [
+  { id: "naknek", name: "Naknek-Kvichak", lat: 58.603, lon: -158.511 },
+  { id: "egegik", name: "Egegik", lat: 58.177, lon: -157.398 },
+  { id: "ugashik", name: "Ugashik", lat: 57.470, lon: -156.920 },
+  { id: "nushagak", name: "Nushagak", lat: 59.035, lon: -161.033 },
+  { id: "togiak", name: "Togiak", lat: 59.054, lon: -160.419 },
+];
+
+const WINDY_EMBED_URLS = {
+  naknek: "https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=kt&zoom=9&overlay=wind&product=ecmwf&level=surface&lat=58.72&lon=-157.176&detailLat=58.65551339815602&detailLon=-157.27203369140628&marker=true&message=true",
+  egegik: "https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=kt&zoom=10&overlay=wind&product=ecmwf&level=surface&lat=58.226&lon=-157.449&detailLat=58.21196137079872&detailLon=-157.52059936523438&marker=true&message=true",
+  ugashik: "https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=kt&zoom=10&overlay=wind&product=ecmwf&level=surface&lat=57.564&lon=-157.721&detailLat=57.5909753067477&detailLon=-157.73071289062503&marker=true&message=true",
+  nushagak: "https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=kt&zoom=9&overlay=wind&product=ecmwf&level=surface&lat=58.724&lon=-158.546&detailLat=58.63264633236806&detailLon=-158.55194091796878&marker=true&message=true",
+  togiak: "https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=kt&zoom=8&overlay=wind&product=ecmwf&level=surface&lat=58.834&lon=-160.411&detailLat=58.839&detailLon=-160.505&marker=true&message=true",
+};
+
 export default function EnvironmentalDashboard({ onBack }) {
   const [mockTempData, setMockTempData] = useState([]);
   const [mockTideData, setMockTideData] = useState([]);
@@ -27,6 +44,7 @@ export default function EnvironmentalDashboard({ onBack }) {
     windSpeed: 12,
     humidity: 68,
   });
+  const [activeDistrict, setActiveDistrict] = useState("naknek");
 
   useEffect(() => {
     generateMockData();
@@ -76,6 +94,8 @@ export default function EnvironmentalDashboard({ onBack }) {
     return () => clearInterval(weatherInterval);
   };
 
+  const currentDistrictData = DISTRICTS.find(d => d.id === activeDistrict);
+
   const WeatherIcon = () => {
     switch (currentWeather.condition) {
       case "Sunny":
@@ -99,28 +119,65 @@ export default function EnvironmentalDashboard({ onBack }) {
             Environmental Factors Dashboard
           </h2>
           <p className="env-subtitle">
-            Water temperature, tides, and weather impact analysis
+            Water temperature, tides, and weather impact analysis by district
           </p>
           <div className="demo-badge">
-            ⚠️ DEMO MODE - Mock Data Only
+            ⚠️ DEMO MODE - Mock Data + Live Weather
           </div>
         </div>
       </div>
 
       <div className="env-content">
+        {/* District Tabs */}
+        <div className="district-tabs-container">
+          <div className="district-tabs">
+            {DISTRICTS.map((district) => (
+              <button
+                key={district.id}
+                className={`district-tab ${activeDistrict === district.id ? "active" : ""}`}
+                onClick={() => setActiveDistrict(district.id)}
+              >
+                {district.name}
+              </button>
+            ))}
+          </div>
+          <div className="active-district-label">
+            Currently viewing: <strong>{currentDistrictData?.name}</strong>
+          </div>
+        </div>
+
         {/* Disclaimer Banner */}
         <div className="disclaimer-banner">
           <div className="disclaimer-icon">ℹ️</div>
           <div className="disclaimer-text">
             <strong>Important Notice:</strong> This dashboard displays demo data
-            for UI preview purposes. The data shown is not connected to live
-            sensors or real environmental monitoring systems. Future versions
-            will integrate with NOAA, ADF&G, and other authoritative data
-            sources.
+            for UI preview purposes, with mock catch and temperature data. The Windy
+            embed displays real-time weather and forecast data. Future versions
+            will integrate full live data from NOAA and ADF&G APIs.
           </div>
         </div>
 
-        {/* Current Weather Card */}
+        {/* Live Weather Embed */}
+        <div className="weather-card">
+          <h3 className="card-title">
+            <Cloud size={20} /> Live Weather & Forecast (Real-time)
+          </h3>
+          <p className="chart-description">
+            Powered by Windy.com - Real-time wind, rain, and temperature data for {currentDistrictData?.name}
+          </p>
+          <div className="windy-embed-container">
+            <iframe
+              width="100%"
+              height="500"
+              src={WINDY_EMBED_URLS[activeDistrict]}
+              frameBorder="0"
+              title={`Windy.com map for ${currentDistrictData?.name}`}
+              style={{ borderRadius: "8px" }}
+            ></iframe>
+          </div>
+        </div>
+
+        {/* Current Conditions Card */}
         <div className="weather-card">
           <h3 className="card-title">
             <Cloud size={20} /> Current Conditions (Mock)
@@ -150,7 +207,7 @@ export default function EnvironmentalDashboard({ onBack }) {
               </div>
             </div>
           </div>
-          <div className="coming-soon-badge">Coming Soon: Real-time NOAA integration</div>
+          <div className="coming-soon-badge">Coming Soon: NOAA real-time integration for all metrics</div>
         </div>
 
         {/* Water Temperature Chart */}
@@ -159,135 +216,85 @@ export default function EnvironmentalDashboard({ onBack }) {
             <Thermometer size={20} /> Water Temperature Trends (Mock)
           </h3>
           <p className="chart-description">
-            Bristol Bay water temperature typically ranges 45-58°F during fishing season
+            Bristol Bay water and air temperature data for {currentDistrictData?.name} - June historical averages
           </p>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart
-              data={mockTempData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-            >
+            <AreaChart data={mockTempData}>
               <defs>
-                <linearGradient id="waterTemp" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                <linearGradient id="colorWater" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                 </linearGradient>
-                <linearGradient id="airTemp" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                <linearGradient id="colorAir" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="date" stroke="#94a3b8" style={{ fontSize: "11px" }} />
-              <YAxis stroke="#94a3b8" style={{ fontSize: "12px" }} unit="°F" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#0f172a",
-                  border: "1px solid #3b82f6",
-                  borderRadius: "6px",
-                  color: "#e2e8f0",
-                }}
+              <XAxis dataKey="date" stroke="#94a3b8" />
+              <YAxis stroke="#94a3b8" />
+              <Tooltip 
+                contentStyle={{ background: "#1e293b", border: "1px solid #3b82f6" }}
+                labelStyle={{ color: "#e2e8f0" }}
               />
-              <Area
-                type="monotone"
-                dataKey="waterTemp"
-                stroke="#3b82f6"
-                fillOpacity={1}
-                fill="url(#waterTemp)"
-                name="Water Temp"
-              />
-              <Area
-                type="monotone"
-                dataKey="airTemp"
-                stroke="#f59e0b"
-                fillOpacity={1}
-                fill="url(#airTemp)"
-                name="Air Temp"
-              />
+              <Area type="monotone" dataKey="waterTemp" stroke="#3b82f6" fillOpacity={1} fill="url(#colorWater)" name="Water Temp" />
+              <Area type="monotone" dataKey="airTemp" stroke="#f59e0b" fillOpacity={1} fill="url(#colorAir)" name="Air Temp" />
             </AreaChart>
           </ResponsiveContainer>
-          <div className="coming-soon-badge">Coming Soon: Live sensor data from monitoring stations</div>
         </div>
 
-        {/* Tide Prediction Chart */}
+        {/* Tide Pattern Chart */}
         <div className="chart-card">
           <h3 className="card-title">
-            <Droplets size={20} /> Tide Predictions (Mock Pattern)
+            <Droplets size={20} /> Tidal Patterns (Mock)
           </h3>
           <p className="chart-description">
-            48-hour tide forecast showing high and low tide cycles
+            48-hour tidal height forecast for {currentDistrictData?.name}
           </p>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart
-              data={mockTideData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-            >
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={mockTideData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis
-                dataKey="hour"
-                stroke="#94a3b8"
-                style={{ fontSize: "11px" }}
-                interval={5}
+              <XAxis dataKey="hour" stroke="#94a3b8" />
+              <YAxis stroke="#94a3b8" />
+              <Tooltip 
+                contentStyle={{ background: "#1e293b", border: "1px solid #3b82f6" }}
+                labelStyle={{ color: "#e2e8f0" }}
               />
-              <YAxis
-                stroke="#94a3b8"
-                style={{ fontSize: "12px" }}
-                unit="ft"
-                domain={[0, 16]}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#0f172a",
-                  border: "1px solid #10b981",
-                  borderRadius: "6px",
-                  color: "#e2e8f0",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="height"
-                stroke="#10b981"
-                strokeWidth={2}
-                dot={false}
-                name="Tide Height"
-              />
+              <Line type="monotone" dataKey="height" stroke="#60a5fa" dot={false} strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
-          <div className="external-link-box">
-            <span>📍 For real tide data, visit:</span>
-            <a
-              href="https://tidesandcurrents.noaa.gov/tide_predictions.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="external-link"
-            >
-              NOAA Tides & Currents →
-            </a>
-          </div>
         </div>
 
         {/* Integration Guide */}
         <div className="integration-guide">
-          <h3 className="guide-title">🔧 Future Integration Plan</h3>
+          <h3 className="guide-title">🔄 Planned NOAA API Integration</h3>
           <div className="integration-items">
             <div className="integration-item">
-              <div className="item-status">📋 Planned</div>
+              <div className="item-status">Mock</div>
               <div className="item-content">
-                <strong>NOAA API Integration</strong>
-                <p>Real-time water temperature, wave height, and weather data</p>
+                <strong>Water Temperature</strong>
+                <p>Will pull from NOAA buoy data and ADF&G temperature sensors</p>
               </div>
             </div>
             <div className="integration-item">
-              <div className="item-status">📋 Planned</div>
+              <div className="item-status">Mock</div>
               <div className="item-content">
-                <strong>ADF&G Environmental Data</strong>
-                <p>Official Alaska Department of Fish & Game environmental monitoring</p>
+                <strong>Tidal Predictions</strong>
+                <p>Will integrate NOAA CO-OPS tidal harmonic predictions</p>
               </div>
             </div>
             <div className="integration-item">
-              <div className="item-status">📋 Planned</div>
+              <div className="item-status">Live</div>
               <div className="item-content">
-                <strong>Historical Correlation Analysis</strong>
-                <p>Machine learning models to correlate environmental factors with catch patterns</p>
+                <strong>Weather Forecasts</strong>
+                <p>Currently displaying real-time data via Windy.com embed</p>
+              </div>
+            </div>
+            <div className="integration-item">
+              <div className="item-status">Planned</div>
+              <div className="item-content">
+                <strong>District-Specific Summaries</strong>
+                <p>Will fetch aggregated catch data from Bristol Predict database</p>
               </div>
             </div>
           </div>
