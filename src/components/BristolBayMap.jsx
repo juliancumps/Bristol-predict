@@ -188,10 +188,71 @@ function GeoJSONLayers() {
   );
 }
 
+
+function SectionLabels() {
+  const map = useMap();
+
+  useEffect(() => {
+    // Placeholder label data (add more as needed)
+    const labels = [
+      L.marker([58.70, -157.22], {
+        icon: L.divIcon({
+          className: "map-label",
+          html: `<div class="map-label-text">Naknek Section</div>`,
+        }),
+      }),
+      L.marker([58.77, -157.36], {
+        icon: L.divIcon({
+          className: "map-label",
+          html: `<div class="map-label-text">Kvichak Section</div>`,
+        }),
+      }),
+      L.marker([58.65, -158.79], {
+        icon: L.divIcon({
+          className: "map-label",
+          html: `<div class="map-label-text">Igushik Section</div>`,
+        }),
+      }),
+      L.marker([58.67, -158.55], {
+        icon: L.divIcon({
+          className: "map-label",
+          html: `<div class="map-label-text">Nushagak Section</div>`,
+        }),
+      }),
+    ];
+
+    // Add all labels initially hidden
+    labels.forEach((label) => label.addTo(map).setOpacity(0));
+
+    // Show/hide labels based on zoom level
+    function handleZoom() {
+      const zoom = map.getZoom();
+      const visible = zoom >= 10; // Adjust threshold if needed
+      labels.forEach((label) => label.setOpacity(visible ? 1 : 0));
+    }
+
+    map.on("zoomend", handleZoom);
+    handleZoom(); // initial run
+
+    return () => {
+      map.off("zoomend", handleZoom);
+      labels.forEach((label) => label.remove());
+    };
+  }, [map]);
+
+  return null;
+}
+
+
+
 // Helper function to check if a value is effectively zero
   const isZeroOrMissing = (value) => {
     return value === 0 || value === "0" || !value || value === null || value === undefined;
   };
+
+
+
+
 
 export default function BristolBayMap({ onNavigateToCatchEfficiency}) {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
@@ -434,7 +495,7 @@ useEffect(() => {
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             />
             <GeoJSONLayers />
-
+            <SectionLabels />
 
             {/* District Markers */}
             {Object.entries(DISTRICTS).map(([key, district]) => {

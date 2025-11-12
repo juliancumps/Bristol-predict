@@ -81,6 +81,19 @@ min-width: 0;
 height: 100%;
 width: 100%;
 }
+
+.map-label-text {
+  background-color: transparent;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: none;
+  white-space: nowrap;
+  pointer-events: none; /* Don't block map interactions */
+}
+
 /* Sidebar Popup - Full Height Overlay */
 .sidebar-popup {
 position: fixed;
