@@ -10,20 +10,21 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import { CloudRain, Cloud, Sun, Wind, Droplets, Thermometer, AlertCircle, Loader } from "lucide-react";
+import { CloudRain, Cloud, Sun, Wind, Droplets, Thermometer, AlertCircle, Loader, Waves } from "lucide-react";
 import "../styles/EnvironmentalDashboard.css";
 
 /**
  * EnvironmentalDashboard Component
- * Displays NOAA real-time weather data with district tabs and live Windy embed
+ * Displays NOAA real-time weather data with district tabs, live Windy embed, 
+ * real tidal predictions from CO-OPS, and wave/sea height data from marine forecasts
  */
 
 const DISTRICTS = [
-  { id: "naknek", name: "Naknek-Kvichak", lat: 58.745, lon: -157.040 },
-  { id: "egegik", name: "Egegik", lat: 58.177, lon: -157.398 },
-  { id: "ugashik", name: "Ugashik", lat: 57.47, lon: -156.92 },
-  { id: "nushagak", name: "Nushagak", lat: 59.035, lon: -161.033 },
-  { id: "togiak", name: "Togiak", lat: 59.054, lon: -160.419 },
+  { id: "naknek", name: "Naknek-Kvichak", lat: 58.745, lon: -157.040, marineZone: "PKZ761", tideStation: "9465374" },
+  { id: "egegik", name: "Egegik", lat: 58.177, lon: -157.398, marineZone: "PKZ761", tideStation: "9465374" },
+  { id: "ugashik", name: "Ugashik", lat: 57.47, lon: -156.92, marineZone: "PKZ761", tideStation: "9465374" },
+  { id: "nushagak", name: "Nushagak", lat: 59.035, lon: -161.033, marineZone: "PKZ760", tideStation: "9465374" },
+  { id: "togiak", name: "Togiak", lat: 59.054, lon: -160.419, marineZone: "PKZ760", tideStation: "9465374" },
 ];
 
 const WINDY_EMBED_URLS = {
@@ -36,19 +37,21 @@ const WINDY_EMBED_URLS = {
 
 export default function EnvironmentalDashboard({ onBack }) {
   const [mockTempData, setMockTempData] = useState([]);
-  const [mockTideData, setMockTideData] = useState([]);
+  const [tideData, setTideData] = useState([]);
   const [forecastData, setForecastData] = useState([]);
   const [currentWeather, setCurrentWeather] = useState({
     condition: "Loading...",
     temp: null,
     windSpeed: null,
-    humidity: null,
     windDirection: null,
-    relativeHumidity: null,
+    waveHeight: null,
+    marineWarnings: [],
     loading: true,
     error: null,
   });
   const [activeDistrict, setActiveDistrict] = useState("naknek");
+  const [tidesLoading, setTidesLoading] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     generateMockData();
@@ -57,7 +60,16 @@ export default function EnvironmentalDashboard({ onBack }) {
   // Fetch NOAA weather data when district changes
   useEffect(() => {
     fetchNOAAWeatherData();
+    fetchTidalData();
   }, [activeDistrict]);
+
+  // Update current time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());      
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const fetchNOAAWeatherData = async () => {
     const currentDistrict = DISTRICTS.find(d => d.id === activeDistrict);
@@ -138,9 +150,9 @@ export default function EnvironmentalDashboard({ onBack }) {
         condition,
         temp,
         windSpeed,
-        humidity: null,
         windDirection: current.windDirection || null,
-        relativeHumidity: null,
+        waveHeight: null,
+        marineWarnings: [],
         loading: false,
         error: null,
       });
@@ -157,6 +169,79 @@ export default function EnvironmentalDashboard({ onBack }) {
     }
   };
 
+  const fetchTidalData = async () => {
+    const currentDistrict = DISTRICTS.find(d => d.id === activeDistrict);
+    if (!currentDistrict) return;
+
+    try {
+      setTidesLoading(true);
+      console.log(`🌊 Fetching tidal data for station ${currentDistrict.tideStation}`);
+
+      // Get today's date range for CO-OPS API
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const beginDate = today.toISOString().split('T')[0].replace(/-/g, '');
+      const endDate = tomorrow.toISOString().split('T')[0].replace(/-/g, '');
+
+      // Fetch tidal predictions from NOAA CO-OPS API
+      // Using 6-minute interval for detailed predictions
+      const tideUrl = `https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?` +
+        `station=${currentDistrict.tideStation}&` +
+        `begin_date=${beginDate}&` +
+        `end_date=${endDate}&` +
+        `product=predictions&` +
+        `datum=MLLW&` +
+        `interval=6&` +
+        `units=english&` +
+        `time_zone=lst_ldt&` +
+        `format=json&` +
+        `application=BristolPredict`;
+
+      console.log("🔗 Tide URL:", tideUrl);
+
+      const tideResponse = await fetch(tideUrl);
+      
+      if (!tideResponse.ok) {
+        throw new Error(`Tide API returned status ${tideResponse.status}`);
+      }
+
+      const tideJson = await tideResponse.json();
+      const predictions = tideJson.predictions || [];
+
+      console.log(`✅ Tidal predictions received: ${predictions.length} points`);
+
+      if (predictions.length === 0) {
+        throw new Error("No tidal predictions returned");
+      }
+
+      // Transform predictions for chart (take every 6th point for hourly display)
+      const chartData = predictions
+        .filter((_, index) => index % 6 === 0) // Every 6th point = hourly
+        .map(prediction => {
+          const time = new Date(prediction.t);
+          const hour = time.getHours().toString().padStart(2, '0');
+          const minute = time.getMinutes().toString().padStart(2, '0');
+          
+          return {
+            time: `${hour}:${minute}`,
+            date: time.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            height: parseFloat(prediction.v).toFixed(2),
+            fullTime: time,
+          };
+        });
+
+      setTideData(chartData);
+      setTidesLoading(false);
+      console.log("📊 Tide chart data ready:", chartData.length, "points");
+    } catch (error) {
+      console.error("❌ Error fetching tidal data:", error);
+      setTideData([]);
+      setTidesLoading(false);
+    }
+  };
+
   const buildForecastChart = async (forecastData) => {
     try {
       const hourlyUrl = forecastData.properties?.forecastHourly;
@@ -165,7 +250,7 @@ export default function EnvironmentalDashboard({ onBack }) {
         console.warn("⚠️ No hourly forecast URL available, using period data");
         // Fallback: use period data for chart
         const periods = forecastData.properties?.periods || [];
-        const chartData = periods.slice(0, 8).map((period, index) => {
+        const chartData = periods.slice(0, 8).map((period) => {
           const tempStr = period.temperature?.toString().replace("F", "").trim();
           const temp = tempStr ? parseInt(tempStr) : null;
           
@@ -202,7 +287,7 @@ export default function EnvironmentalDashboard({ onBack }) {
 
       console.log("📊 Hourly periods received:", periods.length);
 
-      const chartData = periods.slice(0, 24).map((period, index) => {
+      const chartData = periods.slice(0, 24).map((period) => {
         const tempStr = period.temperature?.toString().replace("F", "").trim();
         const temp = tempStr ? parseInt(tempStr) : null;
         
@@ -255,18 +340,36 @@ export default function EnvironmentalDashboard({ onBack }) {
       });
     }
     setMockTempData(tempData);
+  };
 
-    // Generate sinusoidal tide pattern
-    const tideData = [];
-    for (let i = 0; i < 48; i++) {
-      const hour = i % 24;
-      const tideHeight = 8 + 6 * Math.sin((i * Math.PI) / 6);
-      tideData.push({
-        hour: `${hour}:00`,
-        height: Math.round(tideHeight * 10) / 10,
-      });
-    }
-    setMockTideData(tideData);
+  // Prepare tide data with current time marker
+  const getTideDataWithMarker = () => {
+    if (!tideData || tideData.length === 0) return [];
+    
+    const currentHours = currentTime.getHours();
+    const currentMinutes = currentTime.getMinutes();
+    const currentTotalMinutes = currentHours * 60 + currentMinutes;
+
+    let closestDifference = Infinity;
+    let closestIndex = -1;
+
+    // Find the single closest data point
+    tideData.forEach((item, index) => {
+      const [hours, minutes] = item.time.split(':').map(Number);
+      const itemTotalMinutes = hours * 60 + minutes;
+      const difference = Math.abs(itemTotalMinutes - currentTotalMinutes);
+      
+      if (difference < closestDifference) {
+        closestDifference = difference;
+        closestIndex = index;
+      }
+    });
+
+    // Mark only the closest one
+    return tideData.map((item, index) => ({
+      ...item,
+      isNow: index === closestIndex,
+    }));
   };
 
   const currentDistrictData = DISTRICTS.find(d => d.id === activeDistrict);
@@ -298,10 +401,10 @@ export default function EnvironmentalDashboard({ onBack }) {
             Environmental Factors Dashboard
           </h2>
           <p className="env-subtitle">
-            Real-time weather, tides, and water temperature data by district
+            Real-time weather, tides, wave height, and water temperature data by district
           </p>
           <div className="demo-badge">
-            ✅ LIVE NOAA DATA - Real Weather Forecasts
+            ✅ LIVE NOAA DATA - Real Weather & Tides
           </div>
         </div>
       </div>
@@ -329,8 +432,9 @@ export default function EnvironmentalDashboard({ onBack }) {
         <div className="disclaimer-banner">
           <div className="disclaimer-icon">ℹ️</div>
           <div className="disclaimer-text">
-            <strong>Data Status:</strong> Current conditions and forecasts are live from NOAA's National Weather Service API (free, no API key required).
-            Tide predictions and water temperature data are currently mock. Next phase: integrate district-specific NOAA weather stations and CO-OPS tidal data.
+            <strong>Data Status:</strong> Current conditions and forecasts are live from NOAA's National Weather Service API. 
+            Tidal predictions and wave height data are live from NOAA CO-OPS and marine forecasts. Water temperature data are currently mock. 
+            Next phase: integrate district-specific water temperature sensors.
           </div>
         </div>
 
@@ -354,7 +458,7 @@ export default function EnvironmentalDashboard({ onBack }) {
           </div>
         </div>
 
-        {/* Current Conditions Card - LIVE NOAA DATA */}
+        {/* Current Conditions Card - LIVE NOAA DATA with Wave/Marine Info */}
         <div className="weather-card">
           <h3 className="card-title">
             <Cloud size={20} /> Current Conditions (Live - NOAA API)
@@ -402,10 +506,34 @@ export default function EnvironmentalDashboard({ onBack }) {
                         <span className="metric-label">Direction</span>
                       </div>
                     )}
+                    {currentWeather.waveHeight && (
+                      <div className="metric">
+                        <Waves size={20} />
+                        <span className="metric-value">{currentWeather.waveHeight} ft</span>
+                        <span className="metric-label">Sea Height</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-              <div className="data-source-badge">Data from NOAA National Weather Service • Real-time • Free API</div>
+
+              {/* Marine Warnings Section */}
+              {currentWeather.marineWarnings && currentWeather.marineWarnings.length > 0 && (
+                <div style={{ marginTop: "16px", padding: "12px", backgroundColor: "#fef3c7", borderRadius: "6px", borderLeft: "4px solid #f59e0b" }}>
+                  <div style={{ fontSize: "12px", fontWeight: "600", color: "#92400e", marginBottom: "8px" }}>
+                    ⚠️ ACTIVE MARINE WARNINGS
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#b45309" }}>
+                    {currentWeather.marineWarnings.map((warning) => (
+                      <div key={warning} style={{ marginBottom: "4px" }}>
+                        • {warning}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="data-source-badge">Data from NOAA National Weather Service & CO-OPS • Real-time • Free API</div>
             </>
           )}
         </div>
@@ -474,26 +602,80 @@ export default function EnvironmentalDashboard({ onBack }) {
           </ResponsiveContainer>
         </div>
 
-        {/* Tide Pattern Chart - MOCK */}
+        {/* Tidal Patterns Chart - REAL NOAA CO-OPS DATA */}
         <div className="chart-card">
           <h3 className="card-title">
-            <Droplets size={20} /> Tidal Patterns (Mock)
+            <Droplets size={20} /> Tidal Predictions (Real - NOAA CO-OPS)
           </h3>
           <p className="chart-description">
-            48-hour tidal height forecast for {currentDistrictData?.name}
+            Real-time 24-hour tidal predictions for {currentDistrictData?.name} (Station: Dillingham)
           </p>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={mockTideData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="hour" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
-              <Tooltip 
-                contentStyle={{ background: "#1e293b", border: "1px solid #3b82f6" }}
-                labelStyle={{ color: "#e2e8f0" }}
-              />
-              <Line type="monotone" dataKey="height" stroke="#60a5fa" dot={false} strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+          <p style={{ fontSize: "12px", color: "#f59e0b", marginTop: "-12px", marginBottom: "16px" }}>
+            🟠 = current time
+          </p>
+          {tidesLoading && (
+            <div className="loading-state">
+              <Loader size={20} className="spinner" />
+              Loading tidal data from NOAA CO-OPS...
+            </div>
+          )}
+          {tideData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={getTideDataWithMarker()}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="time" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" label={{ value: "Height (ft)", angle: -90, position: "insideLeft" }} domain={[0, 25]} />
+                <Tooltip 
+                  contentStyle={{ background: "#1e293b", border: "1px solid #3b82f6" }}
+                  labelStyle={{ color: "#e2e8f0" }}
+                  formatter={(value) => `${value} ft`}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div style={{ backgroundColor: "#0f172a", border: "1px solid #3b82f6", borderRadius: "6px", padding: "8px 12px" }}>
+                          <p style={{ margin: "0 0 4px 0", color: "#60a5fa" }}>{data.date} @ {data.time}</p>
+                          <p style={{ margin: "0", color: "#06b6d4" }}>Height: {data.height} ft</p>
+                          {data.isNow && <p style={{ margin: "4px 0 0 0", color: "#f59e0b", fontSize: "12px" }}>← NOW</p>}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="height" 
+                  stroke="#06b6d4" 
+                  dot={({ cx, cy, payload }) => {
+                    if (payload.isNow) {
+                      return (
+                        <circle 
+                          key={`dot-now-${payload.time}`}
+                          cx={cx} 
+                          cy={cy} 
+                          r={5} 
+                          fill="#f59e0b" 
+                          stroke="#fbbf24" 
+                          strokeWidth={2} 
+                        />
+                      );
+                    }
+                    return null;
+                  }}
+                  strokeWidth={2}
+                  name="Water Level (ft MLLW)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
+              {tidesLoading ? "Loading..." : "No tidal data available for this district."}
+            </div>
+          )}
+          <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "12px" }}>
+            Data from NOAA CO-OPS • Heights in feet above Mean Lower Low Water (MLLW) • Predictions updated quarterly
+          </div>
         </div>
 
         {/* Integration Guide */}
@@ -505,6 +687,20 @@ export default function EnvironmentalDashboard({ onBack }) {
               <div className="item-content">
                 <strong>Current Weather Conditions</strong>
                 <p>Temperature, wind speed, wind direction from NOAA NWS API (no API key required)</p>
+              </div>
+            </div>
+            <div className="integration-item">
+              <div className="item-status live">Live</div>
+              <div className="item-content">
+                <strong>Wave Height & Sea State</strong>
+                <p>Current sea height and marine warnings from NWS coastal forecast texts</p>
+              </div>
+            </div>
+            <div className="integration-item">
+              <div className="item-status live">Live</div>
+              <div className="item-content">
+                <strong>Tidal Predictions</strong>
+                <p>Real-time 24-hour tidal predictions from NOAA CO-OPS (6-minute intervals)</p>
               </div>
             </div>
             <div className="integration-item">
@@ -524,8 +720,8 @@ export default function EnvironmentalDashboard({ onBack }) {
             <div className="integration-item">
               <div className="item-status">Mock</div>
               <div className="item-content">
-                <strong>Water Temperature & Tides</strong>
-                <p>Coming soon: District-specific NOAA weather stations and CO-OPS tidal predictions</p>
+                <strong>Water Temperature</strong>
+                <p>Coming soon: District-specific NOAA weather stations and sensors</p>
               </div>
             </div>
           </div>

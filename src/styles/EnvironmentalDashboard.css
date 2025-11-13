@@ -433,6 +433,54 @@
   border-color: #60a5fa;
 }
 
+
+/* Wave height metric - already included with existing metric styles */
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+}
+
+/* Marine warnings banner */
+.marine-warnings-banner {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #fef3c7;
+  border-radius: 6px;
+  border-left: 4px solid #f59e0b;
+}
+
+.warning-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 8px;
+}
+
+.warning-list {
+  font-size: 13px;
+  color: #b45309;
+}
+
+.warning-item {
+  margin-bottom: 4px;
+}
+
+/* Tidal chart section */
+.tidal-chart-container {
+  padding: 16px;
+}
+
+.tidal-data-source {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 12px;
+}
+
+
 /* Scrollbar Styling */
 .environmental-dashboard::-webkit-scrollbar {
   width: 6px;
