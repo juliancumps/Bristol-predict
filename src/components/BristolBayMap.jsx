@@ -51,6 +51,7 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
+
 // Bristol Bay fishing districts
 const DISTRICTS = {
   naknek: {

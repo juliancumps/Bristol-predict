@@ -163,7 +163,7 @@ setAvailableDates(sortedDates);
             onClick={onNavigateToWeather}
             title="View Weather Node"
           >
-            🌦️ Weather Node
+            🌦️ Live Weather Dashboard
           </button>
 
         </div>
@@ -328,7 +328,7 @@ setAvailableDates(sortedDates);
       <div className="efficiency-footer">
         <p className="footer-note">
           💡 <strong>Tip:</strong> Save your historical data to track your performance over the season.
-          Login features coming soon!
+          Login features coming later!
         </p>
       </div>
     </div>

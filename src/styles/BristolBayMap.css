@@ -1,68 +1,77 @@
 .bristol-bay-map-container {
-  width: 100vw;
-height: 100vh;
-display: flex;
-flex-direction: column;
-background-color: #0f172a;
-color: #e2e8f0;
-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #0f172a;
+  color: #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
 }
-/* Compact Header - Single Row */
+
 .header-compact {
-display: flex;
-align-items: center;
-gap: 16px;
-padding: 12px 16px;
-background: linear-gradient(to right, #1e3a8a, #1e40af);
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-z-index: 1000;
-border-bottom: 2px solid #3b82f6;
-height: 60px;
-flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(to right, #1e3a8a, #1e40af);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  border-bottom: 2px solid #3b82f6;
+  height: 60px;
+  flex-shrink: 0;
 }
+
 .header-left {
-flex-shrink: 0;
+  flex-shrink: 0;
 }
+
 .header-left h1 {
-margin: 0;
-font-size: 20px;
-font-weight: bold;
-color: white;
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
 }
+
 .header-center {
-flex: 1;
-min-width: 300px;
+  flex: 1;
+  min-width: 300px;
 }
+
 .header-right {
-display: flex;
-gap: 8px;
-flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
 }
+
 .toggle-btn,
 .sidebar-toggle {
-padding: 8px 12px;
-border-radius: 4px;
-border: 1px solid #3b82f6;
-background-color: transparent;
-color: #60a5fa;
-font-size: 14px;
-font-weight: 600;
-cursor: pointer;
-transition: all 0.2s;
-min-width: 40px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #3b82f6;
+  background-color: transparent;
+  color: #60a5fa;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 40px;
 }
+
 .toggle-btn:hover,
 .sidebar-toggle:hover {
-background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(59, 130, 246, 0.1);
 }
+
 .toggle-btn.active,
 .sidebar-toggle.active {
-background-color: #3b82f6;
-color: white;
+  background-color: #3b82f6;
+  color: white;
 }
+
 .sidebar-toggle {
-font-size: 18px;
-padding: 8px 10px;
+  font-size: 18px;
+  padding: 8px 10px;
 }
 /* Main Content - Flex container for map and sidebar */
 .main-content {
@@ -96,19 +105,19 @@ width: 100%;
 
 /* Sidebar Popup - Full Height Overlay */
 .sidebar-popup {
-position: fixed;
-right: 0;
-top: 60px; /* Start below header */
-width: 300px;
-height: calc(100vh - 60px); /* Full height minus header */
-background-color: rgba(15, 23, 42, 0.98);
-border-left: 2px solid #3b82f6;
-box-shadow: -4px 0 12px rgba(0, 0, 0, 0.3);
-z-index: 500;
-display: flex;
-flex-direction: column;
-backdrop-filter: blur(8px);
-animation: slideInRight 0.3s ease-out;
+  position: fixed;
+  right: 0;
+  top: 60px; /* Start below header */
+  width: 300px;
+  height: calc(100vh - 60px); /* Full height minus header */
+  background-color: rgba(15, 23, 42, 0.98);
+  border-left: 2px solid #3b82f6;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.3);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(8px);
+  animation: slideInRight 0.3s ease-out;
 }
 @keyframes slideInRight {
   from {
@@ -237,29 +246,31 @@ text-transform: uppercase;
 letter-spacing: 0.5px;
 }
 .chart-buttons {
-display: grid;
-grid-template-columns: repeat(5, 1fr);
-gap: 9px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 9px;
 }
 
 .chart-btn {
-padding: 3px;
-border-radius: 4px;
-border: 1px solid #6992cafe;
-background-color: transparent;
-color: #cbd5e1;
-font-size: 13px;
-cursor: pointer;
-transition: all 0.2s;
+  padding: 3px;
+  border-radius: 4px;
+  border: 1px solid #6992cafe;
+  background-color: transparent;
+  color: #cbd5e1;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
+
 .chart-btn:hover {
-border-color: #3b82f6;
-background-color: rgba(118, 160, 229, 0.1);
+  border-color: #3b82f6;
+  background-color: rgba(118, 160, 229, 0.1);
 }
+
 .chart-btn.active {
-background-color: #3b82f6;
-color: white;
-border-color: #3b82f6;
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
 }
 /* Districts List */
 .districts-list {
@@ -330,17 +341,17 @@ font-weight: 600;
 }
 /* Charts Section - Now takes remaining space and scrolls */
 .charts-section {
-padding: 15px;
-background-color: rgba(15, 23, 42, 0.6);
-border-top: 0px solid #3b82f6;
-flex: 1;
-overflow-y: auto;
-transition: margin-right 0.3s ease-out;
-margin-right: 0; /* No margin when sidebar is closed */
+  padding: 15px;
+  background-color: rgba(15, 23, 42, 0.6);
+  border-top: 0px solid #3b82f6;
+  flex: 1;
+  overflow-y: auto;
+  transition: margin-right 0.3s ease-out;
+  margin-right: 0; /* No margin when sidebar is closed */
 }
 /* When sidebar is open, shift charts to the left */
 .sidebar-popup ~ .charts-section {
-margin-right: 300px;
+  margin-right: 300px;
 }
 .charts-section::-webkit-scrollbar {
 width: 6px;
@@ -384,68 +395,180 @@ font-size: 10px;
 .popup-stats strong {
 font-weight: 600;
 }
-/* Responsive */
+/* Responsive - Mobile Only */
 @media (max-width: 1024px) {
-.header-compact {
-flex-wrap: wrap;
-height: auto;
-gap: 8px;
-padding: 8px;
+  .header-compact {
+    flex-wrap: wrap;
+    height: auto;
+    gap: 8px;
+    padding: 8px;
   }
-.sidebar-popup {
-width: 300px;
-top: auto; /* Let it position naturally */
-height: auto;
+  .sidebar-popup {
+    width: 300px;
+    top: auto;
+    height: auto;
   }
-.chart-buttons {
-grid-template-columns: repeat(3, 1fr);
+  .chart-buttons {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
+
 @media (max-width: 768px) {
-.header-compact {
-flex-direction: column;
-align-items: stretch;
-height: auto;
+  .header-compact {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    height: auto;
+    padding: 8px;
+    gap: 6px;
   }
-.header-left h1 {
-font-size: 18px;
+  .header-left h1 {
+    font-size: 16px;
   }
-.sidebar-popup {
-width: 100%;
-position: fixed;
-right: 0;
-top: 0;
-height: 100vh;
-border-radius: 0;
+  .header-center {
+    order: 3;
+    flex-basis: 100%;
+    margin-top: 4px;
   }
-.main-content {
-flex-direction: column;
+  .sidebar-popup {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    right: 0;
+    z-index: 999;
+    border-radius: 0;
   }
-.map-section {
-height: 50%;
+  .main-content {
+    flex-direction: column;
   }
-.charts-section {
-margin-right: 0;
+  .map-section {
+    height: 40vh;
+    min-height: 200px;
   }
-.chart-buttons {
-grid-template-columns: repeat(3, 1fr);
+  .charts-section {
+    height: 60vh;
+    margin-right: 0 !important;
+    padding: 8px;
+  }
+  .chart-buttons {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .chart-btn {
+    padding: 6px;
+    font-size: 11px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
+
 @media (max-width: 480px) {
-.header-compact {
-padding: 8px;
-gap: 6px;
+  .bristol-bay-map-container {
+    width: 100%;
   }
-.header-left h1 {
-font-size: 16px;
+  .header-compact {
+    padding: 6px;
+    gap: 4px;
+    min-height: auto;
   }
-.sidebar-popup {
-width: 100%;
+  .header-left h1 {
+    font-size: 14px;
   }
-.district-item {
-padding: 6px;
+  .header-center {
+    min-width: 120px;
   }
-.chart-buttons {
-grid-template-columns: repeat(2, 1fr);
+  .toggle-btn,
+  .sidebar-toggle {
+    padding: 4px 8px;
+    font-size: 11px;
+    min-height: 32px;
+  }
+  .sidebar-toggle {
+    font-size: 16px;
+  }
+  .sidebar-popup {
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    z-index: 999;
+  }
+  .sidebar-header {
+    padding: 6px 10px;
+  }
+  .sidebar-header h3 {
+    font-size: 12px;
+  }
+  .sidebar-content {
+    padding: 6px;
+    gap: 8px;
+  }
+  .map-section {
+    height: 35vh;
+    min-height: 140px;
+  }
+  .charts-section {
+    height: 65vh;
+    padding: 6px;
+    margin-right: 0 !important;
+  }
+  .chart-buttons {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  .chart-btn {
+    padding: 6px;
+    font-size: 10px;
+    min-height: 38px;
+  }
+  .summary-box,
+  .districts-list,
+  .chart-toggle {
+    padding: 6px;
+  }
+  .summary-box h4,
+  .districts-list h4,
+  .chart-toggle h4 {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .district-item {
+    padding: 5px;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+  .district-emoji {
+    font-size: 14px;
+  }
+  .district-name {
+    font-size: 9px;
+  }
+  .district-catch {
+    font-size: 8px;
+  }
+  .summary-stat {
+    font-size: 9px;
+    padding: 3px;
+  }
+  .summary-label {
+    font-size: 8px;
+  }
+  .summary-value {
+    font-size: 9px;
+  }
+  .summary-note {
+    font-size: 8px;
+  }
+  .close-btn {
+    font-size: 16px;
+  }
+  .marker-popup {
+    font-size: 11px;
+    min-width: 140px;
+  }
+  .marker-popup h3 {
+    font-size: 12px;
   }
 }

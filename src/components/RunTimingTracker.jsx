@@ -330,7 +330,7 @@ export default function RunTimingTracker({ onBack }) {
       <div className="tracker-footer">
         <p className="footer-note">
           💡 <strong>Tip:</strong> Compare these historical patterns with current season data to
-          identify early or late runs. Use this to plan your fishing strategy.
+          identify early or late runs.
         </p>
       </div>
     </div>

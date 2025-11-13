@@ -376,14 +376,14 @@ export default function EnvironmentalDashboard({ onBack }) {
         </button>
         <div className="env-title-section">
           <h2 className="env-title">
-            <span className="title-icon">🌡️</span>
-            Environmental Factors Dashboard
+            <span className="title-icon">🌦️</span>
+            Weather Dashboard
           </h2>
           <p className="env-subtitle">
-            Real-time weather, tides, wave height, and water temperature data by district
+            Real-time weather data by district, from multiple sources
           </p>
           <div className="demo-badge">
-            ✅ LIVE NOAA DATA - Real Weather & Tides
+            ✅ LIVE DATA - Weather & Tides from NOAA and windy.com
           </div>
         </div>
       </div>
@@ -420,10 +420,11 @@ export default function EnvironmentalDashboard({ onBack }) {
         {/* Live Weather Embed */}
         <div className="weather-card">
           <h3 className="card-title">
-            <Cloud size={20} /> Live Weather & Forecast Map (Real-time)
+            <Cloud size={20} /> Live Wind/Waves Forecast Map
           </h3>
           <p className="chart-description">
-            Powered by Windy.com - Real-time wind, rain, and temperature visualization for {currentDistrictData?.name}
+            Powered by Windy.com - Real-time wind, waves, rain, and temperature visualization for {currentDistrictData?.name}   |   
+            Click wind icon in upper-right corner of map to view other layers
           </p>
           <div className="windy-embed-container">
             <iframe
@@ -437,10 +438,10 @@ export default function EnvironmentalDashboard({ onBack }) {
           </div>
         </div>
 
-        {/* Current Conditions Card - LIVE NOAA DATA with Wave/Marine Info */}
+        {/* Current Conditions Card - LIVE NOAA DATA */}
         <div className="weather-card">
           <h3 className="card-title">
-            <Cloud size={20} /> Current Conditions (Live - NOAA API)
+            <Cloud size={20} /> Current Conditions (NOAA API)
           </h3>
           {currentWeather.loading && (
             <div className="loading-state">
@@ -520,7 +521,7 @@ export default function EnvironmentalDashboard({ onBack }) {
         {/* Tidal Patterns Chart - REAL NOAA CO-OPS DATA */}
         <div className="chart-card">
           <h3 className="card-title">
-            <Droplets size={20} /> Tidal Predictions (Real - NOAA CO-OPS)
+            <Droplets size={20} /> Tidal Predictions (NOAA CO-OPS)
           </h3>
           <p className="chart-description">
             Real-time 24-hour tidal predictions for {currentDistrictData?.name} (Station: Dillingham)
@@ -597,10 +598,10 @@ export default function EnvironmentalDashboard({ onBack }) {
         {forecastData.length > 0 && (
           <div className="chart-card">
             <h3 className="card-title">
-              <Thermometer size={20} /> Temperature Forecast (Real-time)
+              <Thermometer size={20} /> Daily Temperature Forecast
             </h3>
             <p className="chart-description">
-              Live forecast data from NOAA for {currentDistrictData?.name}
+              Forecast data from NOAA for {currentDistrictData?.name}
             </p>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={forecastData}>
@@ -628,27 +629,27 @@ export default function EnvironmentalDashboard({ onBack }) {
 
         {/* Integration Guide */}
         <div className="integration-guide">
-          <h3 className="guide-title">🔄 Real-Time Data Integration Status</h3>
+          <h3 className="guide-title">ℹ️ Data Integration Status:</h3>
           <div className="integration-items">
             <div className="integration-item">
               <div className="item-status live">Live</div>
               <div className="item-content">
                 <strong>Current Weather Conditions</strong>
-                <p>Temperature, wind speed, wind direction from NOAA NWS API (no API key required)</p>
+                <p>Temperature, wind speed, wind direction from NOAA NWS API</p>
               </div>
             </div>
             <div className="integration-item">
-              <div className="item-status live">Live</div>
+              <div className="item-status planned">Planned</div>
               <div className="item-content">
                 <strong>Wave Height & Sea State</strong>
-                <p>Current sea height and marine warnings from NWS coastal forecast texts</p>
+                <p>Soon will implement sea height and marine warnings from NWS coastal forecasts</p>
               </div>
             </div>
             <div className="integration-item">
-              <div className="item-status live">Live</div>
+              <div className="item-status planned">Planned</div>
               <div className="item-content">
                 <strong>Tidal Predictions</strong>
-                <p>Real-time 24-hour tidal predictions from NOAA CO-OPS (6-minute intervals)</p>
+                <p>Real-time 24-hour tidal predictions from NOAA CO-OPS (6-minute intervals) ALL USING DILLINGHAM STATION, NEED TO UPDATE FOR OTHER DISTRICTS</p>
               </div>
             </div>
             <div className="integration-item">
@@ -662,9 +663,10 @@ export default function EnvironmentalDashboard({ onBack }) {
               <div className="item-status live">Live</div>
               <div className="item-content">
                 <strong>Weather Map Visualization</strong>
-                <p>Interactive Windy.com embed showing wind patterns and forecasts</p>
+                <p>Interactive Windy.com embed showing wind/wave patterns and forecasts</p>
               </div>
             </div>
+            
           </div>
         </div>
       </div>
