@@ -36,7 +36,6 @@ const WINDY_EMBED_URLS = {
 };
 
 export default function EnvironmentalDashboard({ onBack }) {
-  const [mockTempData, setMockTempData] = useState([]);
   const [tideData, setTideData] = useState([]);
   const [forecastData, setForecastData] = useState([]);
   const [currentWeather, setCurrentWeather] = useState({
@@ -52,10 +51,6 @@ export default function EnvironmentalDashboard({ onBack }) {
   const [activeDistrict, setActiveDistrict] = useState("naknek");
   const [tidesLoading, setTidesLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    generateMockData();
-  }, []);
 
   // Fetch NOAA weather data when district changes
   useEffect(() => {
@@ -326,22 +321,6 @@ export default function EnvironmentalDashboard({ onBack }) {
     return "Partly Cloudy";
   };
 
-  const generateMockData = () => {
-    // Generate realistic Bristol Bay water temperatures (45-58°F range)
-    const tempData = [];
-    const baseTemp = 51;
-    
-    for (let i = 0; i < 30; i++) {
-      const variance = Math.sin(i / 5) * 4 + (Math.random() - 0.5) * 2;
-      tempData.push({
-        date: `Jun ${i + 1}`,
-        waterTemp: Math.round((baseTemp + variance) * 10) / 10,
-        airTemp: Math.round((baseTemp + variance + 8) * 10) / 10,
-      });
-    }
-    setMockTempData(tempData);
-  };
-
   // Prepare tide data with current time marker
   const getTideDataWithMarker = () => {
     if (!tideData || tideData.length === 0) return [];
@@ -433,7 +412,7 @@ export default function EnvironmentalDashboard({ onBack }) {
           <div className="disclaimer-icon">ℹ️</div>
           <div className="disclaimer-text">
             <strong>Data Status:</strong> Current conditions and forecasts are live from NOAA's National Weather Service API. 
-            Tidal predictions and wave height data are live from NOAA CO-OPS and marine forecasts. Water temperature data are currently mock. 
+            Tidal predictions and wave height data are live from NOAA CO-OPS and marine forecasts.  
             Next phase: integrate district-specific water temperature sensors.
           </div>
         </div>
@@ -538,70 +517,6 @@ export default function EnvironmentalDashboard({ onBack }) {
           )}
         </div>
 
-        {/* 24-Hour Forecast Chart */}
-        {forecastData.length > 0 && (
-          <div className="chart-card">
-            <h3 className="card-title">
-              <Thermometer size={20} /> Temperature Forecast (Real-time)
-            </h3>
-            <p className="chart-description">
-              Live forecast data from NOAA for {currentDistrictData?.name}
-            </p>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={forecastData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="date" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" domain={["dataMin - 5", "dataMax + 5"]} />
-                <Tooltip 
-                  contentStyle={{ background: "#1e293b", border: "1px solid #3b82f6" }}
-                  labelStyle={{ color: "#e2e8f0" }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="temp" 
-                  stroke="#f59e0b" 
-                  strokeWidth={2}
-                  dot={false}
-                  name="Temperature (°F)"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-
-        {/* Water Temperature Chart - MOCK */}
-        <div className="chart-card">
-          <h3 className="card-title">
-            <Thermometer size={20} /> Water Temperature Trends (Mock)
-          </h3>
-          <p className="chart-description">
-            Bristol Bay water and air temperature data for {currentDistrictData?.name} - June historical averages
-          </p>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={mockTempData}>
-              <defs>
-                <linearGradient id="colorWater" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorAir" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="date" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
-              <Tooltip 
-                contentStyle={{ background: "#1e293b", border: "1px solid #3b82f6" }}
-                labelStyle={{ color: "#e2e8f0" }}
-              />
-              <Area type="monotone" dataKey="waterTemp" stroke="#3b82f6" fillOpacity={1} fill="url(#colorWater)" name="Water Temp" />
-              <Area type="monotone" dataKey="airTemp" stroke="#f59e0b" fillOpacity={1} fill="url(#colorAir)" name="Air Temp" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
         {/* Tidal Patterns Chart - REAL NOAA CO-OPS DATA */}
         <div className="chart-card">
           <h3 className="card-title">
@@ -678,6 +593,39 @@ export default function EnvironmentalDashboard({ onBack }) {
           </div>
         </div>
 
+        {/* 24-Hour Forecast Chart */}
+        {forecastData.length > 0 && (
+          <div className="chart-card">
+            <h3 className="card-title">
+              <Thermometer size={20} /> Temperature Forecast (Real-time)
+            </h3>
+            <p className="chart-description">
+              Live forecast data from NOAA for {currentDistrictData?.name}
+            </p>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={forecastData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="date" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" domain={["dataMin - 5", "dataMax + 5"]} />
+                <Tooltip 
+                  contentStyle={{ background: "#1e293b", border: "1px solid #3b82f6" }}
+                  labelStyle={{ color: "#e2e8f0" }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="temp" 
+                  stroke="#f59e0b" 
+                  strokeWidth={2}
+                  dot={false}
+                  name="Temperature (°F)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        
+
         {/* Integration Guide */}
         <div className="integration-guide">
           <h3 className="guide-title">🔄 Real-Time Data Integration Status</h3>
@@ -715,13 +663,6 @@ export default function EnvironmentalDashboard({ onBack }) {
               <div className="item-content">
                 <strong>Weather Map Visualization</strong>
                 <p>Interactive Windy.com embed showing wind patterns and forecasts</p>
-              </div>
-            </div>
-            <div className="integration-item">
-              <div className="item-status">Mock</div>
-              <div className="item-content">
-                <strong>Water Temperature</strong>
-                <p>Coming soon: District-specific NOAA weather stations and sensors</p>
               </div>
             </div>
           </div>
