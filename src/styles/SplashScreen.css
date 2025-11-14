@@ -136,7 +136,7 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  margin-top: 60px;
+  margin-top: 160px;
   animation: fadeIn 0.8s ease-out 0.4s backwards;
 }
 

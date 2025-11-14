@@ -255,7 +255,7 @@ function SectionLabels() {
 
 
 
-export default function BristolBayMap({ onNavigateToCatchEfficiency}) {
+export default function BristolBayMap({ onNavigateToCatchEfficiency, onBackToSplash }) {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [districtData, setDistrictData] = useState({});
   const [summaryData, setSummaryData] = useState(null);
@@ -471,6 +471,14 @@ useEffect(() => {
             title="Catch Efficiency Analyzer"
           >
             🎣 More Tools...
+          </button>
+
+          <button
+            className="toggle-btn"
+            onClick={() => onBackToSplash && onBackToSplash()}
+            title="Back to Splash Screen"
+          >
+            ← Back
           </button>
 
           <button

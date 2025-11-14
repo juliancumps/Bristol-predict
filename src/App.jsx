@@ -10,7 +10,7 @@ import "./App.css";
 
 function App() {
   const [splashComplete, setSplashComplete] = useState(false);
-  const [currentView, setCurrentView] = useState("map"); // "map", "efficiency", "runtracker", "weather"
+  const [currentView, setCurrentView] = useState("map");
   const [htmlContent, setHtmlContent] = useState("");
 
   // Load HTML content on mount
@@ -28,12 +28,21 @@ function App() {
     loadHtml();
   }, []);
 
+  const handleNavigateToApp = () => {
+    setSplashComplete(true);
+  };
+
+  const handleBackToSplash = () => {
+    setSplashComplete(false);
+    window.scrollTo(0, 0);
+  };
+
   // Only show splash screen OR app, never both
   if (!splashComplete) {
     return (
       <>
         <SplashScreen onComplete={() => setSplashComplete(true)} />
-        <HtmlOverlay htmlContent={htmlContent} />
+        <HtmlOverlay htmlContent={htmlContent} onNavigateToApp={handleNavigateToApp} />
       </>
     );
   }
@@ -45,6 +54,7 @@ function App() {
         <BristolBayMap
           onNavigateToCatchEfficiency={() => setCurrentView("efficiency")}
           onNavigateToWeather={() => setCurrentView("weather")}
+          onBackToSplash={handleBackToSplash}
         />
       )}
       {currentView === "efficiency" && (
