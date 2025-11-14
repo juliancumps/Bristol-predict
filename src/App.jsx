@@ -13,6 +13,10 @@ function App() {
   const [currentView, setCurrentView] = useState("map");
   const [htmlContent, setHtmlContent] = useState("");
 
+  ///FOR DEV MODE /// false for deployment. (true skips the splash overlay)
+  const SKIP_SPLASH_SCREEN = true;
+  ////FOR DEV MODE
+
   // Load HTML content on mount
   useEffect(() => {
     const loadHtml = async () => {
@@ -36,6 +40,12 @@ function App() {
     setSplashComplete(false);
     window.scrollTo(0, 0);
   };
+
+  useEffect(() => {
+  if (SKIP_SPLASH_SCREEN) {
+    setSplashComplete(true);
+  }
+  }, []);
 
   // Only show splash screen OR app, never both
   if (!splashComplete) {
