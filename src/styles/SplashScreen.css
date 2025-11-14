@@ -133,7 +133,7 @@
   padding: 14px 40px;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.08) 100%);
   border: 2px solid #3b82f6;
-  color: #60a5fa;
+  color: #e2e7ed;
   font-size: 1.1rem;
   font-weight: 700;
   border-radius: 8px;
@@ -148,7 +148,7 @@
   border-color: #93c5fd;
   color: #93c5fd;
   box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 .splash-continue-btn:active {

@@ -62,7 +62,7 @@ export default function SplashScreen({ onComplete }) {
           <img src="/icon-512.png" alt="Bristol Predict Icon" className="splash-icon" />
 
           <button className="splash-continue-btn" onClick={handleContinue}>
-            Continue
+            Access Platform
           </button>
         </div>
       </div>
