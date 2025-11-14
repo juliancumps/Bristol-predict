@@ -7,7 +7,7 @@ import './styles/DistrictStats.css'
 import './styles/Charts.css'
 import './styles/CatchEfficiencyScreen.css'
 import './styles/RunTimingTracker.css'
-
+import './styles/HtmlOverlay.css'
 import './styles/EnvironmentalDashboard.css'
 
 import App from './App.jsx'
