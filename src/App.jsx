@@ -14,7 +14,7 @@ function App() {
   const [htmlContent, setHtmlContent] = useState("");
 
   ///FOR DEV MODE /// false for deployment. (true skips the splash overlay)
-  const SKIP_SPLASH_SCREEN = true;
+  const SKIP_SPLASH_SCREEN = false;
   ////FOR DEV MODE
 
   // Load HTML content on mount
