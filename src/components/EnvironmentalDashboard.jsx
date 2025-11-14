@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
+  ReferenceLine,
 } from "recharts";
 import { CloudRain, Cloud, Sun, Wind, Droplets, Thermometer, AlertCircle, Loader, Waves } from "lucide-react";
 import "../styles/EnvironmentalDashboard.css";
@@ -19,12 +20,12 @@ import "../styles/EnvironmentalDashboard.css";
  * real tidal predictions from CO-OPS, and wave/sea height data from marine forecasts
  */
 
-const DISTRICTS = [
-  { id: "naknek", name: "Naknek-Kvichak", lat: 58.745, lon: -157.040, marineZone: "PKZ761", tideStation: "9465374" },
-  { id: "egegik", name: "Egegik", lat: 58.177, lon: -157.398, marineZone: "PKZ761", tideStation: "9465374" },
-  { id: "ugashik", name: "Ugashik", lat: 57.47, lon: -156.92, marineZone: "PKZ761", tideStation: "9465374" },
-  { id: "nushagak", name: "Nushagak", lat: 59.035, lon: -161.033, marineZone: "PKZ760", tideStation: "9465374" },
-  { id: "togiak", name: "Togiak", lat: 59.054, lon: -160.419, marineZone: "PKZ760", tideStation: "9465374" },
+const DISTRICTS = [   //was tideStation 9465374 - snag pt dillingham
+  { id: "naknek", name: "Naknek-Kvichak", lat: 58.745, lon: -157.040, marineZone: "PKZ761", tideStation: "9465203", stationName: "Naknek River Enterance" }, //9465203 - NaknekRiver enterance  
+  { id: "egegik", name: "Egegik", lat: 58.177, lon: -157.398, marineZone: "PKZ761", tideStation: "9464874", stationName: "Egegik River" }, //9464881 - Egegik River ent. | 9464874 - Egegik river
+  { id: "ugashik", name: "Ugashik", lat: 57.47, lon: -156.92, marineZone: "PKZ761", tideStation: "9464512", stationName: "Dago Creek Mouth, Ugashik Bay" }, //9464512 - Dago creek mouth
+  { id: "nushagak", name: "Nushagak", lat: 59.035, lon: -161.033, marineZone: "PKZ760", tideStation: "9465261", stationName: "Clarks Pt, Nushagak Bay" }, //9465261 - clarks point Nush bay
+  { id: "togiak", name: "Togiak", lat: 59.054, lon: -160.419, marineZone: "PKZ760", tideStation: "9465265", stationName: "Kulukak Pt, Kulukak Bay" }, //9465182 - black rock, walrus islands |   9465265 - kulukak point 
 ];
 
 const WINDY_EMBED_URLS = {
@@ -524,7 +525,7 @@ export default function EnvironmentalDashboard({ onBack }) {
             <Droplets size={20} /> Tidal Predictions (NOAA CO-OPS)
           </h3>
           <p className="chart-description">
-            Real-time 24-hour tidal predictions for {currentDistrictData?.name} (Station: Dillingham)
+            Real-time 24-hour tidal predictions for {currentDistrictData?.name} (Station: {currentDistrictData?.stationName} - ID:{currentDistrictData?.tideStation})
           </p>
           <p style={{ fontSize: "12px", color: "#f59e0b", marginTop: "-12px", marginBottom: "16px" }}>
             🟠 = current time
@@ -540,7 +541,7 @@ export default function EnvironmentalDashboard({ onBack }) {
               <LineChart data={getTideDataWithMarker()}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis dataKey="time" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" label={{ value: "Height (ft)", angle: -90, position: "insideLeft" }} domain={[0, 25]} />
+                <YAxis stroke="#94a3b8" label={{ value: "Height (ft)", angle: -90, position: "insideLeft" }} domain={[-3, 25]} />
                 <Tooltip 
                   contentStyle={{ background: "#1e293b", border: "1px solid #3b82f6" }}
                   labelStyle={{ color: "#e2e8f0" }}
@@ -581,6 +582,12 @@ export default function EnvironmentalDashboard({ onBack }) {
                   }}
                   strokeWidth={2}
                   name="Water Level (ft MLLW)"
+                />
+                <ReferenceLine 
+                  y={0} 
+                  stroke="#64748b" 
+                  strokeDasharray="5 5" 
+                  label={{ value: "0", position: "insideLeft", dx: -28 , fill: "#94a3b8", offset: 10 }} 
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -646,10 +653,10 @@ export default function EnvironmentalDashboard({ onBack }) {
               </div>
             </div>
             <div className="integration-item">
-              <div className="item-status planned">Planned</div>
+              <div className="item-status live">Live</div>
               <div className="item-content">
                 <strong>Tidal Predictions</strong>
-                <p>Real-time 24-hour tidal predictions from NOAA CO-OPS (6-minute intervals) ALL USING DILLINGHAM STATION, NEED TO UPDATE FOR OTHER DISTRICTS</p>
+                <p>Real-time 24-hour tidal predictions from NOAA CO-OPS (6-minute intervals)</p>
               </div>
             </div>
             <div className="integration-item">
