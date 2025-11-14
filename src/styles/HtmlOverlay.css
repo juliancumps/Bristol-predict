@@ -1,0 +1,14 @@
+.html-overlay-wrapper {
+  position: relative;
+  width: 100vw;
+  background: #0f172a;
+  margin-top: 100vh;
+}
+
+.html-overlay-iframe {
+  width: 100%;
+  border: none;
+  display: block;
+  position: relative;
+  z-index: 1;
+}

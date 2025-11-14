@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bristol Predict — Salmon Forecasting Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital@0;1&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #0d0d0d;
+            --white: #fafaf7;
+            --midnight-blue: #0a1428;
+            --deep-ocean: #0f2a48;
+            --sunset-gold: #f4a460;
+            --sunset-coral: #ff6b6b;
+            --sunset-orange: #ff8c3a;
+            --accent-blue: #1e5a96;
+            --accent-blue-bright: #3b9ff3;
+            --accent-blue-light: #2a7ec4;
+            --gray-light: #a9a9a5;
+            --border: #2a2a26;
+        }
+
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--midnight-blue);
+            color: var(--white);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            line-height: 1.6;
+        }
+
+        /* Animated Gradient Background - Sunset Inspired */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(58, 159, 243, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(244, 164, 96, 0.08) 0%, transparent 60%),
+                linear-gradient(180deg, rgba(10, 20, 40, 0.5) 0%, rgba(15, 42, 72, 0.8) 50%, rgba(13, 13, 13, 0.95) 100%),
+                linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.02) 32%, rgba(255, 255, 255, 0.02) 34%, transparent 36%),
+                linear-gradient(-45deg, transparent 30%, rgba(255, 255, 255, 0.02) 32%, rgba(255, 255, 255, 0.02) 34%, transparent 36%),
+                linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.04) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.04) 75%, rgba(255, 255, 255, 0.04) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.04) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.04) 75%, rgba(255, 255, 255, 0.04) 76%, transparent 77%, transparent);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 120px 120px, 120px 120px, 100px 100px, 100px 100px;
+            background-attachment: fixed;
+            pointer-events: none;
+            z-index: 0;
+            animation: breathe 8s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 1.05; }
+        }
+
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: 'Crimson Text', serif;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            letter-spacing: -0.04em;
+            background: linear-gradient(135deg, var(--white) 0%, var(--accent-blue-bright) 50%, var(--sunset-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            letter-spacing: -0.03em;
+            position: relative;
+            padding-bottom: 1.25rem;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--sunset-coral), var(--sunset-gold), var(--accent-blue-bright));
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 400;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--accent-blue-bright);
+        }
+
+        p {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: var(--gray-light);
+            font-weight: 300;
+        }
+
+        /* SVG Icon Styles */
+        svg.icon-nav {
+            width: 100%;
+            height: 100%;
+            color: var(--black);
+        }
+
+        svg.icon-feature {
+            width: 60px;
+            height: 60px;
+            color: currentColor;
+            display: inline-block;
+        }
+
+        svg.icon-tool {
+            width: 60px;
+            height: 60px;
+            color: currentColor;
+            display: inline-block;
+            transition: all 0.35s ease;
+        }
+
+        .tool-card:hover svg.icon-tool {
+            color: var(--sunset-coral);
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .feature:hover svg.icon-feature {
+            color: var(--sunset-gold);
+        }
+
+        svg.icon-visual {
+            width: 100px;
+            height: 100px;
+            color: var(--accent-blue-bright);
+            opacity: 0.7;
+            transition: all 0.35s ease;
+        }
+
+        .info-box-visual:hover svg.icon-visual {
+            color: var(--sunset-coral);
+            opacity: 1;
+        }
+
+        /* Navigation - Premium Frosted */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: linear-gradient(135deg, rgba(10, 20, 40, 0.85) 0%, rgba(15, 42, 72, 0.75) 100%);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 2px solid rgba(58, 159, 243, 0.2);
+            padding: 1.25rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-brand {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--sunset-coral), var(--sunset-gold));
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.25rem;
+        }
+
+        .nav-brand span {
+            background: linear-gradient(135deg, var(--sunset-coral), var(--sunset-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--gray-light);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 4px;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--sunset-coral), var(--sunset-gold));
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--white);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem 1.5rem;
+            }
+            .nav-links {
+                display: none;
+            }
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Hero - Full Impact */
+        .hero {
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 5rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(58, 159, 243, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero-content {
+            max-width: 1000px;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-tagline {
+            font-size: 1.25rem;
+            font-weight: 300;
+            color: var(--white);
+            margin-bottom: 2.5rem;
+            max-width: 700px;
+            line-height: 1.8;
+            border-left: 4px solid var(--sunset-coral);
+            padding-left: 1.75rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Button System - Premium */
+        .btn {
+            padding: 1rem 2.25rem;
+            border: 2px solid;
+            background: transparent;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--sunset-coral), var(--sunset-gold));
+            transition: left 0.35s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            left: 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--sunset-coral), var(--sunset-gold));
+            color: var(--black);
+            border-color: var(--sunset-gold);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--white);
+            border-color: var(--white);
+        }
+
+        .btn-secondary::before {
+            background: var(--white);
+        }
+
+        .btn-secondary:hover {
+            color: var(--black);
+            transform: translateY(-3px);
+        }
+
+        /* Section */
+        section {
+            padding: 6rem 2.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        section:nth-child(even) {
+            background: linear-gradient(135deg, rgba(58, 159, 243, 0.04) 0%, transparent 100%);
+        }
+
+        .section-header {
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header p {
+            font-size: 1.05rem;
+            max-width: 750px;
+            margin-top: 1rem;
+            line-height: 1.9;
+        }
+
+        /* Dashboard Grid - Liquid Glass Luxury */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid;
+            border-top-color: var(--sunset-coral);
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.08);
+        }
+
+        .card:nth-child(2) { border-top-color: var(--sunset-gold); }
+        .card:nth-child(3) { border-top-color: var(--sunset-orange); }
+        .card:nth-child(4) { border-top-color: var(--accent-blue-bright); }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 60px rgba(255, 107, 107, 0.2), inset 0 0 40px rgba(255, 255, 255, 0.12);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            background: linear-gradient(90deg, var(--sunset-coral), var(--sunset-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .card-value {
+            font-family: 'Crimson Text', serif;
+            font-size: 4rem;
+            font-weight: 400;
+            margin-bottom: 0.75rem;
+            color: var(--white);
+            letter-spacing: -0.02em;
+        }
+
+        .card-subtitle {
+            font-size: 0.95rem;
+            color: var(--gray-light);
+            margin-bottom: 1.25rem;
+            font-weight: 300;
+        }
+
+        .card-stat {
+            display: inline-block;
+            padding: 0.5rem 1.1rem;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(244, 164, 96, 0.15));
+            color: var(--sunset-coral);
+            border: 1px solid rgba(255, 107, 107, 0.4);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .card-stat.positive {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(10, 150, 100, 0.15));
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        /* Data Table - Architectural */
+        .table-section {
+            margin-top: 4rem;
+        }
+
+        .table-section h3 {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid;
+            border-image: linear-gradient(90deg, var(--sunset-coral), var(--sunset-gold), var(--accent-blue-bright)) 1;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid var(--sunset-coral);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: transparent;
+            border-bottom: 3px solid;
+            border-image: linear-gradient(90deg, var(--sunset-coral), var(--sunset-gold)) 1;
+        }
+
+        th {
+            padding: 1.75rem;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            background: linear-gradient(90deg, var(--sunset-coral), var(--sunset-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Inter', sans-serif;
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        td {
+            padding: 1.5rem 1.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.95rem;
+            font-weight: 300;
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 107, 107, 0.08);
+        }
+
+        /* Info Box - Refined */
+        .info-box {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-left: 5px solid var(--sunset-coral);
+            padding: 3.5rem;
+            margin-top: 3rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.08);
+            transition: all 0.35s ease;
+        }
+
+        .info-box:hover {
+            border-left-color: var(--sunset-gold);
+            transform: translateY(-4px);
+        }
+
+        .info-box p {
+            margin-bottom: 1.75rem;
+            line-height: 1.9;
+        }
+
+        .info-box-visual {
+            width: 100%;
+            height: 360px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid var(--sunset-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.08);
+            transition: all 0.35s ease;
+        }
+
+        .info-box-visual:hover {
+            transform: scale(1.02);
+            box-shadow: 0 16px 56px rgba(255, 107, 107, 0.15), inset 0 0 40px rgba(255, 255, 255, 0.12);
+        }
+
+        @media (max-width: 768px) {
+            .info-box {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 2rem;
+            }
+            .info-box-visual {
+                height: 280px;
+            }
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .feature {
+            padding: 2.5rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-left: 5px solid var(--sunset-coral);
+            transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1);
+            position: relative;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.08);
+        }
+
+        .feature:nth-child(2) { border-left-color: var(--sunset-gold); }
+        .feature:nth-child(3) { border-left-color: var(--sunset-orange); }
+        .feature:nth-child(4) { border-left-color: var(--accent-blue-bright); }
+
+        .feature:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(255, 107, 107, 0.15), inset 0 0 40px rgba(255, 255, 255, 0.12);
+        }
+
+        .feature-icon {
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .feature h4 {
+            margin-bottom: 1rem;
+            font-family: 'Crimson Text', serif;
+            font-size: 1.35rem;
+            font-weight: 400;
+            background: linear-gradient(135deg, var(--white) 0%, var(--accent-blue-bright) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature p {
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        /* Tools Grid */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .tool-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--sunset-coral);
+            padding: 2.25rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1);
+            position: relative;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.08);
+        }
+
+        .tool-card:nth-child(2) { border-top-color: var(--sunset-gold); }
+        .tool-card:nth-child(3) { border-top-color: var(--sunset-orange); }
+        .tool-card:nth-child(4) { border-top-color: var(--accent-blue-bright); }
+        .tool-card:nth-child(5) { border-top-color: var(--sunset-coral); }
+        .tool-card:nth-child(6) { border-top-color: var(--sunset-gold); }
+
+        .tool-card:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(255, 107, 107, 0.15), inset 0 0 40px rgba(255, 255, 255, 0.12);
+        }
+
+        .tool-icon {
+            margin-bottom: 1.25rem;
+            display: inline-block;
+        }
+
+        .tool-card h5 {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, var(--white) 0%, var(--accent-blue-bright) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tool-card p {
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        /* Call to Action - Commanding */
+        .cta-section {
+            text-align: center;
+            padding: 4.5rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid;
+            border-image: linear-gradient(90deg, var(--sunset-coral), var(--sunset-gold), var(--accent-blue-bright)) 1;
+            margin: 4rem 2.5rem;
+            position: relative;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.08);
+            transition: all 0.35s ease;
+        }
+
+        .cta-section:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(255, 107, 107, 0.15), inset 0 0 40px rgba(255, 255, 255, 0.12);
+        }
+
+        .cta-section h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-section h2::after {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .cta-section p {
+            margin: 1.5rem 0 2.5rem 0;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer - Grounded */
+        footer {
+            background: linear-gradient(135deg, rgba(10, 20, 40, 0.9) 0%, rgba(15, 42, 72, 0.8) 100%);
+            border-top: 2px solid rgba(255, 107, 107, 0.3);
+            padding: 4rem 2.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--gray-light);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        /* Scrollbar - Premium */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--midnight-blue);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--sunset-coral), var(--sunset-gold), var(--accent-blue-bright));
+            border: 2px solid var(--midnight-blue);
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--sunset-gold), var(--accent-blue-bright), var(--sunset-coral));
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            section {
+                padding: 3rem 1.5rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            h2 {
+                font-size: 1.75rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .hero-buttons .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .card-value {
+                font-size: 2.75rem;
+            }
+
+            .cta-section {
+                margin: 2rem 1.5rem;
+                padding: 2.5rem;
+            }
+
+            .info-box {
+                gap: 1.5rem;
+                padding: 1.75rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-brand">
+            <div class="nav-brand-icon">
+                <svg class="icon-nav" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="8" cy="9" r="1.5" fill="currentColor"/>
+                    <circle cx="16" cy="9" r="1.5" fill="currentColor"/>
+                    <path d="M9 14h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <span>Bristol Predict</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#forecast">Features</a></li>
+            <li><a href="#intelligence">Why Explore</a></li>
+            <li><a href="#tools">Tools</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Bristol Predict 🐟</h1>
+            <div class="hero-tagline">Real-time salmon harvest data visualization and analysis for Bristol Bay. Explore two decades of migration patterns, live district data, and interactive forecasting tools.</div>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="window.location.href='#app'">Launch Platform</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platform Features Overview -->
+    <section id="forecast">
+        <div class="section-header">
+            <h2>What You'll Discover</h2>
+            <p>Bristol Predict combines automated data scraping, geospatial visualization, and comprehensive analysis tools to make salmon run data accessible and actionable.</p>
+        </div>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-label">📍 Interactive Map</div>
+                <div class="card-value">5 Districts</div>
+                <div class="card-subtitle">Real-time district markers</div>
+                <div class="card-stat">Click to explore</div>
+            </div>
+            <div class="card">
+                <div class="card-label">📊 Live Harvest Data</div>
+                <div class="card-value">Daily Updates</div>
+                <div class="card-subtitle">From Alaska Dept. of Fish & Game</div>
+                <div class="card-stat">June–August</div>
+            </div>
+            <div class="card">
+                <div class="card-label">📈 20+ Years History</div>
+                <div class="card-value">Comprehensive</div>
+                <div class="card-subtitle">2023–2025 backfilled data</div>
+                <div class="card-stat">Auto-updates 2026+</div>
+            </div>
+            <div class="card">
+                <div class="card-label">🌊 Weather Integration</div>
+                <div class="card-value">Multi-Source</div>
+                <div class="card-subtitle">NOAA + Windy.com</div>
+                <div class="card-stat">Live forecasts</div>
+            </div>
+        </div>
+
+        <!-- Feature Highlights Table -->
+        <div class="table-section">
+            <h3>Core Tools & Features</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tool</th>
+                            <th>What It Does</th>
+                            <th>Key Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>District Map</strong></td>
+                            <td>Interactive Leaflet map showing all 5 Bristol Bay fishing districts with real-time catch data</td>
+                            <td>Daily catch, escapement, rivers</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Date Range Analysis</strong></td>
+                            <td>Compare harvest patterns across custom date ranges with multi-district charts</td>
+                            <td>Trend analysis, district comparison</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Single Date Mode</strong></td>
+                            <td>Focused view of catch data for a specific date with detailed breakdowns</td>
+                            <td>Day-to-day comparison, sockeye per delivery</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Season Filtering</strong></td>
+                            <td>Toggle between 2023, 2024, and 2025 seasons to see year-over-year patterns</td>
+                            <td>Historical migrations, peak windows</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Catch Efficiency Analyzer</strong></td>
+                            <td>Enter your catch data and compare against district averages to benchmark performance</td>
+                            <td>Personal metrics, competitive standing</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Environmental Dashboard</strong></td>
+                            <td>Live weather conditions, tidal predictions, temperature forecasts, and wind/wave maps</td>
+                            <td>NOAA API, CO-OPS tides, Windy embeds</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+    <!-- Data-Driven Insights -->
+    <section>
+        <div class="info-box">
+            <div>
+                <h3>Understanding the Data</h3>
+                <p>Bristol Predict scrapes daily harvest reports directly from the Alaska Department of Fish and Game, then visualizes that data with interactive charts, maps, and analysis tools. You're not seeing forecasts or predictions—you're seeing what actually happened in Bristol Bay.</p>
+                <p>Use these insights to understand seasonal patterns, compare district performance, identify peak fishing windows, and benchmark your catch against the broader fishery. The data itself is compelling. And it's there waiting to teach you something about Bristol Bay.</p>
+                <button class="btn btn-primary" onclick="window.location.href='#app'">Explore the Data</button>
+            </div>
+            <div class="info-box-visual">
+                <svg class="icon-visual" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <polyline points="3 12 9 16 15 10 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline points="3 20 9 16 15 18 21 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="2" y="2" width="20" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Explore Bristol Predict -->
+    <section id="intelligence">
+        <div class="section-header">
+            <h2>Why People Use Bristol Predict</h2>
+            <p>Whether you're a commercial fisher, a data enthusiast, or simply curious about Bristol Bay, there's something here worth seeing.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">
+                    <svg class="icon-feature" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 6v6l4 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h4>Real-Time Data</h4>
+                <p>Daily harvest updates from Alaska Department of Fish and Game. When the 2026 fishing season begins, Bristol Predict automatically scrapes and integrates the new data. Year after year, the historical record grows. <em>(Note: ADF&G data publicly available starts at 2023—though 2022 was a record year for sockeye, earlier seasons remain inaccessible. More history would reveal so much more.)</em></p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <svg class="icon-feature" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="12 3 20 7 20 17 12 21 4 17 4 7 12 3" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <polyline points="12 12 20 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <polyline points="12 12 12 21" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <polyline points="12 12 4 7" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h4>Complete Historical Context</h4>
+                <p>Access to three seasons of backfilled data (2023–2025). Understand long-term patterns and seasonal variations across multiple years.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <svg class="icon-feature" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="12" cy="12" r="1" fill="currentColor"/>
+                    </svg>
+                </div>
+                <h4>Benchmark Your Performance</h4>
+                <p>Enter your catch data and compare against district averages. Understand where you stand in the fishery without competitive pressure.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <svg class="icon-feature" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15.09 8.26H22L17.36 12.41L19.45 18.67L12 14.52L4.55 18.67L6.64 12.41L2 8.26H8.91L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h4>Weather Intelligence</h4>
+                <p>Live weather conditions, tidal predictions, and forecasts from NOAA and Windy.com. Essential context for understanding conditions on the bay.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools & Visualizations -->
+    <section id="tools">
+        <div class="section-header">
+            <h2>Tools That Matter</h2>
+            <p>Every tool in Bristol Predict is built to reveal something true about the data. Explore, compare, analyze—discover what the numbers show.</p>
+        </div>
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="tool-icon">
+                    <svg class="icon-tool" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 6v6l4 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h5>Interactive Map</h5>
+                <p>Click on districts to explore real-time catch data from Naknek-Kvichak, Egegik, Ugashik, Nushagak, and Togiak</p>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">
+                    <svg class="icon-tool" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="3 12 9 16 15 10 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="3 20 9 16 15 18 21 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="2" y="2" width="20" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h5>Multi-District Charts</h5>
+                <p>Line and bar charts showing daily catch trends across all districts for your selected date or range</p>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">
+                    <svg class="icon-tool" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 3v9M12 12h9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h5>Pie Chart Distribution</h5>
+                <p>See catch breakdown by district at a glance—which zones are hot on your selected date</p>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">
+                    <svg class="icon-tool" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <path d="M8 7h8M8 11h8M8 15h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h5>Historical Trends</h5>
+                <p>Visualize "sockeye per delivery" across seasons and years to understand long-term patterns</p>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">
+                    <svg class="icon-tool" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="12" cy="12" r="1" fill="currentColor"/>
+                    </svg>
+                </div>
+                <h5>Catch Efficiency Analyzer</h5>
+                <p>Enter your catch data and see how you compare against district averages—benchmark without pressure</p>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon">
+                    <svg class="icon-tool" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h5>Environmental Dashboard</h5>
+                <p>Live weather from NOAA, tidal predictions, wind/wave maps from Windy.com, temperature forecasts</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="section-header">
+            <h2>Why I Built Bristol Predict</h2>
+            <p>The story behind the project and the vision for what it could become.</p>
+        </div>
+        <div class="info-box" style="margin-top: 2rem;">
+            <div>
+                <h3>Julian's Vision</h3>
+                <p>
+                    Bristol Predict started as a personal challenge: could I build something that brings clarity to the noise? Bristol Bay's salmon data exists, but it's scattered across PDFs and government sites. The patterns are hidden.
+                </p>
+                <p>
+                    I wanted to create a tool that didn't make promises it couldn't keep—no black-box predictions, no false confidence. Just clean data visualization, honest analysis, and the tools to discover what the numbers actually show. Something useful for commercial fishermen, interesting for data enthusiasts, and genuinely beautiful to use.
+                </p>
+                <p>
+                    This project combines everything I love: web scraping, geospatial data, real-time visualization, and the complexity of a real-world problem. Every fishing season, Bristol Predict will automatically pull the latest data from Alaska's Department of Fish and Game, adding 2026, 2027, and beyond to the historical record. It grows with the seasons.
+                </p>
+                <p>
+                    <strong>What started as a portfolio piece became something I genuinely believe in.</strong> The data deserves to be seen. Bristol Bay deserves tools built with care.
+                </p>
+            </div>
+            <div class="info-box-visual">
+                <svg class="icon-visual" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+    <div class="cta-section">
+        <h2>Explore Bristol Bay Like Never Before</h2>
+        <p>Discover what the data reveals. Dive into 20+ years of salmon migration patterns, real-time district metrics, and interactive analysis tools designed to help you understand the fishery.</p>
+        <button class="btn btn-primary" onclick="window.location.href='#app'">Launch Bristol Predict</button>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Bristol Predict. Real-time salmon harvest data visualization and historical analysis for Bristol Bay. Built with React, Leaflet, Recharts, NOAA API, and Windy.com.</p>
+    </footer>
+
+    <script>
+        // Smooth scroll navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    e.preventDefault();
+                    const element = document.querySelector(href);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        });
+
+        // Add subtle parallax on scroll
+        window.addEventListener('scroll', () => {
+            const hero = document.querySelector('.hero');
+            const scrolled = window.pageYOffset;
+            if (hero) {
+                hero.style.backgroundPosition = `0 ${scrolled * 0.5}px`;
+            }
+        });
+    </script>
+</body>
+</html>
