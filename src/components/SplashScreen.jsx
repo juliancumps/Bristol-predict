@@ -75,7 +75,7 @@ export default function SplashScreen({ onComplete }) {
           <p className="splash-subtitle">Alaska Salmon Forecast</p>
         </div>
 
-        <img src="/icon-512.png" alt="Bristol Predict Icon" className="splash-icon" />
+        <img src="/icon-192.png" alt="Bristol Predict Icon" className="splash-icon" />
 
         <div className="scroll-hint">
           <p>Scroll to explore more</p>

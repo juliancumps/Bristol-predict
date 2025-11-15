@@ -21,7 +21,7 @@ function App() {
   useEffect(() => {
     const loadHtml = async () => {
       try {
-        const response = await fetch("/newStyle-2.html");
+        const response = await fetch("/about.html");
         const html = await response.text();
         setHtmlContent(html);
       } catch (error) {

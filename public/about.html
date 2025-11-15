@@ -176,6 +176,19 @@
             opacity: 1;
         }
 
+        img.icon-visual {
+            width: 100%;
+            height: 100%;
+            color: var(--accent-blue-bright);
+            opacity: 0.7;
+            transition: all 0.35s ease;
+        }
+
+        .info-box-visual:hover img.icon-visual {
+            color: var(--sunset-coral);
+            opacity: 1;
+        }
+
         /* Navigation - Premium Frosted */
         nav {
             position: fixed;
@@ -209,7 +222,7 @@
             width: 32px;
             height: 32px;
             background: linear-gradient(135deg, var(--sunset-coral), var(--sunset-gold));
-            border-radius: 4px;
+            border-radius: 25%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -275,7 +288,7 @@
             }
         }
 
-        /* Hero - Full Impact */
+        /* Hero  */
         .hero {
             margin-top: 70px;
             min-height: calc(100vh - 70px);
@@ -317,7 +330,7 @@
         }
 
         .hero-content {
-            max-width: 1000px;
+            max-width: 1500px;
             z-index: 2;
         }
 
@@ -331,7 +344,7 @@
             font-weight: 300;
             color: var(--white);
             margin-bottom: 2.5rem;
-            max-width: 700px;
+            max-width: 1500px;
             line-height: 1.8;
             border-left: 4px solid var(--sunset-coral);
             padding-left: 1.75rem;
@@ -516,6 +529,7 @@
         .card-stat {
             display: inline-block;
             padding: 0.5rem 1.1rem;
+            margin: 0.15rem 0;
             background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(244, 164, 96, 0.15));
             color: var(--sunset-coral);
             border: 1px solid rgba(255, 107, 107, 0.4);
@@ -631,7 +645,7 @@
 
         .info-box-visual {
             width: 100%;
-            height: 360px;
+            height: 420px;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
             backdrop-filter: blur(50px);
             -webkit-backdrop-filter: blur(50px);
@@ -894,12 +908,7 @@
     <nav>
         <div class="nav-brand">
             <div class="nav-brand-icon">
-                <svg class="icon-nav" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
-                    <circle cx="8" cy="9" r="1.5" fill="currentColor"/>
-                    <circle cx="16" cy="9" r="1.5" fill="currentColor"/>
-                    <path d="M9 14h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
+                <img src="icon-192.png" alt="bristolpredict logo" class="icon-visual">
             </div>
             <span>Bristol Predict</span>
         </div>
@@ -915,7 +924,8 @@
     <section class="hero">
         <div class="hero-content">
             <h1>Bristol Predict 🐟</h1>
-            <div class="hero-tagline">Real-time salmon harvest data visualization and analysis for Bristol Bay. Explore two decades of migration patterns, live district data, and interactive forecasting tools.</div>
+            <div class="hero-tagline">Real-time salmon harvest data visualization and analysis for the Bristol Bay sockeye salmon gillnet fishery. 
+                <p>Explore past seasons, live district data, and interactive forecasting tools.</p></div>
             <div class="hero-buttons">
                 <button class="btn btn-primary" onclick="window.location.href='#app'">Launch Platform</button>
             </div>
@@ -932,37 +942,44 @@
             <div class="card">
                 <div class="card-label">📍 Interactive Map</div>
                 <div class="card-value">5 Districts</div>
-                <div class="card-subtitle">Real-time district markers</div>
-                <div class="card-stat">Click to explore</div>
+                <div class="card-subtitle">Data for all districts of the Bristol Bay fishery</div>
+                <div class="card-stat">Naknek-Kvichak</div>
+                <div class="card-stat">Nushagak</div>
+                <div class="card-stat">Egegik</div>
+                <div class="card-stat">Ugashik</div>
+                <div class="card-stat">Togiak</div>
             </div>
             <div class="card">
-                <div class="card-label">📊 Live Harvest Data</div>
+                <div class="card-label">🔔 Live Harvest Data</div>
                 <div class="card-value">Daily Updates</div>
-                <div class="card-subtitle">From Alaska Dept. of Fish & Game</div>
+                <div class="card-subtitle">From Alaska Dept. of Fish & Game while in-season</div>
                 <div class="card-stat">June–August</div>
             </div>
             <div class="card">
-                <div class="card-label">📈 20+ Years History</div>
-                <div class="card-value">Comprehensive</div>
-                <div class="card-subtitle">2023–2025 backfilled data</div>
-                <div class="card-stat">Auto-updates 2026+</div>
+                <div class="card-label">⚓️ Historical Data</div>
+                <div class="card-value">Historical Data</div>
+                <div class="card-subtitle">Backfilled data from 2023 - present</div>
+                <div class="card-stat">Data Auto-fetched for 2026+</div>
             </div>
             <div class="card">
                 <div class="card-label">🌊 Weather Integration</div>
-                <div class="card-value">Multi-Source</div>
-                <div class="card-subtitle">NOAA + Windy.com</div>
-                <div class="card-stat">Live forecasts</div>
+                <div class="card-value">Multi-Sourced</div>
+                <div class="card-subtitle">Live and forecasted conditions from NOAA + Windy.com</div>
+                <div class="card-stat">Wind</div>
+                <div class="card-stat">Sea Conditions</div>
+                <div class="card-stat">Tides</div>
+                <div class="card-stat">Temperature</div>
             </div>
         </div>
 
         <!-- Feature Highlights Table -->
         <div class="table-section">
-            <h3>Core Tools & Features</h3>
+            <h3>Features</h3>
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th>Tool</th>
+                            <th>Feature</th>
                             <th>What It Does</th>
                             <th>Key Data</th>
                         </tr>
@@ -970,18 +987,18 @@
                     <tbody>
                         <tr>
                             <td><strong>District Map</strong></td>
-                            <td>Interactive Leaflet map showing all 5 Bristol Bay fishing districts with real-time catch data</td>
-                            <td>Daily catch, escapement, rivers</td>
+                            <td>Interactive Leaflet map showing all 5 Bristol Bay fishing districts with catch data</td>
+                            <td>Daily catch, escapement, rivers, borders</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Single Date Mode</strong></td>
+                            <td>Focused view of catch data for a specific date with detailed breakdowns & charts</td>
+                            <td>Day-to-day comparison, sockeye per delivery</td>
                         </tr>
                         <tr>
                             <td><strong>Date Range Analysis</strong></td>
                             <td>Compare harvest patterns across custom date ranges with multi-district charts</td>
                             <td>Trend analysis, district comparison</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Single Date Mode</strong></td>
-                            <td>Focused view of catch data for a specific date with detailed breakdowns</td>
-                            <td>Day-to-day comparison, sockeye per delivery</td>
                         </tr>
                         <tr>
                             <td><strong>Season Filtering</strong></td>
@@ -994,9 +1011,9 @@
                             <td>Personal metrics, competitive standing</td>
                         </tr>
                         <tr>
-                            <td><strong>Environmental Dashboard</strong></td>
+                            <td><strong>Weather Dashboard</strong></td>
                             <td>Live weather conditions, tidal predictions, temperature forecasts, and wind/wave maps</td>
-                            <td>NOAA API, CO-OPS tides, Windy embeds</td>
+                            <td>NOAA API, CO-OPS tides, Windy.com embeds</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1008,17 +1025,13 @@
     <section>
         <div class="info-box">
             <div>
-                <h3>Understanding the Data</h3>
-                <p>Bristol Predict scrapes daily harvest reports directly from the Alaska Department of Fish and Game, then visualizes that data with interactive charts, maps, and analysis tools. You're not seeing forecasts or predictions—you're seeing what actually happened in Bristol Bay.</p>
-                <p>Use these insights to understand seasonal patterns, compare district performance, identify peak fishing windows, and benchmark your catch against the broader fishery. The data itself is compelling. And it's there waiting to teach you something about Bristol Bay.</p>
+                <h3>Understanding the Data:</h3>
+                <p>Bristol Predict scrapes daily harvest reports directly from the Alaska Department of Fish and Game, then visualizes that data with interactive charts, maps, and analysis tools.</p>
+                <p>Use these insights to understand seasonal patterns, compare district performance, identify peak fishing windows, and benchmark your catch against the broader fishery. The data itself is compelling, and it's there waiting to teach you something about Bristol Bay.</p>
                 <button class="btn btn-primary" onclick="window.location.href='#app'">Explore the Data</button>
             </div>
             <div class="info-box-visual">
-                <svg class="icon-visual" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <polyline points="3 12 9 16 15 10 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <polyline points="3 20 9 16 15 18 21 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <rect x="2" y="2" width="20" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
-                </svg>
+                <img src="images/deckload.JPG" alt="Deckload Image" class="icon-visual">
             </div>
         </div>
     </section>
@@ -1026,8 +1039,8 @@
     <!-- Why Explore Bristol Predict -->
     <section id="intelligence">
         <div class="section-header">
-            <h2>Why People Use Bristol Predict</h2>
-            <p>Whether you're a commercial fisher, a data enthusiast, or simply curious about Bristol Bay, there's something here worth seeing.</p>
+            <h2>Why Use Bristol Predict</h2>
+            <p>Whether you're a commercial fisherman, a data enthusiast, or simply curious about Bristol Bay, there's something here worth seeing.</p>
         </div>
         <div class="features-grid">
             <div class="feature">
@@ -1038,7 +1051,8 @@
                     </svg>
                 </div>
                 <h4>Real-Time Data</h4>
-                <p>Daily harvest updates from Alaska Department of Fish and Game. When the 2026 fishing season begins, Bristol Predict automatically scrapes and integrates the new data. Year after year, the historical record grows. <em>(Note: ADF&G data publicly available starts at 2023—though 2022 was a record year for sockeye, earlier seasons remain inaccessible. More history would reveal so much more.)</em></p>
+                <p>Daily harvest updates from Alaska Department of Fish and Game. When the 2026 fishing season begins, Bristol Predict automatically scrapes and integrates the new data. Year after year, the historical record grows.</p>
+                <p>(Note: ADF&G only has publicly available data starting from the 2023 season. Earlier seasons' data remains inaccessible for web-scraping at this time. More history would reveal so much more...)</p>
             </div>
             <div class="feature">
                 <div class="feature-icon">
@@ -1061,16 +1075,7 @@
                     </svg>
                 </div>
                 <h4>Benchmark Your Performance</h4>
-                <p>Enter your catch data and compare against district averages. Understand where you stand in the fishery without competitive pressure.</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">
-                    <svg class="icon-feature" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L15.09 8.26H22L17.36 12.41L19.45 18.67L12 14.52L4.55 18.67L6.64 12.41L2 8.26H8.91L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h4>Weather Intelligence</h4>
-                <p>Live weather conditions, tidal predictions, and forecasts from NOAA and Windy.com. Essential context for understanding conditions on the bay.</p>
+                <p>Enter your catch data and compare against district averages. Understand where you stand in the fishery.</p>
             </div>
         </div>
     </section>
@@ -1079,7 +1084,8 @@
     <section id="tools">
         <div class="section-header">
             <h2>Tools That Matter</h2>
-            <p>Every tool in Bristol Predict is built to reveal something true about the data. Explore, compare, analyze—discover what the numbers show.</p>
+            <p>Every tool in Bristol Predict is built to reveal something true about the data. Explore, compare, analyze.</p>
+            <p>Discover what the numbers show.</p>
         </div>
         <div class="tools-grid">
             <div class="tool-card">
@@ -1090,7 +1096,7 @@
                     </svg>
                 </div>
                 <h5>Interactive Map</h5>
-                <p>Click on districts to explore real-time catch data from Naknek-Kvichak, Egegik, Ugashik, Nushagak, and Togiak</p>
+                <p>Click on districts to explore historical and current catch data from Naknek-Kvichak, Egegik, Ugashik, Nushagak, and Togiak</p>
             </div>
             <div class="tool-card">
                 <div class="tool-icon">
@@ -1111,7 +1117,7 @@
                     </svg>
                 </div>
                 <h5>Pie Chart Distribution</h5>
-                <p>See catch breakdown by district at a glance—which zones are hot on your selected date</p>
+                <p>See catch breakdown by district at a glance. Which zones are hot on your selected date?</p>
             </div>
             <div class="tool-card">
                 <div class="tool-icon">
@@ -1132,7 +1138,7 @@
                     </svg>
                 </div>
                 <h5>Catch Efficiency Analyzer</h5>
-                <p>Enter your catch data and see how you compare against district averages—benchmark without pressure</p>
+                <p>Enter your delivery data and see how you compare against district averages. Benchmark your own catch!</p>
             </div>
             <div class="tool-card">
                 <div class="tool-icon">
@@ -1141,7 +1147,7 @@
                         <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                     </svg>
                 </div>
-                <h5>Environmental Dashboard</h5>
+                <h5>Weather Dashboard</h5>
                 <p>Live weather from NOAA, tidal predictions, wind/wave maps from Windy.com, temperature forecasts</p>
             </div>
         </div>
@@ -1151,41 +1157,47 @@
     <section id="about">
         <div class="section-header">
             <h2>Why I Built Bristol Predict</h2>
-            <p>The story behind the project and the vision for what it could become.</p>
         </div>
         <div class="info-box" style="margin-top: 2rem;">
             <div>
                 <h3>Julian's Vision</h3>
                 <p>
-                    Bristol Predict started as a personal challenge: could I build something that brings clarity to the noise? Bristol Bay's salmon data exists, but it's scattered across PDFs and government sites. The patterns are hidden.
+                    I began commercial fishing in Bristol Bay at 19, and immediately understood what I was looking at: a fishery of staggering complexity. Hundreds of boats. Five districts. Different strategies. Different fish. Different openings. Every day, the data floods in. From catch numbers, to escapement reports, fishing announcements, tidal predictions, delivery numbers and so much more. There is data everywhere. Now, Bristol Bay's fishery data exists, but it's scattered across PDFs, government sites and radio reports.
                 </p>
                 <p>
-                    I wanted to create a tool that didn't make promises it couldn't keep—no black-box predictions, no false confidence. Just clean data visualization, honest analysis, and the tools to discover what the numbers actually show. Something useful for commercial fishermen, interesting for data enthusiasts, and genuinely beautiful to use.
+                    <strong>I wanted to build something that could bring clarity to that noise.</strong> A single place where all of this data lived. Where patterns emerged. Where you could actually see what was happening in the fishery instead of chasing it across a dozen different sources.
                 </p>
                 <p>
-                    This project combines everything I love: web scraping, geospatial data, real-time visualization, and the complexity of a real-world problem. Every fishing season, Bristol Predict will automatically pull the latest data from Alaska's Department of Fish and Game, adding 2026, 2027, and beyond to the historical record. It grows with the seasons.
+                    I started with ambitious goals; collect the data, build a dashboard, use machine learning to find deeper patterns. Maybe even predict what would happen next. But the reality was humbling: ADF&G only began publishing daily fishery data in 2023. It was not enough. So I pivoted to something more direct. Clean visualization. Real analysis. Tools that reveal what the numbers actually show, not what I wanted them to show. This being said, Bristol Predict automatically pulls the latest data from ADF&G. 2026, 2027, seasons beyond, allowing the app grow and scale. As time passes, the historical record builds, and I believe that some day in the future, machine learning can be given this wealth of data to uncover even more.
                 </p>
                 <p>
-                    <strong>What started as a portfolio piece became something I genuinely believe in.</strong> The data deserves to be seen. Bristol Bay deserves tools built with care.
+                    I wanted to build something useful for commercial fishermen. Something interesting for data enthusiasts. And something genuinely beautiful to look at. This project combines everything I love: web-development, cartography, data visualization, complexities of a real-world problem, and most importantly, a fishery that has become a huge part of my life.
+                </p>
+                <p> 
+                    <strong>This data deserves to be seen.</strong> The Bristol Bay fishery deserves modern tools built with care. 
                 </p>
             </div>
             <div class="info-box-visual">
-                <svg class="icon-visual" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" stroke-width="2"/>
-                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <img src="images/me.jpg" alt="image of me" class="icon-visual">
+            </div>
+            <a href="http://juliancumps.shinyapps.io/myportfolio/" style="display: block; text-align: center; margin-top: 1rem; color: var(--accent-blue-bright); text-decoration: none; font-size: 0.9rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 2px solid var(--accent-blue-bright); padding-bottom: 4px; width: fit-content;">Visit my website</a>
             </div>
         </div>
     </section>
     <div class="cta-section">
         <h2>Explore Bristol Bay Like Never Before</h2>
-        <p>Discover what the data reveals. Dive into 20+ years of salmon migration patterns, real-time district metrics, and interactive analysis tools designed to help you understand the fishery.</p>
+        <p>Discover what the data reveals. Dive in to see sockeye migration patterns, real-time district metrics, and interactive analysis tools designed to help you understand the fishery.</p>
         <button class="btn btn-primary" onclick="window.location.href='#app'">Launch Bristol Predict</button>
     </div>
 
     <!-- Footer -->
     <footer>
-        <p>© 2025 Bristol Predict. Real-time salmon harvest data visualization and historical analysis for Bristol Bay. Built with React, Leaflet, Recharts, NOAA API, and Windy.com.</p>
+        <p>© 2025 Bristol Predict. Real-time salmon harvest data visualization and historical analysis for the Bristol Bay sockeye salmon fishery. Built with React + Vite, Leaflet, Recharts, Node.js + Express, Axios and SQLite.</p>
+        <img 
+            src="/images/NoPebble.png" 
+            alt="No Pebble" 
+            style="margin-top: 20px; width: 75px; height: 75px; object-fit: contain;"
+        />
     </footer>
 
     <script>
