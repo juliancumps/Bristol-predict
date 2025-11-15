@@ -214,22 +214,22 @@ setAvailableDates(sortedDates);
                 onChange={(e) => setSelectedDate(e.target.value)}
                 className="input-field"
               >
-                {availableDates.length > 0 ? (
-  availableDates.map((date) => {
-    // Parse MM-DD-YYYY format
-    const [month, day, year] = date.split('-');
-    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    return (
-      <option key={date} value={date}>
-        {dateObj.toLocaleDateString("en-US", {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        })}
-      </option>
-    );
-  })
+              {availableDates.length > 0 ? (
+              availableDates.map((date) => {
+                // Parse MM-DD-YYYY format
+                const [month, day, year] = date.split('-');
+                const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                return (
+                  <option key={date} value={date}>
+                    {dateObj.toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                    })}
+                  </option>
+                );
+              })
                 ) : (
                   <option>Loading dates...</option>
                 )}
