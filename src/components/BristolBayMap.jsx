@@ -432,7 +432,7 @@ useEffect(() => {
       {/* Compact Header */}
       <div className="header-compact">
         <div className="header-left">
-          <h1>Bristol Predict 🐟 beta.v2.2</h1>
+          <h1>Bristol Predict 🐟 beta.v2.5</h1>
         </div>
         
         <div className="header-center">
