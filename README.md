@@ -1,4 +1,4 @@
-# Bristol Predict BETA 2.0🐟
+# Bristol Predict BETA 2.5🐟
 
 Bristol Bay Sockeye Salmon Run Interactive Data Display
 
