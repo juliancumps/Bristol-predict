@@ -66,7 +66,7 @@ function App() {
         <BristolBayMap
           onNavigateToCatchEfficiency={() => setCurrentView("efficiency")}
           onNavigateToWeather={() => setCurrentView("weather")}
-          //onNavigateToToolsHub={setCurrentView("toolshub")}
+          onNavigateToToolsHub={() => setCurrentView("toolshub")}
           onBackToSplash={handleBackToSplash}
         />
       )}
@@ -82,14 +82,14 @@ function App() {
         <CatchEfficiencyScreen
           onNavigateToRunTracker={() => setCurrentView("runtracker")}
           onNavigateToWeather={() => setCurrentView("weather")}
-          onBack={() => setCurrentView("map")}
+          onBack={() => setCurrentView("toolshub")}
         />
       )}
       {currentView === "runtracker" && (
-        <RunTimingTracker onBack={() => setCurrentView("efficiency")} />
+        <RunTimingTracker onBack={() => setCurrentView("toolshub")} />
       )}
       {currentView === "weather" && (
-        <EnvironmentalDashboard onBack={() => setCurrentView("efficiency")} />
+        <EnvironmentalDashboard onBack={() => setCurrentView("toolshub")} />
       )}
     </>
   );
