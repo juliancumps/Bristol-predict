@@ -5,8 +5,10 @@ import BristolBayMap from "./components/BristolBayMap";
 import CatchEfficiencyScreen from "./components/CatchEfficiencyScreen";
 import RunTimingTracker from "./components/RunTimingTracker";
 import EnvironmentalDashboard from "./components/EnvironmentalDashboard";
+import ToolsHub from "./components/ToolsHub";
 import "./styles/BristolBayMap.css";
 import "./App.css";
+import { Section } from "lucide-react";
 
 function App() {
   const [splashComplete, setSplashComplete] = useState(false);
@@ -57,14 +59,23 @@ function App() {
     );
   }
 
-  // After splash complete, show only the app (no HTML overlay, no scrolling)
+  // After splash complete, show map dashboard
   return (
     <>
       {currentView === "map" && (
         <BristolBayMap
           onNavigateToCatchEfficiency={() => setCurrentView("efficiency")}
           onNavigateToWeather={() => setCurrentView("weather")}
+          //onNavigateToToolsHub={setCurrentView("toolshub")}
           onBackToSplash={handleBackToSplash}
+        />
+      )}
+      {currentView === "toolshub" && (
+        <ToolsHub
+          onNavigateToCatchEfficiency={() => setCurrentView("efficiency")}
+          onNavigateToRunTracker={() => setCurrentView("runtracker")}
+          onNavigateToWeather={() => setCurrentView("weather")}
+          onBackToBristolBayMap={() => setCurrentView("map")}
         />
       )}
       {currentView === "efficiency" && (

@@ -13,3 +13,8 @@ html, body {
 #root {
   width: 100vw;
 }
+
+/* Hide the about.html background gradient when app is active */
+body::before {
+  display: none !important;
+}
