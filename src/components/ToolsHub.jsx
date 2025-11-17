@@ -5,6 +5,8 @@ export default function ToolsHub({
   onNavigateToCatchEfficiency,
   onNavigateToRunTracker,
   onNavigateToWeather,
+  onNavigateToSoutheastMap,
+
   onBackToBristolBayMap,
 }) {
   return (
@@ -95,25 +97,44 @@ export default function ToolsHub({
             </button>
           </div>
 
-          {/* Placeholder Card */}
-          <div className="tool-card-hub tool-card-placeholder">
-            <div className="tool-icon-hub placeholder-icon">
+          {/* Southeast Alaska Region Card */}
+          <div className="tool-card-hub">
+            <div className="tool-icon-hub">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
-                <path d="M9 9h6M9 15h6M9 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2zm8 12H5v-4h6v4zm0-6H5V7h6v4zm8 6h-6v-4h6v4zm0-6h-6V7h6v4z" fill="currentColor" />
               </svg>
             </div>
-            <h3>Placeholder</h3>
+            <h3>Southeast Alaska Region</h3>
             <p>
-              A new tool is coming soon. Stay tuned for additional analysis features designed to enhance your fishing experience.
+              Explore fishery data for the SE Alaska region.
             </p>
             <button
-              className="btn-tool-hub btn-primary-hub disabled-hub"
-              disabled
+              className="btn-tool-hub btn-primary-hub"
+              onClick={onNavigateToSoutheastMap}
             >
-              Coming Soon
+              View
             </button>
           </div>
+
+          {/* ADF&G Link Card */}
+          <div className="tool-card-hub">
+            <div className="tool-icon-hub">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 13v6H6v-6M12 5v8m-4-4h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h3>ADF&G Resources</h3>
+            <p>
+              Access ADF&G commercial fishing data/resources for other regions.
+            </p>
+            <button
+              className="btn-tool-hub btn-primary-hub"
+              onClick={() => window.open('https://www.adfg.alaska.gov/index.cfm?adfg=fishingcommercialbyarea.main', '_blank')}
+            >
+              Visit
+            </button>
+          </div>
+
         </div>
       </div>
     </div>

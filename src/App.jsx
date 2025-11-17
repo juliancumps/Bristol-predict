@@ -6,6 +6,7 @@ import CatchEfficiencyScreen from "./components/CatchEfficiencyScreen";
 import RunTimingTracker from "./components/RunTimingTracker";
 import EnvironmentalDashboard from "./components/EnvironmentalDashboard";
 import ToolsHub from "./components/ToolsHub";
+import SoutheastMap from "./components/SoutheastMap";
 import "./styles/BristolBayMap.css";
 import "./App.css";
 import { Section } from "lucide-react";
@@ -75,13 +76,12 @@ function App() {
           onNavigateToCatchEfficiency={() => setCurrentView("efficiency")}
           onNavigateToRunTracker={() => setCurrentView("runtracker")}
           onNavigateToWeather={() => setCurrentView("weather")}
+          onNavigateToSoutheastMap={() => setCurrentView("southeastmap")}
           onBackToBristolBayMap={() => setCurrentView("map")}
         />
       )}
       {currentView === "efficiency" && (
         <CatchEfficiencyScreen
-          onNavigateToRunTracker={() => setCurrentView("runtracker")}
-          onNavigateToWeather={() => setCurrentView("weather")}
           onBack={() => setCurrentView("toolshub")}
         />
       )}
@@ -90,6 +90,9 @@ function App() {
       )}
       {currentView === "weather" && (
         <EnvironmentalDashboard onBack={() => setCurrentView("toolshub")} />
+      )}
+      {currentView === "southeastmap" && (
+        <SoutheastMap onBackToToolsHub={() => setCurrentView("toolshub")}/>
       )}
     </>
   );
