@@ -25,7 +25,7 @@ export default function ToolsHub({
           </button>
 
           <div className="header-text-section">
-            <h1 className="tools-hub-title">Explore Your Tools</h1>
+            <h1 className="tools-hub-title">Other Tools</h1>
             <p className="tools-hub-subtitle">
               Choose a tool to dive deeper into fishery analysis, catch tracking, and real-time conditions.
             </p>
@@ -45,13 +45,13 @@ export default function ToolsHub({
             </div>
             <h3>Catch Efficiency Analyzer</h3>
             <p>
-              Enter your delivery data and compare against district averages. Benchmark your performance and understand where you stand in the fishery.
+              Enter your delivery data and compare against district averages.
             </p>
             <button
               className="btn-tool-hub btn-primary-hub"
               onClick={onNavigateToCatchEfficiency}
             >
-              View Tool
+              View
             </button>
           </div>
 
@@ -66,13 +66,13 @@ export default function ToolsHub({
             </div>
             <h3>Run Timing Tracker</h3>
             <p>
-              Track salmon run timing and migration patterns across Bristol Bay districts. Identify peak fishing windows and seasonal trends.
+              Track salmon run timing and migration patterns across Bristol Bay districts.
             </p>
             <button
               className="btn-tool-hub btn-primary-hub"
               onClick={onNavigateToRunTracker}
             >
-              View Tool
+              View
             </button>
           </div>
 
@@ -86,13 +86,13 @@ export default function ToolsHub({
             </div>
             <h3>Live Weather Dashboard</h3>
             <p>
-              Real-time weather conditions, tidal predictions, and wind/wave forecasts from NOAA and Windy.com. Plan your fishing days with confidence.
+              Current weather conditions, tides, and wind/wave forecasts from NOAA and Windy.com.
             </p>
             <button
               className="btn-tool-hub btn-primary-hub"
               onClick={onNavigateToWeather}
             >
-              View Tool
+              View
             </button>
           </div>
 
