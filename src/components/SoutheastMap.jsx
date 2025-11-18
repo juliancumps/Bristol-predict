@@ -70,13 +70,13 @@ export default function SoutheastMap({ onBackToToolsHub }) {
               className={`tab-button ${activeTab === 'statewide' ? 'active' : ''}`}
               onClick={() => setActiveTab('statewide')}
             >
-              State-wide Data
+              Statewide Data
             </button>
             <button
               className={`tab-button ${activeTab === 'southeast' ? 'active' : ''}`}
               onClick={() => setActiveTab('southeast')}
             >
-              Southeast Specific Data
+              Southeast Data - Area A
             </button>
           </div>
         </div>
