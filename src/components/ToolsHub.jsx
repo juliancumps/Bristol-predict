@@ -104,9 +104,9 @@ export default function ToolsHub({
                 <path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2zm8 12H5v-4h6v4zm0-6H5V7h6v4zm8 6h-6v-4h6v4zm0-6h-6V7h6v4z" fill="currentColor" />
               </svg>
             </div>
-            <h3>Southeast Alaska Region</h3>
+            <h3>More AK Salmon Harvest Data</h3>
             <p>
-              Explore fishery data for the SE Alaska region.
+              Explore fishery data for all Alaska's regions.
             </p>
             <button
               className="btn-tool-hub btn-primary-hub"
