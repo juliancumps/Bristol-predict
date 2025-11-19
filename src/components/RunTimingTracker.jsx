@@ -3,6 +3,8 @@ import axios from "axios";
 import { getHistoricalData, formatNumber } from "../services/api";
 import "../styles/RunTimingTracker.css";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"; //for railway backend deployment
+
 const DISTRICTS = {
   naknek: { name: "Naknek-Kvichak", color: "#3b82f6", icon: "🅝🅚" },
   egegik: { name: "Egegik", color: "#8b5cf6", icon: "🅔" },
@@ -50,7 +52,8 @@ export default function RunTimingTracker({ onBack }) {
         const startsMap = {};
         for (const season of sortedSeasons) {
           try {
-            const response = await axios.get(`http://localhost:3001/api/season/${season}/start`);
+            //const response = await axios.get(`http://localhost:3001/api/season/${season}/start`); //for local, defore railway deployment
+            const response = await axios.get(`${API_BASE_URL}/season/${season}/start`);
             startsMap[season] = response.data.seasonStart;
           } catch (err) {
             console.warn(`Could not fetch start date for season ${season}:`, err);

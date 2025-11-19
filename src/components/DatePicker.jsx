@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import "../styles/DatePicker.css";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"; //for railway deployment
+
 export default function DatePicker({
   selectedDate,
   onDateChange,
@@ -19,7 +21,8 @@ export default function DatePicker({
   useEffect(() => {
     console.log("📅 DatePicker: Fetching available dates...");
 
-    fetch("http://localhost:3001/api/dates")
+    //fetch("http://localhost:3001/api/dates") //before railway
+    fetch(`${API_BASE_URL}/dates`)
       .then((res) => res.json())
       .then((data) => {
         console.log("📅 DatePicker: Received dates:", data);
@@ -58,7 +61,8 @@ export default function DatePicker({
 
     console.log(`📅 DatePicker: Fetching dates for season ${selectedSeason}...`);
 
-    fetch(`http://localhost:3001/api/dates?season=${selectedSeason}`)
+    //fetch(`http://localhost:3001/api/dates?season=${selectedSeason}`) //before railway deployment
+    fetch(`${API_BASE_URL}/dates?season=${selectedSeason}`)
       .then((res) => res.json())
       .then((data) => {
         console.log(`📅 DatePicker: Retrieved ${data.dates.length} dates for season ${selectedSeason}`);
