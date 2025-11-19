@@ -3,6 +3,16 @@ const path = require("path");
 
 const DB_PATH = path.join(__dirname, "..", "data", "bristol_bay.db");
 
+// CRITICAL: Ensure data directory exists before opening database
+const dataDir = path.dirname(DB_PATH);
+if (!fs.existsSync(dataDir)) {
+  console.log(`📁 Creating data directory: ${dataDir}`);
+  fs.mkdirSync(dataDir, { recursive: true });
+  console.log(`✅ Data directory created`);
+} else {
+  console.log(`✅ Data directory already exists: ${dataDir}`);
+}
+
 /**
  * Initialize the database with tables
  */
