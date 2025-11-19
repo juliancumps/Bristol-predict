@@ -1,5 +1,6 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
+const fs = require("fs");
 
 const DB_PATH = path.join(__dirname, "..", "data", "bristol_bay.db");
 
