@@ -172,11 +172,6 @@ export default function DatePicker({
               </option>
             ))}
           </select>
-          {selectedDate && (
-            <span className="selected-date-display">
-              {formatDisplayDate(selectedDate)}
-            </span>
-          )}
         </div>
       ) : (
         // Date Range Mode
