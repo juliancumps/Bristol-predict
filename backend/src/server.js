@@ -1,11 +1,21 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+
+
+console.log("🚀 SERVER STARTUP BEGINNING");
+console.log("Node version:", process.version);
+console.log("Working directory:", process.cwd());
+
+
 const {
   scrapeHarvestData,
   getSummaryStats,
   formatDateForURL,
 } = require("./scrapers/harvestScraper");
+console.log("✅ Loaded harvestScraper");
+
+
 const {
   initDatabase,
   saveScrapedData,
@@ -13,6 +23,8 @@ const {
   getAvailableDates,
   getAvailableDatesBySeason,
 } = require("./database");
+
+console.log("✅ Loaded database module");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
