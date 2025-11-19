@@ -194,7 +194,6 @@ function SectionLabels() {
   const map = useMap();
 
   useEffect(() => {
-    // Placeholder label data (add more as needed)
     const labels = [
       L.marker([58.70, -157.22], {
         icon: L.divIcon({
@@ -225,10 +224,10 @@ function SectionLabels() {
     // Add all labels initially hidden
     labels.forEach((label) => label.addTo(map).setOpacity(0));
 
-    // Show/hide labels based on zoom level
+    // Show/hide sections labels based on zoom level
     function handleZoom() {
       const zoom = map.getZoom();
-      const visible = zoom >= 10; // Adjust threshold if needed
+      const visible = zoom >= 10; // Adjuster
       labels.forEach((label) => label.setOpacity(visible ? 1 : 0));
     }
 
@@ -238,6 +237,27 @@ function SectionLabels() {
     return () => {
       map.off("zoomend", handleZoom);
       labels.forEach((label) => label.remove());
+    };
+  }, [map]);
+
+  return null;
+}
+
+function BayLabel() {
+  const map = useMap();
+
+  useEffect(() => {
+    const bayLabel = L.marker([58, -159.75], {
+      icon: L.divIcon({
+        className: "bay-label",
+        html: `<div class="bay-label-text">Bristol Bay</div>`,
+      }),
+    });
+
+    bayLabel.addTo(map);
+
+    return () => {
+      bayLabel.remove();
     };
   }, [map]);
 
@@ -496,7 +516,7 @@ useEffect(() => {
         <div className="map-section">
           <MapContainer
             center={bristolBayCenter}
-            zoom={8}
+            zoom={7}
             style={{ width: "100%", height: "100%", borderRadius: "0" }}
           >
             <TileLayer
@@ -505,6 +525,7 @@ useEffect(() => {
             />
             <GeoJSONLayers />
             <SectionLabels />
+            <BayLabel/>
 
             {/* District Markers */}
             {Object.entries(DISTRICTS).map(([key, district]) => {

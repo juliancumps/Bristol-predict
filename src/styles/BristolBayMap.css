@@ -190,6 +190,18 @@ width: 100%;
   pointer-events: none; /* Don't block map interactions */
 }
 
+.bay-label-text {
+  background-color: transparent;
+  color: #f8fafc;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: none;
+  white-space: nowrap;
+  pointer-events: none; /* Don't block map interactions */
+}
+
 /* Sidebar Popup - Full Height Overlay */
 .sidebar-popup {
   position: fixed;
