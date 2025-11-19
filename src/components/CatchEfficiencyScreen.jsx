@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getDailySummary, formatNumber, formatDateForAPI, subtractDays } from "../services/api";
 import "../styles/CatchEfficiencyScreen.css";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"; //for railway deployment
 
 const DISTRICTS = {
   naknek: { name: "Naknek-Kvichak", color: "#3b82f6", icon: "🅝🅚" },
@@ -27,7 +28,8 @@ export default function CatchEfficiencyScreen({ onNavigateToRunTracker, onNaviga
 useEffect(() => {
   async function loadAvailableDates() {
     try {
-      const response = await fetch("http://localhost:3001/api/dates");
+      //const response = await fetch("http://localhost:3001/api/dates");  //from before railway
+      const response = await fetch(`${API_BASE_URL}/dates`);
       const data = await response.json();
 
       // Sort dates: convert MM-DD-YYYY to sortable format, then sort descending (newest first)
@@ -150,21 +152,7 @@ setAvailableDates(sortedDates);
           <h1>🎣 Catch Efficiency Analyzer</h1>
         </div>
         <div className="header-right">
-          <button
-            className="run-tracker-btn"
-            onClick={onNavigateToRunTracker}
-            title="View Run Timing Tracker"
-          >
-            📈 Run Timing Tracker
-          </button>
-
-          <button
-            className="run-tracker-btn"
-            onClick={onNavigateToWeather}
-            title="View Weather Node"
-          >
-            🌦️ Live Weather Dashboard
-          </button>
+          
 
         </div>
       </div>
