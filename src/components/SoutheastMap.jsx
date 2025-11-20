@@ -56,15 +56,7 @@ export default function SoutheastMap({ onBackToToolsHub }) {
           </button>
 
           <div className="header-text-section">
-            <h1 className="southeast-map-title">More Salmon Harvest Data</h1>
-            <p className="southeast-map-subtitle">
-              Explore fishery data and conditions across the state of Alaska.
-            </p>
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="tab-container">
+            <div className="tab-container">
           <div className="tab-buttons">
             <button
               className={`tab-button ${activeTab === 'statewide' ? 'active' : ''}`}
@@ -80,6 +72,11 @@ export default function SoutheastMap({ onBackToToolsHub }) {
             </button>
           </div>
         </div>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+       
 
         {/* Tab Content */}
         <div className="tab-content-wrapper">
