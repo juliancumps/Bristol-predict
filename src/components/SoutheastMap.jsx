@@ -13,7 +13,7 @@ export default function SoutheastMap({ onBackToToolsHub }) {
       const map = L.map('southeast-map').setView([56.5, -131.5], 6);
 
       // Add tile layer
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 18,
       }).addTo(map);

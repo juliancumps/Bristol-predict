@@ -264,15 +264,10 @@ function BayLabel() {
   return null;
 }
 
-
-
 // Helper function to check if a value is effectively zero
   const isZeroOrMissing = (value) => {
     return value === 0 || value === "0" || !value || value === null || value === undefined;
   };
-
-
-
 
 
 export default function BristolBayMap({ onNavigateToToolsHub, onBackToSplash }) {
