@@ -182,6 +182,7 @@
 /* Map Styling */
 .map-item {
   position: relative;
+  height: 550px;
 }
 
 .southeast-map,
@@ -298,6 +299,29 @@
   font-size: 0.9rem;
   color: rgba(169, 169, 165, 0.6);
   font-weight: 300;
+}
+
+
+/* Southeast Tab - Separate Layout */
+.content-split-vertical {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+.dashboards-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.dashboards-column .split-item {
+  height: 650px;
+  flex-shrink: 0;
 }
 
 /* Mobile Responsive Design */
@@ -430,3 +454,4 @@
     min-height: 400px;
   }
 }
+
