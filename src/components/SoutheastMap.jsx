@@ -24,96 +24,6 @@ export default function SoutheastMap({ onBackToToolsHub }) {
 }, [activeTab]);
 
 useEffect(() => {
-  // Initialize southeast map with GeoJSON layers
-  const southeastMapElement = document.getElementById('southeast-map-alt');
-  if (southeastMapElement && activeTab === 'southeast' && !southeastMapElement._leaflet_id) {
-    const map = L.map('southeast-map-alt').setView([56.5, -131.5], 6);
-
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 18,
-    }).addTo(map);
-
-    // Feature group to track bounds for all GeoJSON layers
-    const featureGroup = L.featureGroup();
-
-    // Load and style polygons layer
-    fetch('/geojson/SEAK_ClosedWaters_polygons.geojson')
-      .then(res => res.json())
-      .then(data => {
-        L.geoJSON(data, {
-          style: {
-            color: '#FF6B6B',
-            weight: 2,
-            opacity: 0.7,
-            fillOpacity: 0.3,
-          },
-          onEachFeature: (feature, layer) => {
-            const closureName = feature.properties?.closure_name || 'Closed Waters Area';
-            layer.bindTooltip(closureName, { permanent: false });
-            featureGroup.addLayer(layer);
-          },
-        }).addTo(map);
-      })
-      .catch(err => console.error('Error loading polygons:', err));
-
-    // Load and style lines layer
-    fetch('/geojson/SEAK_ClosedWaters_lines.geojson')
-      .then(res => res.json())
-      .then(data => {
-        L.geoJSON(data, {
-          style: {
-            color: '#4ECDC4',
-            weight: 3,
-            opacity: 0.8,
-          },
-          onEachFeature: (feature, layer) => {
-            const closureName = feature.properties?.closure_name || 'Closed Waters Boundary';
-            layer.bindTooltip(closureName, { permanent: false });
-            featureGroup.addLayer(layer);
-          },
-        }).addTo(map);
-      })
-      .catch(err => console.error('Error loading lines:', err));
-
-    // Load and style points layer
-    fetch('/geojson/SEAK_ClosedWaters_points.geojson')
-      .then(res => res.json())
-      .then(data => {
-        L.geoJSON(data, {
-          pointToLayer: (feature, latlng) => {
-            return L.circleMarker(latlng, {
-              radius: 6,
-              fillColor: '#FFE66D',
-              color: '#FFA500',
-              weight: 2,
-              opacity: 0.8,
-              fillOpacity: 0.7,
-            });
-          },
-          onEachFeature: (feature, layer) => {
-            const closureName = feature.properties?.closurename || 'Closure Point';
-            layer.bindTooltip(closureName, { permanent: false });
-            featureGroup.addLayer(layer);
-          },
-        }).addTo(map);
-
-        // Auto-fit map to all GeoJSON data
-        if (featureGroup.getLayers().length > 0) {
-          setTimeout(() => {
-            map.fitBounds(featureGroup.getBounds(), { padding: [50, 50] });
-          }, 100);
-        }
-      })
-      .catch(err => console.error('Error loading points:', err));
-
-    return () => {
-      if (map) map.remove();
-    };
-  }
-}, [activeTab]);
-
-useEffect(() => {
   // Load Tableau script for both tabs
   const script = document.createElement('script');
   script.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
@@ -234,9 +144,14 @@ useEffect(() => {
           {activeTab === 'southeast' && (
   <div className="tab-content southeast-content">
     <div className="content-split-vertical">
-      {/* Map Container */}
+      {/* Map Container - ArcGIS Embed */}
       <div className="split-item map-item">
-        <div id="southeast-map-alt" className="southeast-map-alt"></div>
+            <iframe 
+  src="https://www.arcgis.com/apps/mapviewer/index.html?layers=d0478d756d7a4b7ba13f7746a4fb801a&theme=light&hideUI=true"
+  className="southeast-map-alt"
+  style={{ border: 'none' }}
+  title="ArcGIS Map Viewer"
+/>
       </div>
 
       {/* Right Side - Dashboards Stacked */}
