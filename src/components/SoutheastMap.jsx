@@ -10,7 +10,7 @@ export default function SoutheastMap({ onBackToToolsHub }) {
   // Initialize statewide map
   const mapElement = document.getElementById('southeast-map');
   if (mapElement && !mapElement._leaflet_id) {
-    const map = L.map('southeast-map').setView([56.5, -131.5], 6);
+    const map = L.map('southeast-map').setView([64.2, -152.5], 3);
 
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: '&copy; OpenStreetMap contributors',
