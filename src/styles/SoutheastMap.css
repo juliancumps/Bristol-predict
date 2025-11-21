@@ -324,6 +324,7 @@
   flex-shrink: 0;
 }
 
+
 /* Mobile Responsive Design */
 @media (max-width: 1024px) {
   .southeast-map-content {
