@@ -214,7 +214,7 @@ export default function DatePicker({
           {rangeStart && rangeEnd && (
             <div className="range-summary">
               <span className="range-dates">
-                📅 {formatDisplayDate(rangeStart)} → {formatDisplayDate(rangeEnd)}
+                🗓️  {formatDisplayDate(rangeStart)} → {formatDisplayDate(rangeEnd)}
               </span>
               <span className="range-days">
                 ({getDaysBetween()} day{getDaysBetween() !== 1 ? "s" : ""})

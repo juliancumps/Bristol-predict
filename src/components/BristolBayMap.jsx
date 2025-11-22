@@ -536,47 +536,47 @@ useEffect(() => {
                   eventHandlers={{ click: () => setSelectedDistrict(key) }}
                 >
                   <Popup>
-  {data ? (
-    <div className="popup-stats">
-      {dateRangeMode ? (
-        // DATE RANGE MODE: Simplified stats
-        <>
-          <div>
-            <strong>Total Catch Over Selected Dates:</strong> {formatNumber(data.catchDaily)}
-          </div>
-          <div>
-            <strong>Percentage of Baywide Catch Over Selected Dates:</strong> {data.percentage?.toFixed(1)}%
-          </div>
-          <div>
-            <strong>Total Escapement Over Selected Dates:</strong> {formatNumber(data.escapementDaily)}
-          </div>
+                    {data ? (
+                      <div className="popup-stats">
+                        {dateRangeMode ? (
+                        // DATE RANGE MODE
+                        <>
+                          <div>
+                            <strong>Total Catch Over Selected Dates:</strong> {formatNumber(data.catchDaily)}
+                          </div>
+                          <div>
+                            <strong>Percentage of Baywide Catch Over Selected Dates:</strong> {data.percentage?.toFixed(1)}%
+                          </div>
+                          <div>
+                            <strong>Total Escapement Over Selected Dates:</strong> {formatNumber(data.escapementDaily)}
+                          </div>
           
-        </>
-      ) : (
-        // SINGLE DATE MODE: Full stats
-        <>
-          <div>
-            <strong>Daily Catch:</strong> {formatNumber(data.catchDaily)}
-          </div>
-          <div>
-            <strong>Percentage:</strong> {calculatePercentage(data.catchDaily, totalCatch)}
-          </div>
-          <div>
-            <strong>Sockeye Per Delivery:</strong> {formatNumber(data.sockeyePerDelivery)}
-          </div>
-          <div>
-            <strong>Cumulative:</strong> {formatNumber(data.catchCumulative)}
-          </div>
-          <div>
-            <strong>Escapement:</strong> {formatNumber(data.escapementDaily)}
-          </div>
-        </>
-      )}
-    </div>
-  ) : (
-    <p>Loading data...</p>
-  )}
-</Popup>
+                        </>
+                      ) : (
+                        // SINGLE DATE MODE
+                        <>
+                          <div>
+                            <strong>Daily Catch:</strong> {formatNumber(data.catchDaily)}
+                          </div>
+                          <div>
+                            <strong>Percentage:</strong> {calculatePercentage(data.catchDaily, totalCatch)}
+                          </div>
+                          <div>
+                            <strong>Sockeye Per Delivery:</strong> {formatNumber(data.sockeyePerDelivery)}
+                          </div>
+                          <div>
+                            <strong>Cumulative:</strong> {formatNumber(data.catchCumulative)}
+                          </div>
+                          <div>
+                            <strong>Escapement:</strong> {formatNumber(data.escapementDaily)}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <p>Loading data...</p>
+                  )}
+                </Popup>
                 </Marker>
               );
             })}
