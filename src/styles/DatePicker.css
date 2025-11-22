@@ -8,6 +8,7 @@
   font-size: 14px;
   width: 100%;
   max-width: 600px;
+  min-width: 400px;
 }
 
 .datepicker-loading,
@@ -95,6 +96,8 @@
 .datepicker-range > label {
   font-weight: 600;
   color: #e2e8f0;
+  margin-bottom: -5px;
+  margin-top: -10px;
 }
 
 .range-inputs {
@@ -150,9 +153,12 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
+  margin-top: -5px;
+  margin-bottom: -10px;
   background-color: rgba(11, 21, 36, 0.4);
   border-radius: 6px;
   border: 1px solid #3b82f6;
+  height: 20px;
 }
 
 .range-dates {
