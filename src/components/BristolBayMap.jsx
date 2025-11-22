@@ -603,7 +603,7 @@ useEffect(() => {
             {/* Summary Stats */}
             {!dateRangeMode && summaryData && (
               <div className="summary-box">
-                <h4>Daily Summary</h4>
+                <h4>Bay-Wide Daily Summary</h4>
                 <div className="summary-grid">
                   <div className="summary-stat">
                     <span className="summary-label">Total Daily Catch</span>

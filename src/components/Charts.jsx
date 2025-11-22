@@ -109,6 +109,8 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict,
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis
             dataKey="date"
+            type="category"
+            domain={[0,filteredData.length - 1]}
             stroke="#94a3b8"
             tick={{ fontSize: 12 }}
             angle={-45}
@@ -296,6 +298,8 @@ export function LineChart_MultiDistrict({ historicalData, districts, selectedSea
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis
             dataKey="date"
+            type="category"
+            domain={[0,filteredData.length - 1]}
             stroke="#94a3b8"
             tick={{ fontSize: 12 }}
             angle={-45}
@@ -378,6 +382,8 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis
             dataKey="date"
+            type="category"
+            domain={[0,filteredData.length - 1]}
             stroke="#94a3b8"
             tick={{ fontSize: 12 }}
             angle={-45}
