@@ -144,7 +144,7 @@
   font-size: 13px;
 }
 
-/* Responsive */
+/* Responsive  */
 @media (max-width: 1024px) {
   .chart-container {
     padding: 12px;
