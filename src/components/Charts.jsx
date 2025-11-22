@@ -104,7 +104,7 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict,
   return (
     <div className="chart-container">
       <h3 className="chart-title">Bay-Wide Catch Per Day</h3>
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={250}>
         <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis
@@ -159,7 +159,7 @@ export function BarChart_DistrictComparison({ data, districtNames }) {
   return (
     <div className="chart-container">
       <h3 className="chart-title">District Comparison (Daily)</h3>
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={250}>
         <BarChart data={chartData} margin={{ top: 5, right: 30, left: 10, bottom: -5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 12 }} />
@@ -216,7 +216,7 @@ export function PieChart_CatchDistribution({ districtData, districtNames }) {
   return (
     <div className="chart-container">
       <h3 className="chart-title">Catch Distribution by District</h3>
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={250}>
         <PieChart>
           <Pie
             data={chartData}
@@ -293,7 +293,7 @@ export function LineChart_MultiDistrict({ historicalData, districts, selectedSea
   return (
     <div className="chart-container">
       <h3 className="chart-title">Daily Catch Trend Per District</h3>
-      <ResponsiveContainer width="100%" height={350}>
+      <ResponsiveContainer width="100%" height={250}>
         <LineChart data={chartData} margin={{ top: 5, right: 30, left: 12, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis
@@ -377,7 +377,7 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
   return (
     <div className="chart-container">
       <h3 className="chart-title">🐟 Sockeye Per Delivery Trends</h3>
-      <ResponsiveContainer width="100%" height={350}>
+      <ResponsiveContainer width="100%" height={250}>
         <LineChart data={chartData} margin={{ top: 5, right: 30, left: 5, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis
@@ -458,7 +458,7 @@ export function LineChart_DateRange({ rangeData, districts }) {
   return (
     <div className="chart-container">
       <h3 className="chart-title">Daily Catch by District Over Selected Date Range</h3>
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData} margin={{ top: 5, right: 30, left: 12, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis
