@@ -133,7 +133,8 @@ function MapController({ selectedDistrict }) {
   const map = useMap();
   if (selectedDistrict) {
     const district = DISTRICTS[selectedDistrict];
-    map.flyTo(district.center, 10, { duration: 1.5 });
+    const offsetCenter = [district.center[0] + 0.017, district.center[1]];
+    map.flyTo(offsetCenter, 10, { duration: 1.5 });
   }
   return null;
 }
@@ -534,7 +535,10 @@ useEffect(() => {
                   key={key}
                   position={district.center}
                   icon={createCustomIcon(district.color, district.icon)}
-                  eventHandlers={{ click: () => setSelectedDistrict(key) }}
+                  eventHandlers={{ 
+                    click: () => setSelectedDistrict(key), 
+                    popupclose: () => setSelectedDistrict(null)
+                  }}
                 >
                   <Popup>
                     {data ? (
