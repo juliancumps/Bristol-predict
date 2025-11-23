@@ -23,7 +23,7 @@ Catch Efficiency Analyzer - Enter your delivery data and benchmark your catch pe
 
 Weather Dashboard - Live NOAA weather data, tidal predictions, wind and wave maps from Windy.com, and temperature forecasts
 
-More Salmon Harvest Data - State-wide and region-specific data visualization with tabbed interface for comprehensive analysis
+More Salmon Harvest Data - State-wide and region-specific data visualization with interactive Tableau dashboards for comprehensive analysis
 
 ### Data Access
 
