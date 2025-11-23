@@ -582,13 +582,12 @@ useEffect(() => {
                 </Marker>
               );
             })}
-
             <MapController selectedDistrict={selectedDistrict} />
           </MapContainer>
         </div>
       </div>
 
-      {/* Popup Sidebar - Full Height */}
+      {/*popup sidebar: full height */}
       {sidebarOpen && (
         <div className="sidebar-popup">
           <div className="sidebar-header">
@@ -602,7 +601,7 @@ useEffect(() => {
           </div>
 
           <div className="sidebar-content">
-            {/* Summary Stats */}
+            {/* summary stats */}
             {!dateRangeMode && summaryData && (
               <div className="summary-box">
                 <h4>Bay-Wide Daily Summary</h4>
@@ -638,7 +637,7 @@ useEffect(() => {
               </div>
             )}
 
-            {/* District Details */}
+            {/* district details*/}
             {selectedDistrict && selectedDistrictData && !dateRangeMode && (
               <DistrictStats
                 district={DISTRICTS[selectedDistrict]}
@@ -653,149 +652,147 @@ useEffect(() => {
 
             {/* District List */}
             {/* Districts List - Hidden in date range mode, shown in single date mode */}
-{!dateRangeMode && sidebarOpen && (
-  <div className="districts-list">
-    <h4>Districts</h4>
-    <div className="district-items">
-      {Object.entries(DISTRICTS).map(([key, district]) => {
-        const data = dateRangeMode 
-          ? rangeData?.districts?.[key] 
-          : districtData[key];
-        return (
-          <div
-            key={key}
-            className={`district-item ${selectedDistrict === key ? "selected" : ""}`}
-            onClick={() => setSelectedDistrict(key)}
-          >
-            <span className="district-emoji">{district.icon}</span>
-            <div className="district-name-info">
-              <div className="district-name">{district.name}</div>
-              {data && (
-                <div className="district-catch">
-                  {formatNumber(data.catchDaily)} 
-                  <span className="catch-percentage">
-                    {calculatePercentage(data.catchDaily, totalCatch)}
-                  </span>
+            {!dateRangeMode && sidebarOpen && (
+              <div className="districts-list">
+                <h4>Districts</h4>
+                <div className="district-items">
+                  {Object.entries(DISTRICTS).map(([key, district]) => {
+                    const data = dateRangeMode 
+                      ? rangeData?.districts?.[key] 
+                      : districtData[key];
+                    return (
+                      <div
+                        key={key}
+                        className={`district-item ${selectedDistrict === key ? "selected" : ""}`}
+                        onClick={() => setSelectedDistrict(key)}
+                      >
+                        <span className="district-emoji">{district.icon}</span>
+                        <div className="district-name-info">
+                        <div className="district-name">{district.name}</div>
+                          {data && (
+                            <div className="district-catch">
+                              {formatNumber(data.catchDaily)} 
+                              <span className="catch-percentage">
+                                {calculatePercentage(data.catchDaily, totalCatch)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-)}
+              </div>
+            )}
 
-{/* DATE RANGE MODE: Simplified Districts List - Sorted by catch */}
-{dateRangeMode && rangeData && sidebarOpen && (
-  <div className="districts-list">
-    <h3>📊 Districts:</h3>
-    <h4>Data Aggregated over Selected Dates</h4>
-    <h5># of sockeye caught over date interval, and percentage of total</h5>
-    <div className="district-items">
-      {rangeData.districtsSorted?.map((district) => (
-        <div
-          key={district.id}
-          className={`district-item ${selectedDistrict === district.id ? "selected" : ""}`}
-          onClick={() => setSelectedDistrict(district.id)}
-        >
-          <span className="district-emoji">{district.icon}</span>
-          <div className="district-name-info">
-            <div className="district-name">{district.name}</div>
-            <div className="district-catch">
-              {formatNumber(district.catchDaily)} 
-              <span className="catch-percentage">
-                {district.percentage?.toFixed(1)}%
-              </span>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+            {/* DATE RANGE MODE: Simplified Districts List - Sorted by catch */}
+            {dateRangeMode && rangeData && sidebarOpen && (
+              <div className="districts-list">
+                <h3>📊 Districts:</h3>
+                <h4>Data Aggregated over Selected Dates</h4>
+                <h5># of sockeye caught over date interval, and percentage of total</h5>
+                <div className="district-items">
+                  {rangeData.districtsSorted?.map((district) => (
+                    <div
+                      key={district.id}
+                      className={`district-item ${selectedDistrict === district.id ? "selected" : ""}`}
+                      onClick={() => setSelectedDistrict(district.id)}
+                    >
+                      <span className="district-emoji">{district.icon}</span>
+                      <div className="district-name-info">
+                        <div className="district-name">{district.name}</div>
+                        <div className="district-catch">
+                          {formatNumber(district.catchDaily)} 
+                          <span className="catch-percentage">
+                            {district.percentage?.toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Charts Section - Scrolls, shifts when sidebar open */}
-      {/* Charts Section - Shows appropriate chart based on mode */}
-<div className="charts-section">
-  {dateRangeMode && rangeData ? (
-    // DATE RANGE MODE: Show ONLY the date range line chart
-    <>
-    {console.log("DEBUG - rangeDataRaw:", rangeDataRaw)}
-    {console.log("DEBUG - is array?:", Array.isArray(rangeDataRaw))}
-    {console.log("DEBUG - length:", rangeDataRaw?.length)}
-    <LineChart_DateRange rangeData={rangeDataRaw} districts={DISTRICTS} />
-  </>
-  ) : (
-    // SINGLE DATE MODE: Show chart toggle buttons and selected chart
-    <>
-      {/* Chart Toggle Buttons */}
-      <div className="chart-toggle">
-        
-        <div className="chart-buttons">
-          <button
-            className={`chart-btn ${chartMode === "single" ? "active" : ""}`}
-            onClick={() => setChartMode("single")}
-            title="Day-to-Day Comparison"
-          >
-            Bay-Wide Daily Catch Trend
-          </button>
-          <button
-            className={`chart-btn ${chartMode === "comparison" ? "active" : ""}`}
-            onClick={() => setChartMode("comparison")}
-            title="District Comparison"
-          >
-            District Comparison for Selected Date
-          </button>
-          <button
-            className={`chart-btn ${chartMode === "distribution" ? "active" : ""}`}
-            onClick={() => setChartMode("distribution")}
-            title="Catch Distribution"
-          >
-            Daily Catch Distribution by District
-          </button>
-          <button
-            className={`chart-btn ${chartMode === "multitrend" ? "active" : ""}`}
-            onClick={() => setChartMode("multitrend")}
-            title="Multi-District Trends"
-          >
-            Daily Catch Trends for all Districts
-          </button>
-          <button
-            className={`chart-btn ${chartMode === "sockeyetrend" ? "active" : ""}`}
-            onClick={() => setChartMode("sockeyetrend")}
-            title="Sockeye Per Delivery"
-          >
-            Sockeye Per Delivery Trend
-          </button>
-        </div>
+      {/* charts section */}
+      <div className="charts-section">
+        {dateRangeMode && rangeData ? (
+          // DATE RANGE MODE: ONLY the date range line chart is showed
+          <>
+          {console.log("DEBUG - rangeDataRaw:", rangeDataRaw)}
+          {console.log("DEBUG - is array?:", Array.isArray(rangeDataRaw))}
+          {console.log("DEBUG - length:", rangeDataRaw?.length)}
+          <LineChart_DateRange rangeData={rangeDataRaw} districts={DISTRICTS} />
+        </>
+        ) : (
+          // SINGLE DATE MODE: Show chart toggle buttons and selected chart
+          <>
+            {/* Chart Toggle Buttons */}
+            <div className="chart-toggle">
+              <div className="chart-buttons">
+                <button
+                  className={`chart-btn ${chartMode === "single" ? "active" : ""}`}
+                  onClick={() => setChartMode("single")}
+                  title="Day-to-Day Comparison"
+                >
+                  Bay-Wide Daily Catch Trend
+                </button>
+                <button
+                  className={`chart-btn ${chartMode === "comparison" ? "active" : ""}`}
+                  onClick={() => setChartMode("comparison")}
+                  title="District Comparison"
+                >
+                  District Comparison for Selected Date
+                </button>
+                <button
+                  className={`chart-btn ${chartMode === "distribution" ? "active" : ""}`}
+                  onClick={() => setChartMode("distribution")}
+                  title="Catch Distribution"
+                >
+                  Daily Catch Distribution by District
+                </button>
+                <button
+                  className={`chart-btn ${chartMode === "multitrend" ? "active" : ""}`}
+                  onClick={() => setChartMode("multitrend")}
+                  title="Multi-District Trends"
+                >
+                  Daily Catch Trends for all Districts
+                </button>
+                <button
+                  className={`chart-btn ${chartMode === "sockeyetrend" ? "active" : ""}`}
+                  onClick={() => setChartMode("sockeyetrend")}
+                  title="Sockeye Per Delivery"
+                >
+                  Sockeye Per Delivery Trend
+                </button>
+              </div>
+            </div>
+
+            {chartMode === "single" && (
+              <LineChart_DayToDayComparison
+                historicalData={historicalData}
+                selectedDistrict={selectedDistrict}
+                selectedSeason={selectedSeason}
+              />
+            )}
+            {chartMode === "comparison" && (
+              <BarChart_DistrictComparison data={districtData} districtNames={DISTRICTS} />
+            )}
+            {chartMode === "distribution" && (
+              <PieChart_CatchDistribution districtData={districtData} districtNames={DISTRICTS} />
+            )}
+            {chartMode === "multitrend" && (
+              <LineChart_MultiDistrict historicalData={historicalData} districts={DISTRICTS} selectedSeason={selectedSeason}/>
+            )}
+            {chartMode === "sockeyetrend" && (
+              <LineChart_MultiDistrict_SockeyePerDelivery historicalData={historicalData} districts={DISTRICTS} selectedSeason={selectedSeason}/>
+            )}
+          </>
+        )}
       </div>
-
-      {chartMode === "single" && (
-        <LineChart_DayToDayComparison
-          historicalData={historicalData}
-          selectedDistrict={selectedDistrict}
-          selectedSeason={selectedSeason}
-        />
-      )}
-      {chartMode === "comparison" && (
-        <BarChart_DistrictComparison data={districtData} districtNames={DISTRICTS} />
-      )}
-      {chartMode === "distribution" && (
-        <PieChart_CatchDistribution districtData={districtData} districtNames={DISTRICTS} />
-      )}
-      {chartMode === "multitrend" && (
-        <LineChart_MultiDistrict historicalData={historicalData} districts={DISTRICTS} selectedSeason={selectedSeason}/>
-      )}
-      {chartMode === "sockeyetrend" && (
-        <LineChart_MultiDistrict_SockeyePerDelivery historicalData={historicalData} districts={DISTRICTS} selectedSeason={selectedSeason}/>
-      )}
-    </>
-  )}
-</div>
 
       {/* Error Message */}
       {error && (
