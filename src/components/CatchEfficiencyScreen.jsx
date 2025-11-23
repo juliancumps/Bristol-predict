@@ -20,11 +20,11 @@ export default function CatchEfficiencyScreen({ onNavigateToRunTracker, onNaviga
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Calculate user's sockeye count
+  //calculate user's sockeye count
   const userSockeyeCount =
     pounds && avgWeight ? Math.round(parseFloat(pounds) / parseFloat(avgWeight)) : null;
 
-  // Load available dates on mount
+  //load available dates on mount
 useEffect(() => {
   async function loadAvailableDates() {
     try {
@@ -32,7 +32,7 @@ useEffect(() => {
       const response = await fetch(`${API_BASE_URL}/dates`);
       const data = await response.json();
 
-      // Sort dates: convert MM-DD-YYYY to sortable format, then sort descending (newest first)
+      //sort dates........convert MM-DD-YYYY to sortable format, then sort descending (newest first)
 const sortedDates = (data.dates || []).sort((a, b) => {
   const [monthA, dayA, yearA] = a.split('-').map(Number);
   const [monthB, dayB, yearB] = b.split('-').map(Number);
@@ -40,12 +40,12 @@ const sortedDates = (data.dates || []).sort((a, b) => {
   const dateA = new Date(yearA, monthA - 1, dayA);
   const dateB = new Date(yearB, monthB - 1, dayB);
   
-  return dateB - dateA; // Descending (newest first)
+  return dateB - dateA; //newest first
 });
 
 setAvailableDates(sortedDates);
       
-      // Set default to LATEST date (first in array, since they're sorted descending)
+      //set default to LATEST date 
       if (data.dates && data.dates.length > 0) {
         
         setSelectedDate(data.dates[0]);
@@ -57,7 +57,7 @@ setAvailableDates(sortedDates);
   loadAvailableDates();
 }, []);
 
-  // Fetch district data when date changes
+  //fetch district data when date changes
   useEffect(() => {
     async function fetchDistrictData() {
       try {
@@ -74,7 +74,7 @@ setAvailableDates(sortedDates);
           return;
         }
 
-        // Build district data with sockeye per delivery
+        //build district data with sockeye per delivery
         const districtMap = {};
         if (Array.isArray(summary.districts)) {
           summary.districts.forEach((district) => {
@@ -93,7 +93,6 @@ setAvailableDates(sortedDates);
         setLoading(false);
       }
     }
-
     if (selectedDate) {
       fetchDistrictData();
     }
@@ -101,7 +100,6 @@ setAvailableDates(sortedDates);
 
   const calculateComparison = () => {
     if (!userSockeyeCount) return null;
-
     const comparisons = [];
     let totalDistrictSockeye = 0;
     let districtCount = 0;
@@ -127,10 +125,10 @@ setAvailableDates(sortedDates);
       }
     });
 
-    // Calculate bay average
+    //calculate bay average
     const bayAverage = districtCount > 0 ? (totalDistrictSockeye / districtCount).toFixed(1) : 0;
 
-    // Sort by best performance vs your catch
+    //sort by best performance vs your catch
     comparisons.sort((a, b) => b.difference - a.difference);
 
     return {
@@ -143,7 +141,7 @@ setAvailableDates(sortedDates);
 
   return (
     <div className="catch-efficiency-screen">
-      {/* Header */}
+      {/*header */}
       <div className="efficiency-header">
         <div className="header-left">
           <button className="back-btn" onClick={onBack} title="Back to Main View">
@@ -157,9 +155,9 @@ setAvailableDates(sortedDates);
         </div>
       </div>
 
-      {/* Main Content */}
+      {/*main content */}
       <div className="efficiency-content">
-        {/* Left Panel - Input Form */}
+        {/*left panel - user input */}
         <div className="input-panel">
           <div className="input-section">
             <h3>📊 Your Delivery Data</h3>
@@ -204,7 +202,7 @@ setAvailableDates(sortedDates);
               >
               {availableDates.length > 0 ? (
               availableDates.map((date) => {
-                // Parse MM-DD-YYYY format
+                // parse MM-DD-YYYY format
                 const [month, day, year] = date.split('-');
                 const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                 return (
@@ -224,7 +222,7 @@ setAvailableDates(sortedDates);
               </select>
             </div>
 
-            {/* Display Calculated Sockeye Count */}
+            {/* show calculated sockeye count */}
             {userSockeyeCount && (
               <div className="calculation-display">
                 <div className="calc-label">Your Sockeye Per Delivery</div>
@@ -237,7 +235,7 @@ setAvailableDates(sortedDates);
           </div>
         </div>
 
-        {/* Right Panel - Comparisons */}
+        {/* right panel - comparisons */}
         <div className="comparison-panel">
           {error && <div className="error-message">⚠️ {error}</div>}
 
@@ -247,7 +245,7 @@ setAvailableDates(sortedDates);
             </div>
           ) : comparison ? (
             <>
-              {/* Bay Average Card */}
+              {/*bay average card */}
               <div className="bay-average-card">
                 <h3>🌊 Bay Average</h3>
                 <div className="average-value">{comparison.bayAverage}</div>
@@ -267,7 +265,7 @@ setAvailableDates(sortedDates);
                 )}
               </div>
 
-              {/* District Comparisons */}
+              {/* district comparisons */}
               <div className="districts-comparison">
                 <h3>📍 District Comparison</h3>
                 <div className="comparison-list">
@@ -305,6 +303,7 @@ setAvailableDates(sortedDates);
               </div>
             </>
           ) : (
+            //before user data is input
             <div className="empty-state">
               <p>👈 Enter your catch data to see comparisons</p>
             </div>
@@ -315,8 +314,7 @@ setAvailableDates(sortedDates);
       {/* Footer Info */}
       <div className="efficiency-footer">
         <p className="footer-note">
-          💡 <strong>Tip:</strong> Save your historical data to track your performance over the season.
-          Login features coming later!
+          💡 <strong>Tip:</strong> Placeholder Text 
         </p>
       </div>
     </div>

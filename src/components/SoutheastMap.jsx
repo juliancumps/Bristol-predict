@@ -74,8 +74,6 @@ useEffect(() => {
         </div>
 
         {/* Tab Navigation */}
-       
-
         {/* Tab Content */}
         <div className="tab-content-wrapper">
           {activeTab === 'statewide' && (

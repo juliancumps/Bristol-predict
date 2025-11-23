@@ -187,7 +187,6 @@ function GeoJSONLayers() {
   );
 }
 
-
 function SectionLabels() {
   const map = useMap();
 
@@ -276,10 +275,8 @@ export default function BristolBayMap({ onNavigateToToolsHub, onBackToSplash }) 
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
-
   const [selectedSeason, setSelectedSeason] = useState(null);
 
-  
   //date range support
   const [dateRangeMode, setDateRangeMode] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState(null);
@@ -434,8 +431,6 @@ useEffect(() => {
 
   fetchDistrictData();
 }, [selectedDistrict, selectedDate, dateRangeMode]);
-
-
 
   const currentData = dateRangeMode ? rangeData : { districts: districtData, rivers: riversData, summary: summaryData };
   const totalCatch = currentData?.summary?.totalCatch || summaryData?.summary?.totalCatch || 0;
@@ -648,8 +643,6 @@ useEffect(() => {
               />
             )}
 
-            
-
             {/* District List */}
             {/* Districts List - Hidden in date range mode, shown in single date mode */}
             {!dateRangeMode && sidebarOpen && (
@@ -803,3 +796,4 @@ useEffect(() => {
     </div>
   );
 }
+

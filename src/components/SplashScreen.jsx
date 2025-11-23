@@ -13,15 +13,15 @@ export default function SplashScreen({ onComplete }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Calculate opacity based on scroll position
+      //calculate opacity based on scroll position
       const scrolled = window.scrollY;
-      const maxScroll = 400; // pixels to scroll before fully faded
+      const maxScroll = 400; //pixels to scroll before fully faded
       
-      // Opacity goes from 1 to 0 as you scroll
+      //opacity goes from 1 to 0 as you scroll
       const opacity = Math.max(0, 1 - scrolled / maxScroll);
       setSplashOpacity(opacity);
 
-      // Hide splash screen completely when scrolled past
+      //hide splash screen completely when scrolled past
       if (scrolled > maxScroll) {
         setShowSplash(false);
       } else {
@@ -46,7 +46,7 @@ export default function SplashScreen({ onComplete }) {
         }}
       />
 
-      {/* Pixel Blast - clicks will work now */}
+      {/*pixel blast - from reactbits.dev */}
       <PixelBlast
         variant="diamond"
         pixelSize={2}
@@ -68,7 +68,7 @@ export default function SplashScreen({ onComplete }) {
         className="splash-pixel-overlay"
       />
       
-      {/* Content */}
+      {/*content */}
       <div className="splash-content">
         <div className="splash-title-group">
           <h1 className="splash-title">Bristol Predict</h1>
