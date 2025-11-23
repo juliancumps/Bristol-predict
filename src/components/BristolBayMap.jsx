@@ -134,7 +134,7 @@ function MapController({ selectedDistrict }) {
   if (selectedDistrict) {
     const district = DISTRICTS[selectedDistrict];
     const offsetCenter = [district.center[0] + 0.017, district.center[1]];
-    map.flyTo(offsetCenter, 10, { duration: 1.5 });
+    map.flyTo(offsetCenter, 10, { duration: 0.9 });
   }
   return null;
 }
@@ -202,7 +202,7 @@ function SectionLabels() {
           html: `<div class="map-label-text">Naknek Section</div>`,
         }),
       }),
-      L.marker([58.77, -157.36], {
+      L.marker([58.72, -157.49], {
         icon: L.divIcon({
           className: "map-label",
           html: `<div class="map-label-text">Kvichak Section</div>`,
@@ -570,10 +570,10 @@ useEffect(() => {
                             <strong>Sockeye Per Delivery:</strong> {formatNumber(data.sockeyePerDelivery)}
                           </div>
                           <div>
-                            <strong>Cumulative:</strong> {formatNumber(data.catchCumulative)}
+                            <strong>Cumulative Catch:</strong> {formatNumber(data.catchCumulative)}
                           </div>
                           <div>
-                            <strong>Escapement:</strong> {formatNumber(data.escapementDaily)}
+                            <strong>Daily Escapement:</strong> {formatNumber(data.escapementDaily)}
                           </div>
                         </>
                       )}
