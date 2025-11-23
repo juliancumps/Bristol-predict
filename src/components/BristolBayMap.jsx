@@ -37,8 +37,7 @@ import {
   RIVER_DISTRICT_MAP,
 } from "../services/api";
 
-
-// Fix for default marker icons in React-Leaflet
+//fix for default marker icons in React-Leaflet
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
@@ -51,8 +50,6 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-
-// Bristol Bay fishing districts
 const DISTRICTS = {
   naknek: {
     name: "Naknek-Kvichak",
@@ -222,13 +219,13 @@ function SectionLabels() {
       }),
     ];
 
-    // Add all labels initially hidden
+    // Add section labels, init as hidden
     labels.forEach((label) => label.addTo(map).setOpacity(0));
 
-    // Show/hide sections labels based on zoom level
+    // show/hide sections labels based on zoom level
     function handleZoom() {
       const zoom = map.getZoom();
-      const visible = zoom >= 10; // Adjuster
+      const visible = zoom >= 10; // adjuster!!!
       labels.forEach((label) => label.setOpacity(visible ? 1 : 0));
     }
 
@@ -265,7 +262,7 @@ function BayLabel() {
   return null;
 }
 
-// Helper function to check if a value is effectively zero
+// helper function to check if a value is effectively 'zero' //Unused???
   const isZeroOrMissing = (value) => {
     return value === 0 || value === "0" || !value || value === null || value === undefined;
   };
@@ -283,25 +280,25 @@ export default function BristolBayMap({ onNavigateToToolsHub, onBackToSplash }) 
   const [selectedSeason, setSelectedSeason] = useState(null);
 
   
-  // Date range support
+  //date range support
   const [dateRangeMode, setDateRangeMode] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState(null);
   const [rangeData, setRangeData] = useState(null);
   const [rangeDataRaw, setRangeDataRaw] = useState(null);
   
-  // Historical data for charts
+  //historical data for charts
   const [historicalData, setHistoricalData] = useState([]);
   const [chartMode, setChartMode] = useState("single");
 
-  // Rivers data
+  //rivers data // 
   const [riversData, setRiversData] = useState([]);
   
-  // Sidebar popup state
+  //sidebar popup state
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const bristolBayCenter = [58.5, -157.5];
 
-  // Fetch single date data
+  //fetch data from .db for single date
   useEffect(() => {
     if (!selectedDate || dateRangeMode) {
       console.log("⏳ Waiting for single date to be selected...");
@@ -334,7 +331,7 @@ export default function BristolBayMap({ onNavigateToToolsHub, onBackToSplash }) 
         setSummaryData(summary);
         setLastUpdated(new Date());
         
-        // Extract rivers from summary
+        //extract rivers from summary
         if (summary.rivers) {
           const mappedRivers = summary.rivers.map((river) => ({
             ...river,
@@ -353,7 +350,7 @@ export default function BristolBayMap({ onNavigateToToolsHub, onBackToSplash }) 
     fetchData();
   }, [selectedDate, dateRangeMode]);
 
-  // Fetch date range data
+  //fetch data for date range mode
   useEffect(() => {
     if (!dateRangeMode || !selectedDateRange) return;
 
@@ -390,23 +387,23 @@ export default function BristolBayMap({ onNavigateToToolsHub, onBackToSplash }) 
     fetchRangeData();
   }, [selectedDateRange, dateRangeMode]);
 
-// Fetch historical data for charts - refetch when season changes
+//fetch historical data for charts - refetch when season changes
 useEffect(() => {
   async function fetchHistorical() {
     try {
-      // If a season is selected, fetch data for entire season
-      // Otherwise fetch last 90 days
+      //if season is selected, fetch data for entire season
+      //otherwise fetch last 90 days
       let data;
       
       if (selectedSeason) {
-      // Fetch from API with season parameter
+      //fetch from API with season parameter
         const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
         const response = await fetch(
           `${baseUrl}/historical?season=${selectedSeason}`
         );
         data = await response.json();
       } else {
-        // Fallback to last 90 days if no season selected
+        //fallback to last 90 days if no season selected
         data = await getHistoricalData(90);
       }
       
@@ -417,9 +414,9 @@ useEffect(() => {
   }
 
   fetchHistorical();
-}, [selectedSeason]); // Re-fetch when season changes
+}, [selectedSeason]); //re-fetch when season changes
 
-// Fetch specific district data when selected
+//fetch specific district data when selected
 useEffect(() => {
   if (!selectedDistrict || dateRangeMode) return;
 
@@ -446,7 +443,7 @@ useEffect(() => {
 
   return (
     <div className="bristol-bay-map-container">
-      {/* Compact Header */}
+      {/* compact header */}
       <div className="header-compact">
         <div className="header-left">
           <h1>Bristol Predict 🐟 beta.v3.0</h1>
