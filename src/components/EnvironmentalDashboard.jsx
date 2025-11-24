@@ -53,13 +53,13 @@ export default function EnvironmentalDashboard({ onBack }) {
   const [tidesLoading, setTidesLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Fetch NOAA weather data when district changes
+  //fetch NOAA weather data when district changes
   useEffect(() => {
     fetchNOAAWeatherData();
     fetchTidalData();
   }, [activeDistrict]);
 
-  // Update current time every minute
+  //update current time every minute (for tidal chart)
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());      
@@ -77,7 +77,6 @@ export default function EnvironmentalDashboard({ onBack }) {
 
       console.log(`🌍 Fetching NOAA data for ${currentDistrict.name} (${currentDistrict.lat}, ${currentDistrict.lon})`);
 
-      // Step 1: Get grid point data using lat/lon
       const pointsUrl = `https://api.weather.gov/points/${currentDistrict.lat},${currentDistrict.lon}`;
       console.log("📍 Points URL:", pointsUrl);
 
@@ -104,7 +103,7 @@ export default function EnvironmentalDashboard({ onBack }) {
 
       console.log("🔗 Forecast URL:", forecastUrl);
 
-      // Step 2: Get forecast using grid data
+      // get forecast using grid data
       const forecastResponse = await fetch(forecastUrl, {
         headers: {
           "User-Agent": "BristolPredict (bristol-predict.com, contact@bristol-predict.com)"
@@ -126,18 +125,18 @@ export default function EnvironmentalDashboard({ onBack }) {
         throw new Error("No forecast periods in NOAA response");
       }
 
-      // Extract current conditions from first period
+      //extract current conditions from first period
       const current = periods[0];
       
-      // Parse temperature (remove "F" if present)
+      //parse temperature (remove "F" if present)
       const tempStr = current.temperature?.toString().replace("F", "").trim();
       const temp = tempStr ? parseInt(tempStr) : null;
       
-      // Parse wind speed
+      //parse wind speed
       const windStr = current.windSpeed?.toString().replace(" mph", "").trim();
       const windSpeed = windStr ? parseInt(windStr) : null;
 
-      // Determine condition from short forecast text
+      //determine condition from short forecast text
       const condition = determineCondition(current.shortForecast);
 
       console.log("🌤️ Parsed weather:", { condition, temp, windSpeed, direction: current.windDirection });
@@ -153,7 +152,7 @@ export default function EnvironmentalDashboard({ onBack }) {
         error: null,
       });
 
-      // Build forecast chart data
+      //build forecast chart data
       buildForecastChart(forecastData);
     } catch (error) {
       console.error("❌ Error fetching NOAA data:", error);
@@ -173,7 +172,7 @@ export default function EnvironmentalDashboard({ onBack }) {
       setTidesLoading(true);
       console.log(`🌊 Fetching tidal data for station ${currentDistrict.tideStation}`);
 
-      // Get today's date range for CO-OPS API
+      //get today's date range for CO-OPS API
       const today = new Date();
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -181,8 +180,7 @@ export default function EnvironmentalDashboard({ onBack }) {
       const beginDate = today.toISOString().split('T')[0].replace(/-/g, '');
       const endDate = tomorrow.toISOString().split('T')[0].replace(/-/g, '');
 
-      // Fetch tidal predictions from NOAA CO-OPS API
-      // Using 6-minute interval for detailed predictions
+      //fetch tidal predictions from NOAA CO-OPS API : 6-minute interval 
       const tideUrl = `https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?` +
         `station=${currentDistrict.tideStation}&` +
         `begin_date=${beginDate}&` +
@@ -194,7 +192,6 @@ export default function EnvironmentalDashboard({ onBack }) {
         `time_zone=lst_ldt&` +
         `format=json&` +
         `application=BristolPredict`;
-
       console.log("🔗 Tide URL:", tideUrl);
 
       const tideResponse = await fetch(tideUrl);
@@ -205,16 +202,15 @@ export default function EnvironmentalDashboard({ onBack }) {
 
       const tideJson = await tideResponse.json();
       const predictions = tideJson.predictions || [];
-
       console.log(`✅ Tidal predictions received: ${predictions.length} points`);
 
       if (predictions.length === 0) {
         throw new Error("No tidal predictions returned");
       }
 
-      // Transform predictions for chart (take every 6th point for hourly display)
+      //transform predictions for chart (take every 6th point for hourly display)
       const chartData = predictions
-        .filter((_, index) => index % 6 === 0) // Every 6th point = hourly
+        .filter((_, index) => index % 6 === 0) //every 6th point = hourly
         .map(prediction => {
           const time = new Date(prediction.t);
           const hour = time.getHours().toString().padStart(2, '0');
@@ -244,7 +240,7 @@ export default function EnvironmentalDashboard({ onBack }) {
       
       if (!hourlyUrl) {
         console.warn("⚠️ No hourly forecast URL available, using period data");
-        // Fallback: use period data for chart
+        //fallback: use period data for chart
         const periods = forecastData.properties?.periods || [];
         const chartData = periods.slice(0, 8).map((period) => {
           const tempStr = period.temperature?.toString().replace("F", "").trim();
@@ -267,7 +263,7 @@ export default function EnvironmentalDashboard({ onBack }) {
 
       if (!hourlyResponse.ok) {
         console.warn("⚠️ Hourly forecast failed, using period data instead");
-        // Fallback to period data
+        //fallback to period data if hourly forecast not available
         const periods = forecastData.properties?.periods || [];
         const chartData = periods.slice(0, 8).map((period) => {
           const tempStr = period.temperature?.toString().replace("F", "").trim();
@@ -299,7 +295,7 @@ export default function EnvironmentalDashboard({ onBack }) {
       setForecastData(chartData);
     } catch (error) {
       console.warn("⚠️ Error building forecast chart:", error);
-      // Don't fail the component if hourly data fails
+      //don't fail the component if hourly data fails
     }
   };
 
@@ -322,7 +318,7 @@ export default function EnvironmentalDashboard({ onBack }) {
     return "Partly Cloudy";
   };
 
-  // Prepare tide data with current time marker
+  //prep tide data with current time marker
   const getTideDataWithMarker = () => {
     if (!tideData || tideData.length === 0) return [];
     
@@ -333,7 +329,7 @@ export default function EnvironmentalDashboard({ onBack }) {
     let closestDifference = Infinity;
     let closestIndex = -1;
 
-    // Find the single closest data point
+    //find closest data point for curr time
     tideData.forEach((item, index) => {
       const [hours, minutes] = item.time.split(':').map(Number);
       const itemTotalMinutes = hours * 60 + minutes;
@@ -345,7 +341,7 @@ export default function EnvironmentalDashboard({ onBack }) {
       }
     });
 
-    // Mark only the closest one
+    // mark it orange
     return tideData.map((item, index) => ({
       ...item,
       isNow: index === closestIndex,
@@ -390,7 +386,7 @@ export default function EnvironmentalDashboard({ onBack }) {
       </div>
 
       <div className="env-content">
-        {/* District Tabs */}
+        {/* district tabs */}
         <div className="district-tabs-container">
           <div className="district-tabs">
             {DISTRICTS.map((district) => (
@@ -408,7 +404,7 @@ export default function EnvironmentalDashboard({ onBack }) {
           </div>
         </div>
 
-        {/* Disclaimer Banner */}
+        {/* disclaimer banner */}
         <div className="disclaimer-banner">
           <div className="disclaimer-icon">ℹ️</div>
           <div className="disclaimer-text">
@@ -439,7 +435,7 @@ export default function EnvironmentalDashboard({ onBack }) {
           </div>
         </div>
 
-        {/* Current Conditions Card - LIVE NOAA DATA */}
+        {/*current conditions card - LIVE NOAA data */}
         <div className="weather-card">
           <h3 className="card-title">
             <Cloud size={20} /> Current Conditions (NOAA API)
@@ -498,7 +494,7 @@ export default function EnvironmentalDashboard({ onBack }) {
                 </div>
               </div>
 
-              {/* Marine Warnings Section */}
+              {/* marine warnings section */}
               {currentWeather.marineWarnings && currentWeather.marineWarnings.length > 0 && (
                 <div style={{ marginTop: "16px", padding: "12px", backgroundColor: "#fef3c7", borderRadius: "6px", borderLeft: "4px solid #f59e0b" }}>
                   <div style={{ fontSize: "12px", fontWeight: "600", color: "#92400e", marginBottom: "8px" }}>
@@ -519,7 +515,7 @@ export default function EnvironmentalDashboard({ onBack }) {
           )}
         </div>
 
-        {/* Tidal Patterns Chart - REAL NOAA CO-OPS DATA */}
+        {/*tidal patterns chart :  NOAA CO-OPS DATA */}
         <div className="chart-card">
           <h3 className="card-title">
             <Droplets size={20} /> Tidal Predictions (NOAA CO-OPS)
@@ -601,7 +597,7 @@ export default function EnvironmentalDashboard({ onBack }) {
           </div>
         </div>
 
-        {/* 24-Hour Forecast Chart */}
+        {/* 24-Hour forecast chart */}
         {forecastData.length > 0 && (
           <div className="chart-card">
             <h3 className="card-title">
@@ -632,9 +628,7 @@ export default function EnvironmentalDashboard({ onBack }) {
           </div>
         )}
 
-        
-
-        {/* Integration Guide */}
+        {/* integration status */}
         <div className="integration-guide">
           <h3 className="guide-title">ℹ️ Data Integration Status:</h3>
           <div className="integration-items">

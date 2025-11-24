@@ -7,7 +7,7 @@ export default function SoutheastMap({ onBackToToolsHub }) {
   const [activeTab, setActiveTab] = useState('statewide');
 
   useEffect(() => {
-  // Initialize statewide map
+  //init statewide map
   const mapElement = document.getElementById('southeast-map');
   if (mapElement && !mapElement._leaflet_id) {
     const map = L.map('southeast-map').setView([64.2, -152.5], 3);
@@ -24,7 +24,7 @@ export default function SoutheastMap({ onBackToToolsHub }) {
 }, [activeTab]);
 
 useEffect(() => {
-  // Load Tableau script for both tabs
+  //script to load tableau for both tabs
   const script = document.createElement('script');
   script.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
   document.body.appendChild(script);
@@ -38,12 +38,12 @@ useEffect(() => {
 
   return (
     <div className="southeast-map-container">
-      {/* Background gradient */}
+      {/*background gradient */}
       <div className="southeast-map-background"></div>
 
-      {/* Main Content */}
+      {/* main content */}
       <div className="southeast-map-content">
-        {/* Header */}
+        {/* header */}
         <div className="southeast-map-header">
           <button
             className="back-button-southeast"
@@ -73,18 +73,18 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        {/* Tab Content */}
+        {/* tab navigation */}
+        {/* tab content */}
         <div className="tab-content-wrapper">
           {activeTab === 'statewide' && (
             <div className="tab-content statewide-content">
               <div className="content-split">
-                {/* Map Container */}
+                {/* map container */}
                 <div className="split-item map-item">
                   <div id="southeast-map" className="southeast-map"></div>
                 </div>
 
-                {/* Tableau Dashboard Container */}
+                {/* tableau dashboard container */}
                 <div className="split-item tableau-item">
                   <div className='tableauPlaceholder' id='viz1763503351809' style={{ position: 'relative', width: '100%', height: '100%' }}>
                     <noscript>
@@ -142,7 +142,7 @@ useEffect(() => {
           {activeTab === 'southeast' && (
           <div className="tab-content southeast-content">
             <div className="content-split-vertical">
-              {/* Map Container - ArcGIS Embed */}
+              {/*embed ArcGIS into map containter for SEAK tab */}
               <div className="split-item map-item">
                 <iframe 
                   src="https://arcg.is/1Knnfu0"
@@ -158,9 +158,9 @@ useEffect(() => {
                 />
               </div>
 
-              {/* Right Side - Dashboards Stacked */}
+              {/* rightside section: tableau dash stack vertically */}
               <div className="dashboards-column">
-                {/* First Dashboard Container */}
+                {/*first dashboard container */}
                 <div className="split-item tableau-item" style={{height: '550px'}}> 
                   <div className='tableauPlaceholder' id='viz1763667574911' style={{ position: 'relative', width: '100%', height: '100%' }}>
                     <noscript>
@@ -198,7 +198,7 @@ useEffect(() => {
                   </script>
                 </div>
 
-                {/* Second Dashboard Container */}
+                {/*second dashboard container */}
                 <div className="split-item tableau-item" style={{height: '500px'}}>
                   <div className='tableauPlaceholder' id='viz1763667608060' style={{ position: 'relative', width: '100%', height: '100%' }}>
                     <noscript>
@@ -236,7 +236,7 @@ useEffect(() => {
                   </script>
                 </div>
 
-                {/* Third Dashboard Container - Sankey Link Button */}
+                {/* third container: sankey chart button with modified containter size */}
                 <div className="split-item tableau-item" style={{width: '50%', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5'}}>
                   <a 
                     href="https://public.tableau.com/views/SEAKSalmonSankey/SEAKSalmonGearSankey?:language=en-US&:sid=&:redirect=auth&:toolbar=no&:display_count=no&:showVizHome=no&:tabs=no&:origin=viz_share_link"

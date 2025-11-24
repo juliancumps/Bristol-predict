@@ -49,7 +49,7 @@
   color: var(--white);
 }
 
-/* Header Section */
+/* header section */
 .southeast-map-header {
   display: flex;
   align-items: flex-start;
@@ -101,7 +101,7 @@
   font-weight: 300;
 }
 
-/* Tab Navigation */
+/* tab nav */
 .tab-container {
   display: flex;
   justify-content: flex-start;
@@ -145,7 +145,7 @@
   box-shadow: 0 4px 12px rgba(58, 159, 243, 0.15);
 }
 
-/* Tab Content */
+/* tab content */
 .tab-content-wrapper {
   flex: 1;
   display: flex;
@@ -179,7 +179,7 @@
   border: 1px solid rgba(58, 159, 243, 0.15);
 }
 
-/* Map Styling */
+/* map styling */
 .map-item {
   position: relative;
   height: 550px;
@@ -195,7 +195,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Leaflet Overrides */
+/* leaflet 'overrides' */
 .southeast-map .leaflet-container,
 .southeast-map-alt .leaflet-container {
   background-color: rgba(15, 42, 72, 0.5);
@@ -231,7 +231,7 @@
   color: var(--sunset-gold);
 }
 
-/* Tableau Dashboard Container */
+/* tableau dashboard container */
 .tableau-item {
   padding: 0;
   overflow: hidden;
@@ -250,7 +250,7 @@
   display: flex !important;
 }
 
-/* Placeholder Styling */
+/* placeholder styling */
 .placeholder-item {
   display: flex;
   align-items: center;
@@ -302,7 +302,7 @@
 }
 
 
-/* Southeast Tab - Separate Layout */
+/* SEAK tab - separate layout */
 .content-split-vertical {
   display: grid;
   grid-template-columns: 1fr 3fr;
@@ -325,7 +325,7 @@
 }
 
 
-/* Mobile Responsive Design */
+/* mobile responsive design (I hope) */
 @media (max-width: 1024px) {
   .southeast-map-content {
     padding: 20px;
@@ -369,7 +369,7 @@
     font-size: 0.9rem;
   }
 
-  /* Stack content vertically on mobile */
+  /* stack content vertically - mobile */
   .content-split {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -445,7 +445,7 @@
   }
 }
 
-/* Ensure proper scrolling behavior */
+/* ensure proper scrolling */
 @media (max-height: 800px) {
   .southeast-map-content {
     min-height: auto;
