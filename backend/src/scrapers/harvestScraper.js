@@ -152,7 +152,7 @@ async function scrapeHarvestDataSingleBrowser(runDate, page = null) {
       const tables = document.querySelectorAll("table");
 
       // ============================================
-      // --- parse Total Run table ---
+      // --- parse 'total run' table ---
       // ============================================
       for (let table of tables) {
         const headerText = table.textContent;
