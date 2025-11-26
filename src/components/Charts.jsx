@@ -25,7 +25,7 @@ const CHART_NOTES = {
 
 const PIE_COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b"];
 
-// Custom Tooltip Component for charts with notes
+//tooltip component for charts with notes
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -65,7 +65,7 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict,
     );
   }
 
-  // Filter data by selected season
+  //filter data by selected season
   const filteredData = selectedSeason
     ? historicalData.filter((day) => day.season === selectedSeason)
     : historicalData;
@@ -78,10 +78,10 @@ export function LineChart_DayToDayComparison({ historicalData, selectedDistrict,
     );
   }
 
-  // Reverse data so oldest dates are first (left side of chart)
+  //reverse data so oldest dates are first (left side of chart)
   const reversedData = [...filteredData].reverse();
 
-  // Prepare data for line chart
+  //prep data for line chart
   const chartData = reversedData.map((day) => {
     const dataPoint = {
       date: day.runDate,
