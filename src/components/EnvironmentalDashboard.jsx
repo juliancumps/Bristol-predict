@@ -438,7 +438,7 @@ export default function EnvironmentalDashboard({ onBack }) {
         {/*current conditions card - LIVE NOAA data */}
         <div className="weather-card">
           <h3 className="card-title">
-            <Cloud size={20} /> Current Conditions (NOAA API)
+            <Cloud size={20} /> Current Conditions (NOAA)
           </h3>
           {currentWeather.loading && (
             <div className="loading-state">
@@ -510,7 +510,7 @@ export default function EnvironmentalDashboard({ onBack }) {
                 </div>
               )}
 
-              <div className="data-source-badge">Data from NOAA National Weather Service & CO-OPS • Real-time • Free API</div>
+              <div className="data-source-badge">Data from NOAA National Weather Service & CO-OPS</div>
             </>
           )}
         </div>
