@@ -25,7 +25,7 @@ const CHART_NOTES = {
 
 const PIE_COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#10b981", "#f59e0b"];
 
-//tooltip component for charts with notes
+//tooltip component for charts having notes
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
