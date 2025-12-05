@@ -259,7 +259,7 @@ export function LineChart_MultiDistrict({ historicalData, districts, selectedSea
     );
   }
 
-  // Filter data by selected season
+  //filter data by selected season
   const filteredData = selectedSeason
     ? historicalData.filter((day) => day.season === selectedSeason)
     : historicalData;
@@ -272,7 +272,7 @@ export function LineChart_MultiDistrict({ historicalData, districts, selectedSea
     );
   }
 
-  // Reverse data so oldest dates are first (left side of chart)
+  //reverse data so oldest dates are first (left side of chart)
   const reversedData = [...filteredData].reverse();
 
   const chartData = reversedData.map((day) => {
@@ -287,7 +287,7 @@ export function LineChart_MultiDistrict({ historicalData, districts, selectedSea
     return dataPoint;
   });
 
-  // Calculate interval to show reasonable number of ticks (roughly 15-20 labels)
+  //calculate interval to show reasonable number of ticks (roughly 15-20 labels)
   const interval = Math.max(0, Math.floor(chartData.length / 20));
 
   return (
@@ -340,7 +340,7 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
     );
   }
 
-  // Filter data by selected season
+  //filter data by selected season
   const filteredData = selectedSeason
     ? historicalData.filter((day) => day.season === selectedSeason)
     : historicalData;
@@ -353,7 +353,7 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
     );
   }
 
-  // Reverse data so oldest dates are first (left side of chart)
+  //reverse data so oldest dates are first (left side of chart)
   const reversedData = [...filteredData].reverse();
 
   const chartData = reversedData.map((day) => {
@@ -361,7 +361,7 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
       date: day.runDate,
     };
 
-    // Get sockeye per delivery for each district
+    //get sockeye per delivery for each district
     if (day.sockeyePerDelivery && typeof day.sockeyePerDelivery === "object") {
       Object.entries(day.sockeyePerDelivery).forEach(([districtId, sockeyeValue]) => {
         dataPoint[districtId] = sockeyeValue;
@@ -371,7 +371,7 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
     return dataPoint;
   });
 
-  // Calculate interval to show reasonable number of ticks (roughly 15-20 labels)
+  //calculate interval to show reasonable number of ticks (roughly 15-20 labels)
   const interval = Math.max(0, Math.floor(chartData.length / 30));
 
   return (
@@ -417,7 +417,7 @@ export function LineChart_MultiDistrict_SockeyePerDelivery({ historicalData, dis
 
 /**
  * NEW: Line Chart for Date Range Mode
- * Shows daily catch trends for all 5 districts across the selected date range
+ * show daily catch trends for all 5 districts across the selected date range
  */
 export function LineChart_DateRange({ rangeData, districts }) {
   if (!rangeData || !Array.isArray(rangeData) || rangeData.length === 0) {
@@ -428,13 +428,13 @@ export function LineChart_DateRange({ rangeData, districts }) {
     );
   }
 
-  // Build chart data from the array of daily data
+  //build chart data from the array of daily data
   const chartData = rangeData.map((dayData) => {
     const dataPoint = {
       date: dayData.runDate,
     };
 
-    // Add daily catch for each district
+    // add daily catch for each district
     if (Array.isArray(dayData.districts)) {
       dayData.districts.forEach((district) => {
         dataPoint[district.id] = district.catchDaily || 0;
@@ -452,7 +452,7 @@ export function LineChart_DateRange({ rangeData, districts }) {
     );
   }
 
-  // Calculate interval to show reasonable number of date ticks
+  //calculate interval to show reasonable number of date ticks
   const interval = Math.max(0, Math.floor(chartData.length / 15));
 
   return (
