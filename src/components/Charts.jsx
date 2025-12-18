@@ -10,6 +10,7 @@ const DISTRICT_COLORS = {
   togiak: "#f59e0b",
 };
 
+
 const CHART_NOTES = {
   "07-18-2025": "ADF&G did not collect data on this date :(",
   "07-19-2025": "ADF&G did not collect data on this date :(",
