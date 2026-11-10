@@ -103,7 +103,7 @@ async function scrapeHarvestDataSingleBrowser(runDate, page = null) {
       page._browser = browser;
     }
 
-    await page.goto(HARVEST_URL, { waitUntil: "networkidle0", timeout: 60000 });
+    await page.goto(HARVEST_URL, { waitUntil: "domcontentloaded", timeout: 60000 });
 
     const found = await waitForElement(page, DATE_SELECTOR, 15000);
     if (!found) throw new Error("Date dropdown not found");
@@ -115,9 +115,10 @@ async function scrapeHarvestDataSingleBrowser(runDate, page = null) {
     if (!goButton) throw new Error("Go button not found");
 
     await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 90000 }),
       goButton.click(),
-      page.waitForNetworkIdle({ timeout: 30000 }),
     ]);
+    await page.waitForSelector("table", { timeout: 30000 });
 
     await new Promise((r) => setTimeout(r, 3000));
 

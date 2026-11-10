@@ -6,7 +6,7 @@ const { initDatabase, saveScrapedData } = require("./database");
 const fs = require("fs");
 const path = require("path");
 
-// Define all three seasons with specific date ranges
+// Define all seasons with specific date ranges
 // Fishing season runs June to August
 const SEASONS = [
   {
@@ -24,6 +24,11 @@ const SEASONS = [
     start: new Date("2025-06-17"), //actual start is 06/16
     end: new Date("2025-07-25"),    //actual end is 07/24
   },
+  {
+    year: 2026,
+    start: new Date("2026-06-17"), //actual start is 06/16
+    end: new Date("2026-07-27"),  //actual end is 07/26
+  }
 ];
 ////////////////////////////////////////////
 
