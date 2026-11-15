@@ -151,10 +151,17 @@ function registrationSeries(items) {
   const rows = [];
   for (const item of items) {
     for (const reg of item.registrations || []) {
-      rows.push({ ...reg, issued: item.issued, sourceId: item.id });
+      rows.push({ ...reg, issued: item.issued, sourceId: item.id, sourceUrl: item.url, sourceTitle: item.title });
     }
   }
   return rows.sort((a, b) => (a.issued < b.issued ? -1 : 1));
 }
 
-module.exports = { computeStatus, registrationSeries, alaskaNow, DISTRICTS };
+/** The newest boat count for each district (for the daily briefing). */
+function latestRegistrations(items) {
+  const out = {};
+  for (const row of registrationSeries(items)) out[row.district] = row;
+  return out;
+}
+
+module.exports = { computeStatus, registrationSeries, latestRegistrations, alaskaNow, DISTRICTS };

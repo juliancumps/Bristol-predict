@@ -8,6 +8,7 @@
     "dev": "nodemon src/server.js",
     "update": "node src/jobs/update.js",
     "update:announcements": "node src/jobs/update.js --announcements-only",
+    "update:portmoller": "node src/jobs/update.js --portmoller",
     "backfill": "node src/backfill.js",
     "backfill:rivers": "node src/backfill.js rivers",
     "test": "node test/parsers.test.js",

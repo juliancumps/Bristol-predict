@@ -492,3 +492,219 @@
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 }
+
+/* ---------- charts and Port Moller ---------- */
+.v4-chart {
+  width: 100%;
+  height: 240px;
+}
+.v4-tooltip {
+  background: rgba(10, 20, 40, 0.95);
+  border: 1px solid rgba(58, 159, 243, 0.4);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  color: var(--white, #fafaf7);
+}
+.v4-key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+.v4-pm-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.v4-pm-asof {
+  grid-column: 1 / -1;
+}
+.v4-big-sm {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.4rem;
+  color: var(--white, #fafaf7);
+}
+.v4-stock {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+.v4-stock-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.v4-content code {
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+@media (min-width: 700px) {
+  .v4-chart {
+    height: 320px;
+  }
+  .v4-pm-top {
+    grid-template-columns: 1fr 1fr 2fr;
+    align-items: end;
+  }
+  .v4-pm-asof {
+    grid-column: auto;
+  }
+}
+.v4-arrival {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+.v4-arrival-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-left: 4px solid;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+}
+@media (min-width: 700px) {
+  .v4-arrival {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* ---------- tables ---------- */
+.v4-table-wrap {
+  overflow-x: auto;
+}
+.v4-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.v4-table th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gray-light, #a9a9a5);
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(58, 159, 243, 0.25);
+}
+.v4-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: top;
+}
+.v4-table td:first-child {
+  padding-left: 10px;
+}
+
+/* ---------- daily briefing ---------- */
+.v4-brief-fresh {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.85rem;
+  color: var(--gray-light, #a9a9a5);
+  margin-bottom: 12px;
+}
+.v4-warn {
+  color: #ff8f8f !important;
+  font-weight: 600;
+}
+.v4-up {
+  color: #6ee7b7;
+}
+.v4-down {
+  color: #ffb1b1;
+}
+.v4-brief-statuslist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v4-brief-status {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  align-items: center;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 12px;
+  text-align: left;
+  font-family: inherit;
+  color: var(--white, #fafaf7);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(58, 159, 243, 0.2);
+  border-left: 5px solid;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.v4-brief-status:active {
+  background: rgba(58, 159, 243, 0.12);
+}
+.v4-brief-status-name {
+  font-weight: 600;
+}
+.v4-brief-status-detail {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+  color: var(--gray-light, #a9a9a5);
+}
+.v4-table tr.v4-home td {
+  background: rgba(58, 159, 243, 0.08);
+}
+.v4-goalbar-thin {
+  height: 8px;
+}
+.v4-brief-mini {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+  margin-top: 14px;
+}
+.v4-brief-esc {
+  margin-top: 12px;
+}
+.v4-card[role="button"] {
+  cursor: pointer;
+}
+.v4-wide {
+  width: 100%;
+  min-height: 48px;
+}
+.v4-settings label {
+  display: block;
+  margin-bottom: 12px;
+}
+.v4-settings select {
+  margin-top: 6px;
+}
+.v4-check {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.v4-check input {
+  width: 22px;
+  height: 22px;
+}
+@media (min-width: 700px) {
+  .v4-brief-status {
+    grid-template-columns: 180px auto 1fr;
+  }
+  .v4-brief-status-detail {
+    grid-column: auto;
+  }
+  .v4-brief-mini {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}

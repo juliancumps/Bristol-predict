@@ -26,8 +26,15 @@ const {
   getRiverSeries,
   DATE_SORT,
 } = require("./database");
-const { loadAnnouncements, announcementYears, loadReference } = require("./store");
-const { computeStatus, registrationSeries, alaskaNow } = require("./openingsStatus");
+const { loadAnnouncements, announcementYears, loadReference, loadPortMoller, portMollerYears } = require("./store");
+const {
+  parseStockComposition,
+  sharesByDistrict,
+  cumulativeIndex,
+  arrivalWindow,
+  TRAVEL_DAYS,
+} = require("./scrapers/portMoller");
+const { computeStatus, registrationSeries, latestRegistrations, alaskaNow } = require("./openingsStatus");
 
 console.log("✅ Loaded database module");
 
@@ -689,6 +696,140 @@ app.get("/api/escapement", async (req, res) => {
   } catch (error) {
     console.error("Error in /api/escapement:", error);
     res.status(500).json({ error: "Failed to load escapement", message: error.message });
+  }
+});
+
+// Port Moller test fishery. ?year=2026
+// Catch index from BBSRI (data/portmoller), stock composition from the saved ADF&G announcements.
+function portMollerData(yearParam) {
+  const years = [...new Set([...portMollerYears(), ...announcementYears()])].sort((a, b) => b - a);
+  const year = parseInt(yearParam) || years[0] || new Date().getFullYear();
+  const pm = loadPortMoller(year);
+  const ann = loadAnnouncements(year);
+  const stockComposition = ann.items
+    .filter((i) => i.kind === "portmoller" && i.text)
+    .map((i) => {
+      const sc = parseStockComposition(i.text, i.title);
+      return {
+        id: i.id,
+        title: i.title,
+        url: i.url,
+        issued: i.issued,
+        ...sc,
+        byDistrict: sharesByDistrict(sc.groups),
+        arrival: arrivalWindow(sc.periodStart, sc.periodEnd),
+      };
+    })
+    .sort((a, b) => (a.periodStart || "").localeCompare(b.periodStart || ""));
+  const catchUpdates = [...pm.catchUpdates].sort((a, b) => a.number - b.number);
+  return {
+    year,
+    years,
+    source: pm.source,
+    checkedAt: pm.checkedAt,
+    updatedAt: pm.updatedAt,
+    announcementsCheckedAt: ann.checkedAt,
+    travelDays: TRAVEL_DAYS,
+    catchUpdates,
+    cumulativeIndex: cumulativeIndex(catchUpdates),
+    stockComposition,
+  };
+}
+
+app.get("/api/portmoller", (req, res) => {
+  try {
+    res.json(cached(`pm-${req.query.year || "latest"}`, () => portMollerData(req.query.year)));
+  } catch (error) {
+    res.status(500).json({ error: "Failed to load Port Moller data", message: error.message });
+  }
+});
+
+// Daily briefing: one small answer for the morning check on a weak signal.
+// ?asOf=2026-07-01T06:00 (Alaska time) replays a past morning.
+const mdyKey = (d) => d.slice(6) + d.slice(0, 2) + d.slice(3, 5); // MM-DD-YYYY -> YYYYMMDD
+
+function riverState(value, goal) {
+  if (value < goal.lower) return "below";
+  if (goal.upper && value > goal.upper) return "above";
+  return "within";
+}
+
+app.get("/api/briefing", async (req, res) => {
+  try {
+    const asOf = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(req.query.asOf || "") ? req.query.asOf : alaskaNow();
+    const asOfKey = asOf.slice(0, 10).replace(/-/g, "");
+
+    // Newest run summary day before asOf (ADF&G posts day D on the morning of D+1)
+    const dates = await getAvailableDates(db);
+    const day = dates.find((d) => mdyKey(d.run_date) < asOfKey) || null;
+    const run = day ? await getDataByDate(db, day.run_date) : null;
+    const prevDay = day ? dates.find((d) => mdyKey(d.run_date) < mdyKey(day.run_date) && d.season === day.season) : null;
+    const prev = prevDay ? await getDataByDate(db, prevDay.run_date) : null;
+
+    const { year, store } = announcementsForYear(asOf.slice(0, 4));
+    const status = computeStatus(store.items, asOf);
+    const drift = {};
+    for (const [id, d] of Object.entries(status.districts)) {
+      drift[id] = { ...d.drift, registration: d.registration || null };
+    }
+    const fleet = latestRegistrations(store.items.filter((i) => i.issued && i.issued <= asOf));
+
+    const season = run ? run.season : year;
+    const forecasts = cached("forecasts", () => loadReference("forecasts")) || { years: {} };
+    const goals = cached("goals", () => loadReference("escapement_goals"));
+    const escapement = run && goals
+      ? goals.rivers
+          .map((g) => {
+            const r = (run.rivers || []).find((x) => x.name === g.name);
+            if (!r) return null;
+            return { river: g.name, district: g.district, cumulative: r.escapementCumulative, daily: r.escapementDaily,
+              lower: g.lower, upper: g.upper, state: riverState(r.escapementCumulative, g) };
+          })
+          .filter(Boolean)
+      : [];
+
+    const pm = portMollerData(season);
+    // BBSRI posts the catch update in the evening of its date
+    const pmLast = [...pm.cumulativeIndex].reverse().find((c) => `${c.date}T21:00` <= asOf) || null;
+    const pmUpdate = pmLast ? pm.catchUpdates.find((u) => u.number === pmLast.number) : null;
+    const pmStock = [...pm.stockComposition].reverse().find((s) => s.issued && s.issued <= asOf) || null;
+
+    res.json({
+      asOf,
+      now: alaskaNow(),
+      season,
+      inSeason: status.inSeason,
+      status: drift,
+      latestRun: run && {
+        runDate: run.runDate,
+        scrapedAt: run.scrapedAt,
+        totalRun: run.totalRun,
+        districts: run.districts,
+        sockeyePerDelivery: run.sockeyePerDelivery || {},
+        previous: prev && { runDate: prev.runDate, districts: prev.districts, sockeyePerDelivery: prev.sockeyePerDelivery || {} },
+      },
+      forecast: forecasts.years?.[season] || null,
+      escapement,
+      portMoller: {
+        date: pmLast?.date || null,
+        number: pmLast?.number || null,
+        dailyIndex: pmLast?.dailyIndex ?? null,
+        cumulativeIndex: pmLast?.cumulative ?? null,
+        url: pmUpdate?.url || null,
+        stock: pmStock && { period: [pmStock.periodStart, pmStock.periodEnd], byDistrict: pmStock.byDistrict,
+          arrival: pmStock.arrival, url: pmStock.url, complete: pmStock.complete },
+      },
+      fleet,
+      freshness: {
+        runSummary: run ? run.runDate : null,
+        runSummaryScrapedAt: run ? run.scrapedAt : null,
+        announcements: store.checkedAt,
+        portMoller: pm.checkedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error in /api/briefing:", error);
+    res.status(500).json({ error: "Failed to build the briefing", message: error.message });
   }
 });
 

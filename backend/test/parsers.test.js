@@ -283,4 +283,126 @@ test("Off season: no recent announcements means 'none'", () => {
   assert.strictEqual(s.inSeason, false);
 });
 
+
+/* ---------- Port Moller ---------- */
+const {
+  parseStockComposition, listCatchUpdates, parseCatchUpdate, sharesByDistrict, cumulativeIndex, arrivalWindow,
+} = require("../src/scrapers/portMoller");
+
+// ADF&G stock composition, text as pdf-parse saves it (July 8-9, 2026)
+const PM_STOCK = `This is the Alaska Department of Fish and Game with an update regarding genetic stock 
+composition estimates for sockeye salmon from the Port Moller Test Fishery for July 8-9, 2026. 
+ 
+A total of 180 fish were sampled and 180 were analyzed (180 had adequate data to include in the 
+analysis). 
+ 
+  Stock 90% 
+ 
+Composition Confidence Intervals 
+Reporting Group Estimate Lower Upper 
+North Peninsula 0.6% 0.0% 2.9% 
+Ugashik 13.8% 0.0% 25.2% 
+Egegik 11.2% 3.0% 24.7% 
+Naknek 11.7% 5.9% 18.3% 
+Alagnak 12.3% 3.9% 20.7% 
+Kvichak 20.5% 13.5% 28.4% 
+Nushagak 9.9% 0.0% 17.9% 
+Wood 2.5% 0.0% 8.2% 
+Igushik 8.3% 2.4% 14.6% 
+Togiak 8.5% 4.5% 13.0% 
+Kuskokwim 0.7% 0.0% 3.7%`;
+
+// BBSRI catch updates (2026 #25, 2026 #32, 2026 #3, 2025 #25)
+const PM_CU25 = `Port Moller Test Fish Catch Update
+Catch Update #25, July 4, 2026
+1—PMTF Catch Update Table
+3—C+E by District and Day for 2011-2026
+Index by Station
+S2: Not fished
+S4: 11
+S6: 333
+S8: 28
+S10: 26
+S12: 21
+S14: 13
+S16: 7
+S18: 4
+S20: 0
+S22: 0
+S24: 0
+Daily Catch Index = 39
+Jordan and Scott`;
+const PM_CU32 = `Catch Update #32, July 11, 2026
+S2: Not fished
+S4: 75
+S6: 71
+S8: 35
+S10: 0
+S12-14: Not fished
+Daily Catch Index = 18`;
+const PM_CU3 = `Catch Update #3, June 12, 2026
+S2: Skipped
+S4: Skipped
+S6: 0
+S8: 12
+S10: 72
+S14:0
+Daily Catch Index = ~7`;
+const PM_CU25_2025 = `Catch Update #25, July 4, 2025
+S2: 0
+S4: 15
+S6: 118
+S8-24: Not fished
+Daily Catch Index = Will update tomorrow`;
+const PM_PAGE = `<tr><td><a data-testid="linkElement" href="https://www.bbsri.org/_files/ugd/bc10d6_f9ab.pdf" target="_blank"><div class="g0q0vK">Catch Update #32</div></a></td><td><div><div class="g0q0vK">July 11, 2026</div></div></td></tr>
+<tr><td><a href="/_files/ugd/bc10d6_9913.pdf"><div>Catch Update #25</div></a></td><td><div><div>July 4, 2026</div></div></td></tr>
+<tr><td><a href="https://www.bbsri.org/_files/ugd/x.pdf"><div>July 8-9, 2026</div></a></td></tr>`;
+
+console.log("Port Moller");
+test("stock composition table, dates from the title", () => {
+  const sc = parseStockComposition(PM_STOCK, "Port Moller Sockeye Salmon Stock Composition Summary June 30-July 1, 2026 – All Stations");
+  assert.strictEqual(sc.periodStart, "2026-06-30");
+  assert.strictEqual(sc.periodEnd, "2026-07-01");
+  assert.strictEqual(sc.sampled, 180);
+  assert.strictEqual(sc.groups.length, 11);
+  assert.deepStrictEqual(sc.groups[5], { group: "Kvichak", estimate: 20.5, lower: 13.5, upper: 28.4, district: "naknek" });
+  assert.strictEqual(sc.complete, true);
+  const by = sharesByDistrict(sc.groups);
+  assert.strictEqual(by.naknek, 44.5);
+  assert.strictEqual(by.nushagak, 20.7);
+  assert.deepStrictEqual(arrivalWindow(sc.periodStart, sc.periodEnd), { from: "2026-07-06", to: "2026-07-10" });
+});
+test("catch update: stations, 'Not fished' is null, index", () => {
+  const u = parseCatchUpdate(PM_CU25);
+  assert.strictEqual(u.number, 25);
+  assert.strictEqual(u.date, "2026-07-04");
+  assert.strictEqual(u.stations.S2, null);
+  assert.strictEqual(u.stations.S6, 333);
+  assert.strictEqual(Object.keys(u.stations).length, 12);
+  assert.strictEqual(u.dailyIndex, 39);
+});
+test("catch update: station ranges, '~7', missing index", () => {
+  const a = parseCatchUpdate(PM_CU32);
+  assert.strictEqual(a.stations.S12, null);
+  assert.strictEqual(a.stations.S14, null);
+  assert.strictEqual(a.dailyIndex, 18);
+  const b = parseCatchUpdate(PM_CU3);
+  assert.strictEqual(b.dailyIndex, 7);
+  assert.strictEqual(b.indexApprox, true);
+  assert.strictEqual(b.stations.S14, 0);
+  assert.strictEqual(b.stationNotes.S2, "Skipped");
+  const c = parseCatchUpdate(PM_CU25_2025);
+  assert.strictEqual(c.dailyIndex, null);
+  assert.strictEqual(c.indexNote, "Will update tomorrow");
+  assert.strictEqual(c.stations.S24, null);
+  assert.strictEqual(Object.keys(c.stations).length, 12);
+});
+test("BBSRI page links and running total", () => {
+  const links = listCatchUpdates(PM_PAGE);
+  assert.strictEqual(links.length, 2);
+  assert.deepStrictEqual(links[0], { number: 25, url: "https://www.bbsri.org/_files/ugd/bc10d6_9913.pdf", dateText: "July 4, 2026" });
+  const cum = cumulativeIndex([parseCatchUpdate(PM_CU32), parseCatchUpdate(PM_CU25), parseCatchUpdate(PM_CU3)]);
+  assert.deepStrictEqual(cum.map((c) => c.cumulative), [7, 46, 64]);
+});
+
 console.log(`\n${passed} tests passed${process.exitCode ? ", SOME FAILED" : ""}`);

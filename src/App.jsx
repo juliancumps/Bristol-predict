@@ -9,19 +9,31 @@ import ToolsHub from "./components/ToolsHub";
 import SoutheastMap from "./components/SoutheastMap";
 import OpeningsBoard from "./components/OpeningsBoard";
 import EscapementTracker from "./components/EscapementTracker";
+import PortMoller from "./components/PortMoller";
+import FleetTracker from "./components/FleetTracker";
+import DailyBriefing from "./components/DailyBriefing";
 import "./styles/BristolBayMap.css";
 import "./App.css";
 
 const VIEWS = [
   "map", "toolshub", "efficiency", "runtracker", "weather",
-  "southeastmap", "openings", "escapement",
+  "southeastmap", "openings", "escapement", "portmoller", "fleet", "briefing",
 ];
 
 // A link like  https://bristol-predict.vercel.app/?view=openings  opens that
 // tool directly and skips the splash screen (good for a phone home-screen icon).
 function viewFromUrl() {
   const view = new URLSearchParams(window.location.search).get("view");
-  return VIEWS.includes(view) ? view : null;
+  if (VIEWS.includes(view)) return view;
+  // Setting on the Daily Briefing screen: open the app on the briefing.
+  if (!window.location.search) {
+    try {
+      if (window.localStorage.getItem("bp.startView") === "briefing") return "briefing";
+    } catch {
+      /* no storage */
+    }
+  }
+  return null;
 }
 
 function App() {
@@ -106,6 +118,9 @@ function App() {
           onNavigateToSoutheastMap={() => setCurrentView("southeastmap")}
           onNavigateToOpenings={() => setCurrentView("openings")}
           onNavigateToEscapement={() => setCurrentView("escapement")}
+          onNavigateToPortMoller={() => setCurrentView("portmoller")}
+          onNavigateToFleet={() => setCurrentView("fleet")}
+          onNavigateToBriefing={() => setCurrentView("briefing")}
           onBackToBristolBayMap={() => setCurrentView("map")}
         />
       )}
@@ -115,6 +130,17 @@ function App() {
       {currentView === "southeastmap" && <SoutheastMap onBackToToolsHub={toHub} />}
       {currentView === "openings" && <OpeningsBoard onBack={toHub} />}
       {currentView === "escapement" && <EscapementTracker onBack={toHub} />}
+      {currentView === "portmoller" && <PortMoller onBack={toHub} />}
+      {currentView === "fleet" && <FleetTracker onBack={toHub} />}
+      {currentView === "briefing" && (
+        <DailyBriefing
+          onBack={toHub}
+          onOpenOpenings={() => setCurrentView("openings")}
+          onOpenPortMoller={() => setCurrentView("portmoller")}
+          onOpenWeather={() => setCurrentView("weather")}
+          onOpenEscapement={() => setCurrentView("escapement")}
+        />
+      )}
     </>
   );
 }

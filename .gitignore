@@ -30,3 +30,7 @@ lerna-debug.log*
 
 # OS
 Thumbs.db
+# Secrets
+.env
+.env.*
+backend/.env

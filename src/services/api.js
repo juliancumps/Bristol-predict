@@ -420,3 +420,11 @@ export function durationBetween(a, b) {
   if (hours > 0) return `${hours}h ${mins}m`;
   return `${mins}m`;
 }
+
+/** Port Moller test fishery: BBSRI catch index + ADF&G stock composition. */
+export const getPortMoller = (year = null) =>
+  get(year ? `/portmoller?year=${year}` : "/portmoller");
+
+/** Everything for the morning check in one request. ?asOf replays a past morning. */
+export const getBriefing = (asOf = null) =>
+  get(asOf ? `/briefing?asOf=${encodeURIComponent(asOf)}` : "/briefing");

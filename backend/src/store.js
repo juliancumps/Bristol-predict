@@ -2,6 +2,7 @@
  * Small JSON file store for data that is not in SQLite:
  *   data/announcements/<year>.json   - parsed ADF&G announcements
  *   data/reference/*.json            - escapement goals, forecasts
+ *   data/portmoller/<year>.json      - BBSRI Port Moller catch updates
  * JSON files are easy to read and give clean git history.
  */
 const fs = require("fs");
@@ -10,6 +11,7 @@ const path = require("path");
 const DATA_DIR = path.join(__dirname, "..", "data");
 const ANNOUNCEMENTS_DIR = path.join(DATA_DIR, "announcements");
 const REFERENCE_DIR = path.join(DATA_DIR, "reference");
+const PORTMOLLER_DIR = path.join(DATA_DIR, "portmoller");
 
 function readJson(file, fallback) {
   try {
@@ -46,7 +48,36 @@ function loadReference(name) {
   return readJson(path.join(REFERENCE_DIR, `${name}.json`), null);
 }
 
+function yearsIn(dir) {
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .map((f) => parseInt(f))
+    .filter(Boolean)
+    .sort((a, b) => b - a);
+}
+
+function portMollerFile(year) {
+  return path.join(PORTMOLLER_DIR, `${year}.json`);
+}
+
+function loadPortMoller(year) {
+  return readJson(portMollerFile(year), { year, source: null, checkedAt: null, updatedAt: null, catchUpdates: [] });
+}
+
+function savePortMoller(year, store) {
+  fs.mkdirSync(PORTMOLLER_DIR, { recursive: true });
+  store.catchUpdates.sort((a, b) => a.number - b.number);
+  fs.writeFileSync(portMollerFile(year), JSON.stringify(store, null, 1) + "\n");
+}
+
+const portMollerYears = () => yearsIn(PORTMOLLER_DIR);
+
 module.exports = {
+  loadPortMoller,
+  savePortMoller,
+  portMollerYears,
+  yearsIn,
   loadAnnouncements,
   saveAnnouncements,
   announcementYears,

@@ -8,6 +8,9 @@ export default function ToolsHub({
   onNavigateToSoutheastMap,
   onNavigateToOpenings,
   onNavigateToEscapement,
+  onNavigateToPortMoller,
+  onNavigateToFleet,
+  onNavigateToBriefing,
 
   onBackToBristolBayMap,
 }) {
@@ -38,6 +41,26 @@ export default function ToolsHub({
 
         {/* Tools Grid */}
         <div className="tools-hub-grid">
+          {/* Daily Briefing Card (V4) - first */}
+          <div className="tool-card-hub">
+            <div className="tool-icon-hub">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="13" r="4" stroke="currentColor" strokeWidth="2" />
+                <path d="M12 3v3M4.2 6.2l2.1 2.1M19.8 6.2l-2.1 2.1M3 21h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+            <h3>Daily Briefing</h3>
+            <p>
+              The morning check on one screen: openings, yesterday's catch, run against forecast, Port Moller.
+            </p>
+            <button
+              className="btn-tool-hub btn-primary-hub"
+              onClick={onNavigateToBriefing}
+            >
+              View
+            </button>
+          </div>
+
           {/* Openings & Announcements Card (V4) */}
           <div className="tool-card-hub">
             <div className="tool-icon-hub">
@@ -74,6 +97,46 @@ export default function ToolsHub({
             <button
               className="btn-tool-hub btn-primary-hub"
               onClick={onNavigateToEscapement}
+            >
+              View
+            </button>
+          </div>
+
+          {/* Port Moller Card (V4) */}
+          <div className="tool-card-hub">
+            <div className="tool-icon-hub">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 17c2 0 2-2 4.5-2s2.5 2 4.5 2 2-2 4.5-2 2.5 2 4.5 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M5 12V6m4 6V9m4 3V4m4 8V8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+            <h3>Port Moller</h3>
+            <p>
+              Test fishery catch index and stock composition, with the arrival window for each district.
+            </p>
+            <button
+              className="btn-tool-hub btn-primary-hub"
+              onClick={onNavigateToPortMoller}
+            >
+              View
+            </button>
+          </div>
+
+          {/* Fleet Card (V4) */}
+          <div className="tool-card-hub">
+            <div className="tool-icon-hub">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 15h18l-3 4H6l-3-4z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M12 15V5l5 6h-5" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h3>Fleet</h3>
+            <p>
+              Drift boats in each district from the announcements, and an estimate of the catch per boat.
+            </p>
+            <button
+              className="btn-tool-hub btn-primary-hub"
+              onClick={onNavigateToFleet}
             >
               View
             </button>
