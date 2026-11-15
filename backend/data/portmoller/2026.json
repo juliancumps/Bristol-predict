@@ -1,0 +1,721 @@
+{
+ "year": 2026,
+ "source": "https://www.bbsri.org/inseason-data",
+ "checkedAt": "2026-11-15T21:23:52.078Z",
+ "updatedAt": "2026-11-15T21:23:52.078Z",
+ "catchUpdates": [
+  {
+   "number": 1,
+   "date": "2026-06-10",
+   "stations": {},
+   "dailyIndex": null,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_9f7ffe62f4e4497b90b3f5928cd5e650.pdf",
+   "fetchedAt": "2026-11-15T21:23:00.916Z"
+  },
+  {
+   "number": 2,
+   "date": "2026-06-11",
+   "stations": {
+    "S2": 0,
+    "S4": 0,
+    "S6": 0,
+    "S8": 0,
+    "S10": 4,
+    "S12": 0,
+    "S14": 0,
+    "S16": 0,
+    "S18": 0,
+    "S20": 0,
+    "S22": 0,
+    "S24": 0
+   },
+   "dailyIndex": 0.3,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_c41d4e71fc2e468f9252cb083dd6b086.pdf",
+   "fetchedAt": "2026-11-15T21:23:02.525Z"
+  },
+  {
+   "number": 3,
+   "date": "2026-06-12",
+   "stations": {
+    "S2": null,
+    "S4": null,
+    "S6": 0,
+    "S8": 12,
+    "S10": 72,
+    "S12": 4,
+    "S14": 0,
+    "S16": 0,
+    "S18": 0,
+    "S20": 0,
+    "S22": 0,
+    "S24": 0
+   },
+   "stationNotes": {
+    "S2": "Skipped",
+    "S4": "Skipped"
+   },
+   "dailyIndex": 7,
+   "indexApprox": true,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_237c4061f0a44586bd5486c75f2a1a3e.pdf",
+   "fetchedAt": "2026-11-15T21:23:04.094Z"
+  },
+  {
+   "number": 4,
+   "date": "2026-06-13",
+   "stations": {
+    "S2": 0,
+    "S4": 0,
+    "S6": 0,
+    "S8": 4,
+    "S10": 38,
+    "S12": 6,
+    "S14": 0,
+    "S16": null,
+    "S18": 0,
+    "S20": 0,
+    "S22": 0,
+    "S24": 0
+   },
+   "stationNotes": {
+    "S16": "Not fished"
+   },
+   "dailyIndex": 4,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_f4880cc9b6f9476e81995c853df0589e.pdf",
+   "fetchedAt": "2026-11-15T21:23:05.722Z"
+  },
+  {
+   "number": 5,
+   "date": "2026-06-14",
+   "stations": {
+    "S2": 0,
+    "S4": 2,
+    "S6": 2,
+    "S8": 2,
+    "S10": 39,
+    "S12": 14,
+    "S14": 4,
+    "S16": 0,
+    "S18": 0,
+    "S20": 0,
+    "S22": 0,
+    "S24": 2
+   },
+   "dailyIndex": 5,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_6b94de5ae6544fdf806574e9c173c0f0.pdf",
+   "fetchedAt": "2026-11-15T21:23:07.285Z"
+  },
+  {
+   "number": 6,
+   "date": "2026-06-15",
+   "stations": {
+    "S2": 0,
+    "S4": 0,
+    "S6": 2,
+    "S8": 0,
+    "S10": 60,
+    "S12": 78,
+    "S14": 2,
+    "S16": 10,
+    "S18": 12,
+    "S20": 0,
+    "S22": 0,
+    "S24": 0
+   },
+   "dailyIndex": 14,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_2937c798bc6245f7a138d28778f3f89c.pdf",
+   "fetchedAt": "2026-11-15T21:23:08.858Z"
+  },
+  {
+   "number": 7,
+   "date": "2026-06-16",
+   "stations": {
+    "S2": 2,
+    "S4": 0,
+    "S6": 12,
+    "S8": 19,
+    "S10": 93,
+    "S12": 310,
+    "S14": 4,
+    "S16": 0,
+    "S18": 0,
+    "S20": 2,
+    "S22": 0,
+    "S24": 2
+   },
+   "dailyIndex": 37,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_e98953ee13bc4016947fa7cfd6427fb6.pdf",
+   "fetchedAt": "2026-11-15T21:23:10.482Z"
+  },
+  {
+   "number": 8,
+   "date": "2026-06-17",
+   "stations": {
+    "S2": 0,
+    "S4": 2,
+    "S6": 7,
+    "S8": 13,
+    "S10": 29,
+    "S12": 58,
+    "S14": 0,
+    "S16": 2,
+    "S18": 0,
+    "S20": 0,
+    "S22": 0,
+    "S24": 0
+   },
+   "dailyIndex": 9,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_9e154ca3d61240bb8c7def968b5d6548.pdf",
+   "fetchedAt": "2026-11-15T21:23:12.153Z"
+  },
+  {
+   "number": 9,
+   "date": "2026-06-18",
+   "stations": {
+    "S2": 0,
+    "S4": 2,
+    "S6": 283,
+    "S8": 333,
+    "S10": 188,
+    "S12": 142,
+    "S14": 0,
+    "S16": 2,
+    "S18": 0,
+    "S20": 2,
+    "S22": 4,
+    "S24": 2
+   },
+   "dailyIndex": 80,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_b4c15c556b3d47abbd79a28647c1c788.pdf",
+   "fetchedAt": "2026-11-15T21:23:13.758Z"
+  },
+  {
+   "number": 10,
+   "date": "2026-06-19",
+   "stations": {
+    "S2": 2,
+    "S4": 15,
+    "S6": 93,
+    "S8": 199,
+    "S10": 168,
+    "S12": 317,
+    "S14": 0,
+    "S16": 0,
+    "S18": 0,
+    "S20": 0,
+    "S22": 0,
+    "S24": 0
+   },
+   "dailyIndex": 66,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_c4b388d4f9ea41979b0e8f5cd156c112.pdf",
+   "fetchedAt": "2026-11-15T21:23:15.429Z"
+  },
+  {
+   "number": 11,
+   "date": "2026-06-20",
+   "stations": {
+    "S2": 4,
+    "S4": 0,
+    "S6": 83,
+    "S8": 92,
+    "S10": 26,
+    "S12": 99,
+    "S14": 2,
+    "S16": 0,
+    "S18": 0,
+    "S20": 2,
+    "S22": 2,
+    "S24": 0
+   },
+   "dailyIndex": 26,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_7458b6cea0b646ccbc152c69bcc67270.pdf",
+   "fetchedAt": "2026-11-15T21:23:17.016Z"
+  },
+  {
+   "number": 12,
+   "date": "2026-06-21",
+   "stations": {
+    "S2": 3,
+    "S4": 0,
+    "S6": 29,
+    "S8": 56,
+    "S10": 109,
+    "S12": 424,
+    "S14": 0,
+    "S16": 0,
+    "S18": 8,
+    "S20": 0,
+    "S22": 5,
+    "S24": 0
+   },
+   "dailyIndex": 53,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_7eea74bf441546298bb1880810046e87.pdf",
+   "fetchedAt": "2026-11-15T21:23:18.629Z"
+  },
+  {
+   "number": 13,
+   "date": "2026-06-22",
+   "stations": {
+    "S2": 15,
+    "S4": null,
+    "S6": 60,
+    "S8": 54,
+    "S10": 163,
+    "S12": 534,
+    "S14": 9,
+    "S16": 0,
+    "S18": 0,
+    "S20": 6,
+    "S22": 0,
+    "S24": 2
+   },
+   "stationNotes": {
+    "S4": "Not fished"
+   },
+   "dailyIndex": 72,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_176cca75108045fe9e20aea11b3a9f3d.pdf",
+   "fetchedAt": "2026-11-15T21:23:20.224Z"
+  },
+  {
+   "number": 14,
+   "date": "2026-06-23",
+   "stations": {
+    "S2": 4,
+    "S4": 0,
+    "S6": 151,
+    "S8": 0,
+    "S10": 358,
+    "S12": 286,
+    "S14": 4,
+    "S16": 9,
+    "S18": 0,
+    "S20": 14,
+    "S22": 12,
+    "S24": 2
+   },
+   "dailyIndex": 70,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_61115b45f7084b988bdbd4981ca3f92a.pdf",
+   "fetchedAt": "2026-11-15T21:23:21.840Z"
+  },
+  {
+   "number": 15,
+   "date": "2026-06-24",
+   "stations": {
+    "S2": 3,
+    "S4": 64,
+    "S6": 60,
+    "S8": 238,
+    "S10": 186,
+    "S12": 336,
+    "S14": 10,
+    "S16": 10,
+    "S18": 2,
+    "S20": 0,
+    "S22": 19,
+    "S24": null
+   },
+   "stationNotes": {
+    "S24": "Not fished"
+   },
+   "dailyIndex": 78,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_a21d3d84b65143658576e79e0bf7bab2.pdf",
+   "fetchedAt": "2026-11-15T21:23:23.435Z"
+  },
+  {
+   "number": 16,
+   "date": "2026-06-25",
+   "stations": {
+    "S2": null,
+    "S4": 41,
+    "S6": 151,
+    "S8": 149,
+    "S10": 275,
+    "S12": 103,
+    "S14": 4,
+    "S16": 15,
+    "S18": 2,
+    "S20": 0,
+    "S22": null,
+    "S24": null
+   },
+   "stationNotes": {
+    "S2": "Not fished",
+    "S22": "Not fished",
+    "S24": "Not fished"
+   },
+   "dailyIndex": 65,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_7e2b4c1ff2e844f8ac9c463aeccad5be.pdf",
+   "fetchedAt": "2026-11-15T21:23:25.017Z"
+  },
+  {
+   "number": 17,
+   "date": "2026-06-26",
+   "stations": {
+    "S2": 9,
+    "S4": 143,
+    "S6": 114,
+    "S8": 126,
+    "S10": 132,
+    "S12": 35,
+    "S14": 0,
+    "S16": 2,
+    "S18": 0,
+    "S20": 4,
+    "S22": 2,
+    "S24": 7
+   },
+   "dailyIndex": 48,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_2e42fb481f904b189b24a86270b7e7ec.pdf",
+   "fetchedAt": "2026-11-15T21:23:26.605Z"
+  },
+  {
+   "number": 18,
+   "date": "2026-06-27",
+   "stations": {
+    "S2": 2,
+    "S4": 178,
+    "S6": 64,
+    "S8": 170,
+    "S10": 386,
+    "S12": 178,
+    "S14": 3,
+    "S16": 0,
+    "S18": 6,
+    "S20": 5,
+    "S22": 0,
+    "S24": 0
+   },
+   "dailyIndex": 83,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_ae02f32dbdff4c58a83a92bc7f90d47e.pdf",
+   "fetchedAt": "2026-11-15T21:23:28.196Z"
+  },
+  {
+   "number": 19,
+   "date": "2026-06-28",
+   "stations": {
+    "S2": 0,
+    "S4": 90,
+    "S6": 109,
+    "S8": 154,
+    "S10": 23,
+    "S12": 28,
+    "S14": 9,
+    "S16": 2,
+    "S18": 0,
+    "S20": 2,
+    "S22": 2,
+    "S24": 2
+   },
+   "dailyIndex": 35,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_7c3039737c504b59b688e103370b35cb.pdf",
+   "fetchedAt": "2026-11-15T21:23:29.792Z"
+  },
+  {
+   "number": 20,
+   "date": "2026-06-29",
+   "stations": {
+    "S2": null,
+    "S4": null,
+    "S6": 158,
+    "S8": 135,
+    "S10": 51,
+    "S12": 15,
+    "S14": 0,
+    "S16": 4,
+    "S18": 2,
+    "S20": 0,
+    "S22": 4,
+    "S24": null
+   },
+   "stationNotes": {
+    "S2": "Not fished",
+    "S4": "Not fished",
+    "S24": "Not fished"
+   },
+   "dailyIndex": 39,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_9f86027835134244af52b171747d8a34.pdf",
+   "fetchedAt": "2026-11-15T21:23:31.390Z"
+  },
+  {
+   "number": 21,
+   "date": "2026-06-30",
+   "stations": {
+    "S2": 17,
+    "S4": 83,
+    "S6": 139,
+    "S8": 182,
+    "S10": 244,
+    "S12": 14,
+    "S14": 0,
+    "S16": 2,
+    "S18": 0,
+    "S20": 17,
+    "S22": 2,
+    "S24": 4
+   },
+   "dailyIndex": 59,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_5ed1197f99744be0a3a78d85a64cfbd9.pdf",
+   "fetchedAt": "2026-11-15T21:23:32.997Z"
+  },
+  {
+   "number": 22,
+   "date": "2026-07-01",
+   "stations": {
+    "S2": 10,
+    "S4": 192,
+    "S6": 278,
+    "S8": 277,
+    "S10": 50,
+    "S12": 6,
+    "S14": 3,
+    "S16": 6,
+    "S18": 2,
+    "S20": 5,
+    "S22": 2,
+    "S24": 2
+   },
+   "dailyIndex": 69,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_16d3577f4d564d4499020d8002ae4ad8.pdf",
+   "fetchedAt": "2026-11-15T21:23:34.609Z"
+  },
+  {
+   "number": 23,
+   "date": "2026-07-02",
+   "stations": {
+    "S2": 17,
+    "S4": 34,
+    "S6": 41,
+    "S8": 115,
+    "S10": 9,
+    "S12": 4,
+    "S14": 0,
+    "S16": 4,
+    "S18": 0,
+    "S20": 0,
+    "S22": null,
+    "S24": null
+   },
+   "stationNotes": {
+    "S22": "Not fished",
+    "S24": "Not fished"
+   },
+   "dailyIndex": 19,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_346461c4946443f99dea6c19d3310a9c.pdf",
+   "fetchedAt": "2026-11-15T21:23:36.207Z"
+  },
+  {
+   "number": 24,
+   "date": "2026-07-03",
+   "stations": {
+    "S2": null,
+    "S4": null,
+    "S6": 132,
+    "S8": 42,
+    "S10": 2,
+    "S12": 2,
+    "S14": 0,
+    "S16": 0,
+    "S18": 2,
+    "S20": 4,
+    "S22": null,
+    "S24": null
+   },
+   "stationNotes": {
+    "S2": "Not fished",
+    "S4": "Not fished",
+    "S22": "Not fished",
+    "S24": "Not fished"
+   },
+   "dailyIndex": 21,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_8b7e5fd84e6d4386bc6f626665aa30b7.pdf",
+   "fetchedAt": "2026-11-15T21:23:37.804Z"
+  },
+  {
+   "number": 25,
+   "date": "2026-07-04",
+   "stations": {
+    "S2": null,
+    "S4": 11,
+    "S6": 333,
+    "S8": 28,
+    "S10": 26,
+    "S12": 21,
+    "S14": 13,
+    "S16": 7,
+    "S18": 4,
+    "S20": 0,
+    "S22": 0,
+    "S24": 0
+   },
+   "stationNotes": {
+    "S2": "Not fished"
+   },
+   "dailyIndex": 39,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_991399fd4a2e49c8b0f4cab92801cb8f.pdf",
+   "fetchedAt": "2026-11-15T21:23:39.396Z"
+  },
+  {
+   "number": 26,
+   "date": "2026-07-05",
+   "stations": {
+    "S2": 0,
+    "S4": 6,
+    "S6": 12,
+    "S8": 102,
+    "S10": 130,
+    "S12": 0,
+    "S14": 0,
+    "S16": 0,
+    "S18": 0,
+    "S20": 0,
+    "S22": 4,
+    "S24": 2
+   },
+   "dailyIndex": 21,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_945a42946a99435cbbe503a79ffdb27c.pdf",
+   "fetchedAt": "2026-11-15T21:23:40.983Z"
+  },
+  {
+   "number": 27,
+   "date": "2026-07-06",
+   "stations": {
+    "S2": 0,
+    "S4": 20,
+    "S6": 0,
+    "S8": 128,
+    "S10": 74,
+    "S12": 0,
+    "S14": 0,
+    "S16": 0,
+    "S18": 4,
+    "S20": 4,
+    "S22": 0,
+    "S24": 0
+   },
+   "dailyIndex": 19,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_f935987a544c43a68bbd136dd7251086.pdf",
+   "fetchedAt": "2026-11-15T21:23:42.569Z"
+  },
+  {
+   "number": 28,
+   "date": "2026-07-07",
+   "stations": {
+    "S2": 60,
+    "S4": 105,
+    "S6": 188,
+    "S8": 225,
+    "S10": 49,
+    "S12": 3,
+    "S14": 8,
+    "S16": 4,
+    "S18": 2,
+    "S20": 0,
+    "S22": 2,
+    "S24": null
+   },
+   "stationNotes": {
+    "S24": "Not fished"
+   },
+   "dailyIndex": 54,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_8623881e3fbf47ee8937579f0ea9d1eb.pdf",
+   "fetchedAt": "2026-11-15T21:23:44.150Z"
+  },
+  {
+   "number": 29,
+   "date": "2026-07-08",
+   "stations": {
+    "S2": 0,
+    "S4": 43,
+    "S6": 0,
+    "S8": 81,
+    "S10": 75,
+    "S12": 5,
+    "S14": 0,
+    "S16": 23,
+    "S18": null,
+    "S20": null,
+    "S22": null,
+    "S24": null
+   },
+   "stationNotes": {
+    "S18": "Not fished",
+    "S20": "Not fished",
+    "S22": "Not fished",
+    "S24": "Not fished"
+   },
+   "dailyIndex": 20,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_b248585381be4937b2b9b1bfdabfed59.pdf",
+   "fetchedAt": "2026-11-15T21:23:45.809Z"
+  },
+  {
+   "number": 30,
+   "date": "2026-07-09",
+   "stations": {
+    "S2": null,
+    "S4": 56,
+    "S6": 38,
+    "S8": 32,
+    "S10": 0,
+    "S12": 6,
+    "S14": 2,
+    "S16": null,
+    "S18": null,
+    "S20": null,
+    "S22": null,
+    "S24": null
+   },
+   "stationNotes": {
+    "S2": "Not fished",
+    "S16": "Not fished",
+    "S18": "Not fished",
+    "S20": "Not fished",
+    "S22": "Not fished",
+    "S24": "Not fished"
+   },
+   "dailyIndex": 14,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_c92ae92566174953af5bfeef9a386da1.pdf",
+   "fetchedAt": "2026-11-15T21:23:47.406Z"
+  },
+  {
+   "number": 31,
+   "date": "2026-07-10",
+   "stations": {
+    "S2": 2,
+    "S4": 2,
+    "S6": 37,
+    "S8": 8,
+    "S10": 2,
+    "S12": 0,
+    "S14": 4,
+    "S16": 4,
+    "S18": 8,
+    "S20": 4,
+    "S22": 0,
+    "S24": 0
+   },
+   "dailyIndex": 6,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_fc9cf93fb9394c29a0b69c6860051b54.pdf",
+   "fetchedAt": "2026-11-15T21:23:48.998Z"
+  },
+  {
+   "number": 32,
+   "date": "2026-07-11",
+   "stations": {
+    "S2": null,
+    "S4": 75,
+    "S6": 71,
+    "S8": 35,
+    "S10": 0,
+    "S12": null,
+    "S14": null
+   },
+   "stationNotes": {
+    "S2": "Not fished",
+    "S12": "Not fished",
+    "S14": "Not fished"
+   },
+   "dailyIndex": 18,
+   "url": "https://www.bbsri.org/_files/ugd/bc10d6_f9ab9f5189854af79174957cb6ae1bfc.pdf",
+   "fetchedAt": "2026-11-15T21:23:50.576Z"
+  }
+ ]
+}
