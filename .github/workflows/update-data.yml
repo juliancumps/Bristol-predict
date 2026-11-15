@@ -1,0 +1,73 @@
+# Bristol Predict - scheduled data update (free on GitHub Actions for public repos)
+#
+# What it does: reads the ADF&G run summary and the announcement list, saves
+# new data in backend/data, and commits it. Railway then redeploys the backend
+# with the new data. No server has to stay awake for this.
+#
+# Run it by hand: GitHub > Actions > "Update fishery data" > Run workflow.
+name: Update fishery data
+
+on:
+  schedule:
+    # Times are UTC. GitHub can start scheduled jobs some minutes late.
+    - cron: "7,37 * * 6-8 *"   # June-August: every 30 minutes
+    - cron: "17 */6 * 5 *"     # May: every 6 hours (first announcements, outlook)
+    - cron: "27 18 * 1-4,9-12 1" # Off season: Mondays (forecast, season summary)
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "What to run"
+        type: choice
+        default: update
+        options:
+          - update            # new run-summary days + new announcements
+          - backfill          # read every day of every season again (about 8 minutes)
+          - backfill-rivers   # only days with no river data
+          - reparse           # parse saved announcement text again (no network)
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Run job
+        run: |
+          case "${{ github.event.inputs.job || 'update' }}" in
+            backfill)        npm run backfill ;;
+            backfill-rivers) npm run backfill:rivers ;;
+            reparse)         node src/jobs/update.js --reparse ;;
+            *)               npm run update ;;
+          esac
+
+      - name: Commit new data
+        run: |
+          git config user.name "bristol-predict-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/bristol_bay.db data/announcements
+          if git diff --cached --quiet; then
+            echo "No new data."
+          else
+            git commit -m "data: update from ADF&G ($(date -u +'%Y-%m-%d %H:%M') UTC)"
+            git pull --rebase --autostash
+            git push
+          fi

@@ -175,17 +175,33 @@
 @media (max-width: 768px) {
   .datepicker-container {
     max-width: 100%;
+    min-width: 0;
     background-color: #1e293b;
     margin-top: 0;
-    padding: 12px;
+    padding: 10px;
+  }
+
+  .season-selector {
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
   }
 
   .season-buttons {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 6px;
   }
 
   .season-btn {
+    padding: 8px 12px;
+    min-height: 40px;
+  }
+
+  /* 16px text stops iPhone Safari from zooming in when a field is tapped */
+  .date-select {
     width: 100%;
+    min-height: 44px;
+    font-size: 16px;
   }
 
   .range-inputs {

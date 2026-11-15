@@ -10,6 +10,7 @@ console.log("Working directory:", process.cwd());
 
 const {
   scrapeHarvestData,
+  listAvailableDates,
   getSummaryStats,
   formatDateForURL,
 } = require("./scrapers/harvestScraper");
@@ -22,7 +23,11 @@ const {
   getDataByDate,
   getAvailableDates,
   getAvailableDatesBySeason,
+  getRiverSeries,
+  DATE_SORT,
 } = require("./database");
+const { loadAnnouncements, announcementYears, loadReference } = require("./store");
+const { computeStatus, registrationSeries, alaskaNow } = require("./openingsStatus");
 
 console.log("✅ Loaded database module");
 
@@ -39,26 +44,41 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 
 /**
- * Check if current date is within Bristol Bay fishing season
- * Approx June 16 to July 26, but we can change this if needed. 
+ * Check if current date is within the Bristol Bay fishing season.
+ * ADF&G publishes run summaries from about June 1 to mid August.
+ * Change the window here if needed.
  */
+const SEASON_WINDOW = { startMonth: 6, startDay: 1, endMonth: 8, endDay: 15 };
 function isInFishingSeason(date = new Date()) {
-  const month = date.getMonth(); // 0-indexed (0 = January)
-  const day = date.getDate();
-  
-  // June 16 - July 26
-  if (month === 5 && day >= 16) return true; // June (month 5)
-  if (month === 6 && day <= 26) return true; // July (month 6)
-  
-  return false;
+  const key = (date.getMonth() + 1) * 100 + date.getDate();
+  return (
+    key >= SEASON_WINDOW.startMonth * 100 + SEASON_WINDOW.startDay &&
+    key <= SEASON_WINDOW.endMonth * 100 + SEASON_WINDOW.endDay
+  );
+}
+
+/**
+ * Protect admin endpoints. Set ADMIN_TOKEN in the Railway variables, then
+ * send it in the "x-admin-token" header. With no ADMIN_TOKEN set, the
+ * endpoint is switched off.
+ */
+function requireAdmin(req, res, next) {
+  const token = process.env.ADMIN_TOKEN;
+  if (!token) {
+    return res.status(403).json({ error: "Refresh is disabled (no ADMIN_TOKEN set on the server)" });
+  }
+  if (req.get("x-admin-token") !== token) {
+    return res.status(401).json({ error: "Wrong or missing admin token" });
+  }
+  next();
 }
 
 // Middleware
 app.use(cors({
   origin: [
     "https://bristol-predict.vercel.app",
-    "http://localhost:3000",
-    "http://localhost:5173"
+    /^https:\/\/bristol-predict[a-z0-9-]*\.vercel\.app$/, // Vercel preview builds
+    /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+):\d+$/ // local dev, also from a phone on the same Wi-Fi
   ]
 }));
 app.use(express.json());
@@ -81,7 +101,7 @@ async function initializeServer() {
 async function getHistoricalData(db, days) {
   return new Promise((resolve, reject) => {
     db.all(
-      `SELECT * FROM daily_summaries ORDER BY run_date DESC LIMIT ?`,
+      `SELECT * FROM daily_summaries ORDER BY ${DATE_SORT} DESC LIMIT ?`,
       [days],
       (err, rows) => {
         if (err) {
@@ -162,6 +182,17 @@ async function getFreshData(runDate = null) {
         lastScraped = Date.now();
       }
       return dbData;
+    }
+
+    // No date asked: serve the newest day in the database. The scheduled
+    // update job (GitHub Actions) keeps the database current, so a page view
+    // never has to wait for a scrape.
+    if (!runDate) {
+      const latest = await getAvailableDates(db);
+      if (latest.length > 0) {
+        const latestData = await getDataFromDatabaseOnly(db, latest[0].run_date);
+        if (latestData) return latestData;
+      }
     }
 
     // If no database data and a specific date was requested, throw error
@@ -377,11 +408,11 @@ app.get("/api/historical", async (req, res) => {
     
     console.log(`📊 Fetching last ${days} days of data${season ? ` for season ${season}` : ""}`);
 
-    let query = `SELECT * FROM daily_summaries ORDER BY run_date DESC LIMIT ?`;
+    let query = `SELECT * FROM daily_summaries ORDER BY ${DATE_SORT} DESC LIMIT ?`;
     let params = [days];
 
     if (season) {
-      query = `SELECT * FROM daily_summaries WHERE season = ? ORDER BY run_date DESC LIMIT ?`;
+      query = `SELECT * FROM daily_summaries WHERE season = ? ORDER BY ${DATE_SORT} DESC LIMIT ?`;
       params = [season, days];
     }
 
@@ -538,12 +569,15 @@ app.get("/api/range", async (req, res) => {
 });
 
 // Force refresh endpoint
-app.post("/api/refresh", async (req, res) => {
+app.post("/api/refresh", requireAdmin, async (req, res) => {
   try {
     console.log("🔄 Force refresh requested");
     cachedData = null;
     lastScraped = null;
-    const data = await getFreshData();
+    // Read the newest day ADF&G has and save it.
+    const available = await listAvailableDates();
+    const data = await scrapeHarvestData(available[0]);
+    await saveScrapedData(db, data);
     const summary = getSummaryStats(data);
 
     res.json({
@@ -559,6 +593,108 @@ app.post("/api/refresh", async (req, res) => {
       message: error.message,
     });
   }
+});
+
+// ====== V4 ENDPOINTS ======
+
+// Small in-memory cache for the JSON files (they change only on deploy)
+const fileCache = new Map();
+function cached(key, loader, ttlMs = 60 * 1000) {
+  const hit = fileCache.get(key);
+  if (hit && Date.now() - hit.at < ttlMs) return hit.value;
+  const value = loader();
+  fileCache.set(key, { at: Date.now(), value });
+  return value;
+}
+
+function announcementsForYear(yearParam) {
+  const years = announcementYears();
+  const year = parseInt(yearParam) || years[0] || new Date().getFullYear();
+  return { year, years, store: cached(`ann-${year}`, () => loadAnnouncements(year)) };
+}
+
+// Announcement feed. ?year=2026  ?kind=eastside,westside  ?full=1 (include text)
+app.get("/api/announcements", (req, res) => {
+  try {
+    const { year, years, store } = announcementsForYear(req.query.year);
+    const kinds = req.query.kind ? String(req.query.kind).split(",") : null;
+    const items = store.items
+      .filter((i) => !kinds || kinds.includes(i.kind))
+      .map((i) => (req.query.full ? i : { ...i, text: undefined }));
+    res.json({ year, years, updatedAt: store.updatedAt, checkedAt: store.checkedAt, count: items.length, items });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to load announcements", message: error.message });
+  }
+});
+
+// One announcement with full text
+app.get("/api/announcements/:id", (req, res) => {
+  for (const year of announcementYears()) {
+    const item = cached(`ann-${year}`, () => loadAnnouncements(year)).items.find((i) => i.id === req.params.id);
+    if (item) return res.json(item);
+  }
+  res.status(404).json({ error: "Announcement not found" });
+});
+
+// District status board. ?asOf=2026-07-01T08:00 (Alaska time) replays a past moment.
+app.get("/api/openings", (req, res) => {
+  try {
+    const asOf = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(req.query.asOf || "") ? req.query.asOf : alaskaNow();
+    const { year, years, store } = announcementsForYear(asOf.slice(0, 4));
+    res.json({
+      ...computeStatus(store.items, asOf),
+      now: alaskaNow(),
+      year,
+      years,
+      checkedAt: store.checkedAt,
+      updatedAt: store.updatedAt,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to compute openings", message: error.message });
+  }
+});
+
+// Boat counts found in the announcements. ?year=2026
+app.get("/api/registrations", (req, res) => {
+  try {
+    const { year, years, store } = announcementsForYear(req.query.year);
+    res.json({ year, years, series: registrationSeries(store.items) });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to load registrations", message: error.message });
+  }
+});
+
+// Escapement by river for a season, with the ADF&G goal ranges. ?season=2026
+app.get("/api/escapement", async (req, res) => {
+  try {
+    const dates = await getAvailableDates(db);
+    const seasons = [...new Set(dates.map((d) => d.season))].sort((a, b) => b - a);
+    const season = parseInt(req.query.season) || seasons[0];
+    const rows = await getRiverSeries(db, season);
+    const rivers = {};
+    rows.forEach((r) => {
+      (rivers[r.river_name] ||= []).push({
+        date: r.run_date,
+        daily: r.escapement_daily,
+        cumulative: r.escapement_cumulative,
+        inRiver: r.in_river_estimate,
+      });
+    });
+    res.json({
+      season,
+      seasons,
+      goals: cached("goals", () => loadReference("escapement_goals")),
+      rivers,
+    });
+  } catch (error) {
+    console.error("Error in /api/escapement:", error);
+    res.status(500).json({ error: "Failed to load escapement", message: error.message });
+  }
+});
+
+// Preseason forecasts by year and district
+app.get("/api/forecasts", (req, res) => {
+  res.json(cached("forecasts", () => loadReference("forecasts")) || { years: {} });
 });
 
 // Error handling middleware

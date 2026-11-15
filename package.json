@@ -1,7 +1,7 @@
 {
   "name": "bristol-predict",
   "private": true,
-  "version": "0.0.0",
+  "version": "4.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -17,7 +17,6 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^0.553.0",
     "postprocessing": "^6.38.0",
-    "puppeteer": "^24.28.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-leaflet": "^5.0.0",

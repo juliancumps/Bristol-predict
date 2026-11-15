@@ -7,18 +7,40 @@ import RunTimingTracker from "./components/RunTimingTracker";
 import EnvironmentalDashboard from "./components/EnvironmentalDashboard";
 import ToolsHub from "./components/ToolsHub";
 import SoutheastMap from "./components/SoutheastMap";
+import OpeningsBoard from "./components/OpeningsBoard";
+import EscapementTracker from "./components/EscapementTracker";
 import "./styles/BristolBayMap.css";
 import "./App.css";
-import { Section } from "lucide-react";
+
+const VIEWS = [
+  "map", "toolshub", "efficiency", "runtracker", "weather",
+  "southeastmap", "openings", "escapement",
+];
+
+// A link like  https://bristol-predict.vercel.app/?view=openings  opens that
+// tool directly and skips the splash screen (good for a phone home-screen icon).
+function viewFromUrl() {
+  const view = new URLSearchParams(window.location.search).get("view");
+  return VIEWS.includes(view) ? view : null;
+}
 
 function App() {
-  const [splashComplete, setSplashComplete] = useState(false);
-  const [currentView, setCurrentView] = useState("map");
+  const startView = viewFromUrl();
+  const [splashComplete, setSplashComplete] = useState(startView !== null);
+  const [currentView, setCurrentViewState] = useState(startView || "map");
   const [htmlContent, setHtmlContent] = useState("");
 
-  ///FOR DEV MODE /// false for deployment. (true skips the splash overlay)
+  ////FOR DEV MODE (true skips the splash overlay)
   const SKIP_SPLASH_SCREEN = false;
   ////FOR DEV MODE
+
+  // Keep the address bar in step with the view, so a reload or a shared
+  // link returns to the same tool.
+  const setCurrentView = (view) => {
+    setCurrentViewState(view);
+    window.history.replaceState(null, "", view === "map" ? "/?view=map" : `/?view=${view}`);
+    window.scrollTo(0, 0);
+  };
 
   // Load HTML content on mount
   useEffect(() => {
@@ -37,17 +59,20 @@ function App() {
 
   const handleNavigateToApp = () => {
     setSplashComplete(true);
+    window.history.replaceState(null, "", "/?view=map");
+    window.scrollTo(0, 0);
   };
 
   const handleBackToSplash = () => {
     setSplashComplete(false);
+    window.history.replaceState(null, "", "/");
     window.scrollTo(0, 0);
   };
 
   useEffect(() => {
-  if (SKIP_SPLASH_SCREEN) {
-    setSplashComplete(true);
-  }
+    if (SKIP_SPLASH_SCREEN) {
+      setSplashComplete(true);
+    }
   }, []);
 
   // Only show splash screen OR app, never both
@@ -60,6 +85,8 @@ function App() {
     );
   }
 
+  const toHub = () => setCurrentView("toolshub");
+
   // After splash complete, show map dashboard
   return (
     <>
@@ -67,7 +94,7 @@ function App() {
         <BristolBayMap
           onNavigateToCatchEfficiency={() => setCurrentView("efficiency")}
           onNavigateToWeather={() => setCurrentView("weather")}
-          onNavigateToToolsHub={() => setCurrentView("toolshub")}
+          onNavigateToToolsHub={toHub}
           onBackToSplash={handleBackToSplash}
         />
       )}
@@ -77,23 +104,17 @@ function App() {
           onNavigateToRunTracker={() => setCurrentView("runtracker")}
           onNavigateToWeather={() => setCurrentView("weather")}
           onNavigateToSoutheastMap={() => setCurrentView("southeastmap")}
+          onNavigateToOpenings={() => setCurrentView("openings")}
+          onNavigateToEscapement={() => setCurrentView("escapement")}
           onBackToBristolBayMap={() => setCurrentView("map")}
         />
       )}
-      {currentView === "efficiency" && (
-        <CatchEfficiencyScreen
-          onBack={() => setCurrentView("toolshub")}
-        />
-      )}
-      {currentView === "runtracker" && (
-        <RunTimingTracker onBack={() => setCurrentView("toolshub")} />
-      )}
-      {currentView === "weather" && (
-        <EnvironmentalDashboard onBack={() => setCurrentView("toolshub")} />
-      )}
-      {currentView === "southeastmap" && (
-        <SoutheastMap onBackToToolsHub={() => setCurrentView("toolshub")}/>
-      )}
+      {currentView === "efficiency" && <CatchEfficiencyScreen onBack={toHub} />}
+      {currentView === "runtracker" && <RunTimingTracker onBack={toHub} />}
+      {currentView === "weather" && <EnvironmentalDashboard onBack={toHub} />}
+      {currentView === "southeastmap" && <SoutheastMap onBackToToolsHub={toHub} />}
+      {currentView === "openings" && <OpeningsBoard onBack={toHub} />}
+      {currentView === "escapement" && <EscapementTracker onBack={toHub} />}
     </>
   );
 }

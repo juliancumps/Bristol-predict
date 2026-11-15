@@ -1,0 +1,258 @@
+{
+ "source": "ADF&G Bristol Bay Sockeye Salmon Forecast, Table 2",
+ "note": "harvest = Bristol Bay harvestable surplus; inshoreRun = total run minus South Peninsula harvest",
+ "years": {
+  "2025": {
+   "sourceUrl": "https://www.adfg.alaska.gov/static/applications/dcfnewsrelease/1643354231.pdf",
+   "units": "millions of sockeye",
+   "baywide": {
+    "totalRun": 51.38,
+    "totalRunRange": [
+     37.08,
+     65.67
+    ],
+    "escapement": 14.98,
+    "harvest": 34.84,
+    "inshoreRun": 49.83
+   },
+   "districts": {
+    "naknek": {
+     "totalRun": 16.01,
+     "escapement": 7.8,
+     "harvest": 7.73,
+     "inshoreRun": 15.53
+    },
+    "egegik": {
+     "totalRun": 6.46,
+     "escapement": 1.1,
+     "harvest": 5.16,
+     "inshoreRun": 6.26
+    },
+    "ugashik": {
+     "totalRun": 6.9,
+     "escapement": 1.18,
+     "harvest": 5.52,
+     "inshoreRun": 6.7
+    },
+    "nushagak": {
+     "totalRun": 21.0,
+     "escapement": 4.68,
+     "harvest": 15.68,
+     "inshoreRun": 20.36
+    },
+    "togiak": {
+     "totalRun": 1.01,
+     "escapement": 0.23,
+     "harvest": 0.75,
+     "inshoreRun": 0.98
+    }
+   },
+   "rivers": {
+    "Kvichak": {
+     "totalRun": 7.38,
+     "escapement": 4.0,
+     "harvest": 3.16,
+     "inshoreRun": 7.16
+    },
+    "Alagnak": {
+     "totalRun": 4.97,
+     "escapement": 2.7,
+     "harvest": 2.13,
+     "inshoreRun": 4.82
+    },
+    "Naknek": {
+     "totalRun": 3.66,
+     "escapement": 1.1,
+     "harvest": 2.45,
+     "inshoreRun": 3.55
+    },
+    "Wood": {
+     "totalRun": 7.63,
+     "escapement": 2.38,
+     "harvest": 5.01,
+     "inshoreRun": 7.4
+    },
+    "Igushik": {
+     "totalRun": 2.79,
+     "escapement": 0.34,
+     "harvest": 2.37,
+     "inshoreRun": 2.7
+    },
+    "Nushagak": {
+     "totalRun": 10.58,
+     "escapement": 1.96,
+     "harvest": 8.31,
+     "inshoreRun": 10.26
+    }
+   }
+  },
+  "2026": {
+   "sourceUrl": "https://www.adfg.alaska.gov/static/applications/dcfnewsrelease/1745780946.pdf",
+   "units": "millions of sockeye",
+   "baywide": {
+    "totalRun": 45.32,
+    "totalRunRange": [
+     31.12,
+     59.52
+    ],
+    "escapement": 11.79,
+    "harvest": 32.26,
+    "inshoreRun": 44.05
+   },
+   "districts": {
+    "naknek": {
+     "totalRun": 11.3,
+     "escapement": 4.75,
+     "harvest": 6.23,
+     "inshoreRun": 10.98
+    },
+    "egegik": {
+     "totalRun": 9.19,
+     "escapement": 1.4,
+     "harvest": 7.53,
+     "inshoreRun": 8.93
+    },
+    "ugashik": {
+     "totalRun": 5.36,
+     "escapement": 0.95,
+     "harvest": 4.26,
+     "inshoreRun": 5.21
+    },
+    "nushagak": {
+     "totalRun": 18.92,
+     "escapement": 4.53,
+     "harvest": 13.86,
+     "inshoreRun": 18.39
+    },
+    "togiak": {
+     "totalRun": 0.54,
+     "escapement": 0.16,
+     "harvest": 0.37,
+     "inshoreRun": 0.53
+    }
+   },
+   "rivers": {
+    "Kvichak": {
+     "totalRun": 4.04,
+     "escapement": 2.02,
+     "harvest": 1.91,
+     "inshoreRun": 3.93
+    },
+    "Alagnak": {
+     "totalRun": 3.26,
+     "escapement": 1.63,
+     "harvest": 1.54,
+     "inshoreRun": 3.17
+    },
+    "Naknek": {
+     "totalRun": 4.0,
+     "escapement": 1.1,
+     "harvest": 2.79,
+     "inshoreRun": 3.89
+    },
+    "Wood": {
+     "totalRun": 6.61,
+     "escapement": 2.27,
+     "harvest": 4.16,
+     "inshoreRun": 6.43
+    },
+    "Igushik": {
+     "totalRun": 0.91,
+     "escapement": 0.21,
+     "harvest": 0.68,
+     "inshoreRun": 0.89
+    },
+    "Nushagak": {
+     "totalRun": 11.39,
+     "escapement": 2.05,
+     "harvest": 9.02,
+     "inshoreRun": 11.07
+    }
+   }
+  },
+  "2027": {
+   "sourceUrl": "https://www.adfg.alaska.gov/static/applications/dcfnewsrelease/1844150625.pdf",
+   "units": "millions of sockeye",
+   "baywide": {
+    "totalRun": 49.31,
+    "totalRunRange": [
+     35.47,
+     63.14
+    ],
+    "escapement": 14.04,
+    "harvest": 33.97,
+    "inshoreRun": 48.01
+   },
+   "districts": {
+    "naknek": {
+     "totalRun": 15.28,
+     "escapement": 6.95,
+     "harvest": 7.92,
+     "inshoreRun": 14.88
+    },
+    "egegik": {
+     "totalRun": 12.23,
+     "escapement": 1.7,
+     "harvest": 10.21,
+     "inshoreRun": 11.91
+    },
+    "ugashik": {
+     "totalRun": 6.44,
+     "escapement": 1.18,
+     "harvest": 5.09,
+     "inshoreRun": 6.27
+    },
+    "nushagak": {
+     "totalRun": 15.0,
+     "escapement": 4.06,
+     "harvest": 10.54,
+     "inshoreRun": 14.6
+    },
+    "togiak": {
+     "totalRun": 0.36,
+     "escapement": 0.16,
+     "harvest": 0.19,
+     "inshoreRun": 0.35
+    }
+   },
+   "rivers": {
+    "Kvichak": {
+     "totalRun": 7.34,
+     "escapement": 3.7,
+     "harvest": 3.45,
+     "inshoreRun": 7.15
+    },
+    "Alagnak": {
+     "totalRun": 4.27,
+     "escapement": 2.15,
+     "harvest": 2.0,
+     "inshoreRun": 4.15
+    },
+    "Naknek": {
+     "totalRun": 3.67,
+     "escapement": 1.1,
+     "harvest": 2.48,
+     "inshoreRun": 3.58
+    },
+    "Wood": {
+     "totalRun": 8.16,
+     "escapement": 2.44,
+     "harvest": 5.51,
+     "inshoreRun": 7.95
+    },
+    "Igushik": {
+     "totalRun": 1.19,
+     "escapement": 0.21,
+     "harvest": 0.95,
+     "inshoreRun": 1.16
+    },
+    "Nushagak": {
+     "totalRun": 5.64,
+     "escapement": 1.4,
+     "harvest": 4.09,
+     "inshoreRun": 5.49
+    }
+   }
+  }
+ }
+}

@@ -210,3 +210,22 @@
     font-size: 0.9rem;
   }
 }
+/* Phone: give the title the full width so it is not cut off (V4) */
+@media (max-width: 768px) {
+  .splash-content {
+    width: 90vw;
+    align-items: center;
+  }
+
+  .splash-title-group {
+    width: 100%;
+    padding: 10px 12px 14px;
+  }
+
+  .splash-title {
+    font-size: clamp(2rem, 10vw, 2.8rem);
+    line-height: 1.1;
+    margin-bottom: 0;
+    letter-spacing: -1px;
+  }
+}

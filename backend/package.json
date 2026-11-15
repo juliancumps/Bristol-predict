@@ -1,15 +1,17 @@
 {
   "name": "bristol-predict-backend",
-  "version": "1.0.0",
+  "version": "4.0.0",
   "description": "Backend API for Bristol Bay Salmon Prediction",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "postinstall": "npm run build --prefix=. 2>/dev/null || true",
     "dev": "nodemon src/server.js",
-    "test:scraper": "node src/scrapers/harvestScraper.js",
+    "update": "node src/jobs/update.js",
+    "update:announcements": "node src/jobs/update.js --announcements-only",
     "backfill": "node src/backfill.js",
-    "clean:november": "node src/scrapers/cleanNovemberData.js"
+    "backfill:rivers": "node src/backfill.js rivers",
+    "test": "node test/parsers.test.js",
+    "test:scraper": "node src/scrapers/harvestScraper.js"
   },
   "keywords": [
     "bristol-bay",
@@ -27,8 +29,6 @@
     "express": "^4.18.2",
     "node-cron": "^3.0.3",
     "pdf-parse": "^1.1.1",
-    "pg": "^8.11.3",
-    "puppeteer": "^21.0.0",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
