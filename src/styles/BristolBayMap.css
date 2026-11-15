@@ -538,244 +538,117 @@ font-weight: 600;
   }
 }
 
+/* ==========================================================================
+   PHONE LAYOUT (V4)
+   On a phone the screen is one scrolling page:
+     header -> date picker -> map -> data panel -> charts
+   (The old rules hid the map, panel and charts on small screens.)
+   ========================================================================== */
 @media (max-width: 768px) {
-  .header-compact {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    height: auto;
-    padding: 8px;
-    gap: 6px;
-  }
-  .header-left h1 {
-    font-size: 16px;
-  }
-  .header-center {
-    order: 3;
-    flex-basis: 100%;
-    margin-top: 4px;
-  }
-  .sidebar-popup {
-    position: fixed;
-    width: 100%;
-    height: 100vh;
-    top: 0;
-    right: 0;
-    z-index: 999;
-    border-radius: 0;
-  }
-  .main-content {
-    flex-direction: column;
-  }
-  .map-section {
-    height: 40vh;
-    min-height: 200px;
-  }
-  .charts-section {
-    height: 60vh;
-    margin-right: 0 !important;
-    padding: 8px;
-  }
-  .chart-buttons {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-  }
-  .chart-btn {
-    padding: 6px;
-    font-size: 11px;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
   .bristol-bay-map-container {
-    width: 100%;
-  }
-
-  /* Mobile nav at bottom */
-  .mobile-nav {
-    display: flex;
-    height: 50px;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
   }
 
   .header-compact {
-    padding: 6px;
-    gap: 4px;
-    min-height: auto;
+    position: static;
+    flex-wrap: wrap;
+    align-items: center;
+    height: auto;
+    gap: 8px;
+    padding: 8px 10px;
+    padding-top: max(8px, env(safe-area-inset-top));
   }
 
   .header-left h1 {
-    font-size: 14px;
-  }
-
-  .header-center {
-    min-width: 120px;
-    min-width: auto;
-    order: 3;
-    flex-basis: 100%;
-    margin-top: 1px;
-  }
-
-  .header-center input,
-  .header-center button,
-  .header-center select {
-    font-size: 10px !important;
-    padding: 1px 3px !important;
-    height: auto !important;
-    min-height: 26px !important;
-  }
-
-  .toggle-btn,
-  .sidebar-toggle {
-    padding: 4px 8px;
-    font-size: 11px;
-    min-height: 32px;
-  }
-
-  .sidebar-toggle {
     font-size: 16px;
   }
 
-  /* layout for mobile content tab */
-  .main-content {
-    flex-direction: column;
-    position: relative;
-    padding-bottom: 50px; /* space for smaller nav */
+  /* Buttons: one row that scrolls sideways */
+  .header-right {
+    order: 2;
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .header-right::-webkit-scrollbar {
+    display: none;
+  }
+  .toggle-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    min-height: 40px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  /* The data panel is part of the page on a phone, so no open/close buttons */
+  .sidebar-toggle,
+  .sidebar-header .close-btn {
+    display: none;
   }
 
-  /* tab sections */
+  .header-center {
+    order: 3;
+    flex-basis: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .main-content {
+    display: block;
+    flex: none;
+    overflow: visible;
+  }
+
   .map-section {
     width: 100%;
-    height: 100%;
+    height: 48vh;
     min-height: 300px;
-    display: none;
-    flex-direction: column;
-  }
-
-  .map-section.active {
-    display: flex;
   }
 
   .sidebar-popup {
     position: static;
     width: 100%;
-    height: 100%;
-    min-height: 300px;
+    height: auto;
+    max-height: none;
     border-left: none;
     border-radius: 0;
-    display: none;
-    flex-direction: column;
-    animation: none;
-    top: auto;
     box-shadow: none;
-    border-top: 1px solid #334155;
+    animation: none;
+    z-index: auto;
   }
-
-  .sidebar-popup.active {
-    display: flex;
+  .sidebar-content {
+    overflow: visible;
   }
 
   .charts-section {
     width: 100%;
-    height: 100%;
-    min-height: 300px;
+    height: auto;
+    overflow: visible;
     margin-right: 0 !important;
-    padding: 6px;
-    display: none;
-    overflow-y: auto;
-  }
-
-  .charts-section.active {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .sidebar-header {
-    padding: 6px 10px;
-  }
-
-  .sidebar-header h3 {
-    font-size: 12px;
-  }
-
-  .sidebar-content {
-    padding: 6px;
-    gap: 8px;
+    padding: 10px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
 
   .chart-buttons {
-    grid-template-columns: 1fr;
-    gap: 5px;
-  }
-
-  .chart-btn {
-    padding: 6px;
-    font-size: 10px;
-    min-height: 38px;
-  }
-
-  .summary-box,
-  .districts-list,
-  .chart-toggle {
-    padding: 6px;
-  }
-
-  .summary-box h4,
-  .districts-list h4,
-  .chart-toggle h4 {
-    font-size: 10px;
-    margin-bottom: 4px;
-  }
-
-  .district-item {
-    padding: 5px;
+    grid-template-columns: repeat(2, 1fr);
     gap: 6px;
-    margin-bottom: 2px;
   }
-
-  .district-emoji {
-    font-size: 14px;
-  }
-
-  .district-name {
-    font-size: 9px;
-  }
-
-  .district-catch {
-    font-size: 8px;
-  }
-
-  .summary-stat {
-    font-size: 9px;
-    padding: 3px;
-  }
-
-  .summary-label {
-    font-size: 8px;
-  }
-
-  .summary-value {
-    font-size: 9px;
-  }
-
-  .summary-note {
-    font-size: 8px;
-  }
-
-  .close-btn {
-    font-size: 16px;
+  .chart-btn {
+    min-height: 44px;
+    padding: 6px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .marker-popup {
-    font-size: 11px;
-    min-width: 140px;
-  }
-
-  .marker-popup h3 {
-    font-size: 12px;
+    min-width: 150px;
   }
 }
-

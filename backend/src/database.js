@@ -4,6 +4,10 @@ const fs = require("fs");
 
 const DB_PATH = path.join(__dirname, "..", "data", "bristol_bay.db");
 
+// run_date is stored as MM-DD-YYYY text. Sorting that text directly sorts by
+// MONTH first and mixes the years. Always sort with this expression (YYYYMMDD).
+const DATE_SORT = "(substr(run_date,7,4) || substr(run_date,1,2) || substr(run_date,4,2))";
+
 // CRITICAL: Ensure data directory exists before opening database
 const dataDir = path.dirname(DB_PATH);
 if (!fs.existsSync(dataDir)) {
@@ -314,7 +318,7 @@ async function getDataByDate(db, runDate) {
 function getAvailableDates(db) {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT run_date, season, total_run FROM daily_summaries ORDER BY run_date DESC",
+      "SELECT run_date, season, total_run FROM daily_summaries ORDER BY " + DATE_SORT + " DESC",
       [],
       (err, rows) => {
         if (err) {
@@ -333,7 +337,7 @@ function getAvailableDates(db) {
 function getAvailableDatesBySeason(db, season) {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT run_date, season, total_run FROM daily_summaries WHERE season = ? ORDER BY run_date DESC",
+      "SELECT run_date, season, total_run FROM daily_summaries WHERE season = ? ORDER BY " + DATE_SORT + " DESC",
       [season],
       (err, rows) => {
         if (err) {
@@ -406,7 +410,7 @@ function getSeasonDateRange(db, season) {
       `SELECT run_date, total_run 
        FROM daily_summaries 
        WHERE season = ? 
-       ORDER BY run_date ASC`,
+       ORDER BY ${DATE_SORT} ASC`,
       [season],
       (err, rows) => {
         if (err) {
@@ -415,6 +419,40 @@ function getSeasonDateRange(db, season) {
         }
         resolve(rows);
       }
+    );
+  });
+}
+
+/**
+ * Daily river escapement for one season, oldest day first.
+ * Returns [{ run_date, river_name, escapement_daily, escapement_cumulative, in_river_estimate }]
+ */
+function getRiverSeries(db, season) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `SELECT run_date, river_name, escapement_daily, escapement_cumulative, in_river_estimate
+       FROM river_data
+       WHERE substr(run_date,7,4) = ?
+       ORDER BY ${DATE_SORT} ASC, river_name ASC`,
+      [String(season)],
+      (err, rows) => (err ? reject(err) : resolve(rows))
+    );
+  });
+}
+
+/**
+ * All run dates in the database, oldest first, with a flag that shows
+ * if the day has river rows. Used by the update and backfill jobs.
+ */
+function getRunDates(db) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `SELECT s.run_date, s.season, s.total_run,
+              (SELECT COUNT(*) FROM river_data r WHERE r.run_date = s.run_date) AS river_rows
+       FROM daily_summaries s
+       ORDER BY ${DATE_SORT} ASC`,
+      [],
+      (err, rows) => (err ? reject(err) : resolve(rows))
     );
   });
 }
@@ -428,5 +466,8 @@ module.exports = {
   getAvailableSeasons,
   getSeasonDateRange,
   getSockeyePerDeliveryByDate,
+  getRiverSeries,
+  getRunDates,
+  DATE_SORT,
   DB_PATH,
 };

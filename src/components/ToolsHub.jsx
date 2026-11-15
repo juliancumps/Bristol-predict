@@ -6,6 +6,8 @@ export default function ToolsHub({
   onNavigateToRunTracker,
   onNavigateToWeather,
   onNavigateToSoutheastMap,
+  onNavigateToOpenings,
+  onNavigateToEscapement,
 
   onBackToBristolBayMap,
 }) {
@@ -36,6 +38,47 @@ export default function ToolsHub({
 
         {/* Tools Grid */}
         <div className="tools-hub-grid">
+          {/* Openings & Announcements Card (V4) */}
+          <div className="tool-card-hub">
+            <div className="tool-icon-hub">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+                <path d="M12 7v5l3.5 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h3>Openings & Announcements</h3>
+            <p>
+              Which districts are open, when they close, and the next opening. Read from the ADF&G announcements, with boat counts.
+            </p>
+            <button
+              className="btn-tool-hub btn-primary-hub"
+              onClick={onNavigateToOpenings}
+            >
+              View
+            </button>
+          </div>
+
+          {/* Escapement & Forecast Card (V4) */}
+          <div className="tool-card-hub">
+            <div className="tool-icon-hub">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="5" width="18" height="4" rx="2" stroke="currentColor" strokeWidth="2" />
+                <rect x="3" y="15" width="18" height="4" rx="2" stroke="currentColor" strokeWidth="2" />
+                <path d="M3 7h9M3 17h14" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+              </svg>
+            </div>
+            <h3>Escapement & Forecast</h3>
+            <p>
+              River escapement against the ADF&G goal ranges, and each district's run against the preseason forecast.
+            </p>
+            <button
+              className="btn-tool-hub btn-primary-hub"
+              onClick={onNavigateToEscapement}
+            >
+              View
+            </button>
+          </div>
+
           {/* Catch Efficiency Card */}
           <div className="tool-card-hub">
             <div className="tool-icon-hub">

@@ -1,4 +1,4 @@
-# Bristol Predict BETA 3.0🐟
+# Bristol Predict BETA 4.0🐟
 
 
 Real-time salmon harvest data visualization and historical analysis for the Bristol Bay sockeye salmon fishery.
@@ -32,6 +32,30 @@ Complete Historical Context - Access to three seasons of backfilled data (2023-2
 Real-time Data Integration - Automatically pulls the latest data from Alaska Department of Fish and Game (ADF&G) daily
 
 Benchmark Your Performance - Compare your catch data against district averages to understand your position in the fishery
+
+## V4: data updates, new tools, phone layout
+
+New tools (in "More Tools"):
+- Openings & Announcements - district status board read from the ADF&G announcement PDFs, with boat counts, a replay control, and the full announcement feed. Direct link: `/?view=openings`
+- Escapement & Forecast - river escapement against the ADF&G goal ranges, and the run against the preseason forecast. Direct link: `/?view=escapement`
+
+How the data stays current (no cost):
+- `.github/workflows/update-data.yml` runs on GitHub Actions. In June-August it runs every 30 minutes. It reads the ADF&G run summary and announcement list, saves new data in `backend/data`, and commits it. The backend host then redeploys with the new data.
+- To run it by hand: GitHub > Actions > "Update fishery data" > Run workflow (choose `update`, `backfill`, `backfill-rivers` or `reparse`).
+
+Backend commands (in `backend/`):
+```
+npm run update            # new run-summary days + new announcements
+npm run backfill          # read every day of every season again (about 8 minutes)
+npm run backfill:rivers   # only days that have no river data
+npm test                  # parser tests (no network)
+```
+
+Notes:
+- The scraper uses plain HTTP (axios + cheerio). Puppeteer is no longer used.
+- `POST /api/refresh` needs the `x-admin-token` header. Set `ADMIN_TOKEN` in the backend host variables; with no token set, the endpoint is off.
+- Reference data (escapement goals, forecasts) is in `backend/data/reference/*.json`. Add each new forecast there once a year.
+- To go back to the version before V4: `git checkout v3-before-v4 -- .`
 
 ## Tech Stack
 

@@ -353,3 +353,70 @@ export function aggregateDateRangeData(dataArray) {
 
   return aggregated;
 }
+
+/* ======================================================================
+   V4: openings, announcements, escapement, forecasts
+   ====================================================================== */
+
+async function get(path) {
+  const response = await axios.get(`${API_BASE_URL}${path}`);
+  return response.data;
+}
+
+/**
+ * District status board.
+ * @param {string|null} asOf - Alaska time "YYYY-MM-DDTHH:MM" to replay a past moment, or null for now
+ */
+export const getOpenings = (asOf = null) =>
+  get(asOf ? `/openings?asOf=${encodeURIComponent(asOf)}` : "/openings");
+
+/** Announcement list (no body text). */
+export const getAnnouncements = (year = null) =>
+  get(year ? `/announcements?year=${year}` : "/announcements");
+
+/** One announcement with its full text. */
+export const getAnnouncement = (id) => get(`/announcements/${id}`);
+
+/** Boat counts read from the announcements. */
+export const getRegistrations = (year = null) =>
+  get(year ? `/registrations?year=${year}` : "/registrations");
+
+/** River escapement series for a season, with ADF&G goal ranges. */
+export const getEscapement = (season = null) =>
+  get(season ? `/escapement?season=${season}` : "/escapement");
+
+/** ADF&G preseason forecasts by year and district. */
+export const getForecasts = () => get("/forecasts");
+
+/** Every saved day of one season (newest first). */
+export const getSeasonDays = (season) => get(`/historical?season=${season}&days=90`);
+
+/**
+ * Alaska-time helpers. The backend sends Alaska local time as
+ * "YYYY-MM-DDTHH:MM" with no time zone. Read it as UTC and print it as UTC,
+ * so the phone's own time zone never changes what is shown.
+ */
+export function formatAkTime(isoLocal, { withDay = true } = {}) {
+  if (!isoLocal) return "";
+  const d = new Date(`${isoLocal}:00Z`);
+  return d.toLocaleString("en-US", {
+    timeZone: "UTC",
+    weekday: withDay ? "short" : undefined,
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+/** "3h 20m" between two Alaska-time strings (b - a). */
+export function durationBetween(a, b) {
+  const minutes = Math.round((new Date(`${b}:00Z`) - new Date(`${a}:00Z`)) / 60000);
+  if (!isFinite(minutes) || minutes < 0) return "";
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const mins = minutes % 60;
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}

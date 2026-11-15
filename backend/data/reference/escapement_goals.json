@@ -1,0 +1,65 @@
+{
+ "source": "ADF&G Bristol Bay Salmon Escapement page",
+ "sourceUrl": "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.escapement",
+ "checked": "2026-11-15",
+ "species": "sockeye",
+ "rivers": [
+  {
+   "name": "Kvichak River",
+   "district": "naknek",
+   "lower": 2000000,
+   "upper": 10000000
+  },
+  {
+   "name": "Alagnak River",
+   "district": "naknek",
+   "lower": 210000,
+   "upper": null,
+   "note": "Lower bound only (more than 210,000)"
+  },
+  {
+   "name": "Naknek River",
+   "district": "naknek",
+   "lower": 800000,
+   "upper": 2000000
+  },
+  {
+   "name": "Egegik River",
+   "district": "egegik",
+   "lower": 800000,
+   "upper": 2000000
+  },
+  {
+   "name": "Ugashik River",
+   "district": "ugashik",
+   "lower": 500000,
+   "upper": 1400000
+  },
+  {
+   "name": "Wood River",
+   "district": "nushagak",
+   "lower": 700000,
+   "upper": 3000000,
+   "note": "OEG. The upper end adds 15% of the preseason forecast when the run is forecast above 5 million. Otherwise the goal is 700,000-1,800,000."
+  },
+  {
+   "name": "Igushik River",
+   "district": "nushagak",
+   "lower": 150000,
+   "upper": 400000
+  },
+  {
+   "name": "Nushagak River",
+   "district": "nushagak",
+   "lower": 370000,
+   "upper": 2500000,
+   "note": "OEG. The upper end adds 15% of the preseason forecast when the run is forecast above 2.5 million. Otherwise the goal is 370,000-900,000."
+  },
+  {
+   "name": "Togiak River",
+   "district": "togiak",
+   "lower": 120000,
+   "upper": 270000
+  }
+ ]
+}

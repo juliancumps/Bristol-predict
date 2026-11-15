@@ -1,0 +1,494 @@
+/* ==========================================================================
+   V4 tool screens (Openings & Announcements, Escapement & Forecast)
+   Follows the about.html design: midnight blue, Crimson Text titles,
+   Inter body text, blue / gold / coral accents. Phone first.
+   ========================================================================== */
+
+.v4-content {
+  padding: 20px 14px 48px;
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: max(48px, env(safe-area-inset-bottom));
+}
+
+.v4-header {
+  margin-bottom: 20px;
+}
+.v4-header .back-button-hub {
+  margin-bottom: 16px;
+  min-height: 44px;
+}
+.v4-header .tools-hub-title {
+  font-size: clamp(2rem, 7vw, 3rem);
+}
+
+.v4-section-title {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--white, #fafaf7);
+  margin: 36px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(58, 159, 243, 0.25);
+}
+
+/* ---------- cards ---------- */
+.v4-card {
+  position: relative;
+  padding: 18px 16px;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, rgba(58, 159, 243, 0.08) 0%, rgba(244, 164, 96, 0.06) 100%);
+  border: 1px solid rgba(58, 159, 243, 0.2);
+  border-radius: 12px;
+}
+.v4-card h3 {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--white, #fafaf7);
+  margin: 0 0 10px;
+  line-height: 1.25;
+}
+
+.v4-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+.v4-grid .v4-card {
+  margin-bottom: 0;
+}
+
+.v4-district,
+.v4-river {
+  border-top: 3px solid var(--accent-blue-bright, #3b9ff3);
+}
+
+.v4-empty {
+  text-align: center;
+}
+
+/* ---------- small text ---------- */
+.v4-dim {
+  color: var(--gray-light, #a9a9a5);
+  font-weight: 300;
+}
+.v4-small {
+  font-size: 0.8rem;
+}
+.v4-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-light, #a9a9a5);
+}
+.v4-big {
+  font-family: 'Crimson Text', serif;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--white, #fafaf7);
+}
+.v4-footnote {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--gray-light, #a9a9a5);
+  font-weight: 300;
+}
+.v4-content a {
+  color: var(--accent-blue-bright, #3b9ff3);
+  text-decoration: none;
+  font-weight: 500;
+}
+.v4-content a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- notices ---------- */
+.v4-notice {
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(244, 164, 96, 0.45);
+  background: rgba(244, 164, 96, 0.1);
+  color: #f6c79a;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+.v4-notice-error {
+  border-color: rgba(255, 107, 107, 0.5);
+  background: rgba(255, 107, 107, 0.12);
+  color: #ffb1b1;
+}
+
+/* ---------- pills ---------- */
+.v4-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.v4-pill-open {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+.v4-pill-closed {
+  color: #ffb1b1;
+  background: rgba(255, 107, 107, 0.12);
+  border-color: rgba(255, 107, 107, 0.45);
+}
+.v4-pill-none {
+  color: var(--gray-light, #a9a9a5);
+  background: rgba(169, 169, 165, 0.1);
+  border-color: rgba(169, 169, 165, 0.3);
+}
+.v4-pill-check {
+  color: #f6c79a;
+  background: rgba(244, 164, 96, 0.12);
+  border-color: rgba(244, 164, 96, 0.5);
+}
+.v4-kind-eastside,
+.v4-kind-westside {
+  color: #9cd0fa;
+  background: rgba(58, 159, 243, 0.14);
+  border-color: rgba(58, 159, 243, 0.45);
+}
+.v4-kind-portmoller {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+.v4-kind-forecast,
+.v4-kind-outlook,
+.v4-kind-summary,
+.v4-kind-other {
+  color: #f6c79a;
+  background: rgba(244, 164, 96, 0.1);
+  border-color: rgba(244, 164, 96, 0.4);
+}
+
+/* ---------- buttons, inputs, chips ---------- */
+.v4-btn,
+.v4-chip {
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(58, 159, 243, 0.4);
+  background: rgba(58, 159, 243, 0.1);
+  color: var(--accent-blue-bright, #3b9ff3);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.v4-btn:hover,
+.v4-chip:hover {
+  background: rgba(58, 159, 243, 0.2);
+  color: var(--white, #fafaf7);
+}
+.v4-chip.active {
+  background: linear-gradient(135deg, var(--accent-blue-bright, #3b9ff3), var(--sunset-coral, #ff6b6b));
+  border-color: transparent;
+  color: #fff;
+}
+.v4-chips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.v4-chips::-webkit-scrollbar {
+  display: none;
+}
+.v4-chip {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.v4-input {
+  min-height: 44px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(58, 159, 243, 0.4);
+  background: rgba(10, 20, 40, 0.7);
+  color: var(--white, #fafaf7);
+  font-family: inherit;
+  font-size: 16px; /* 16px stops iPhone Safari from zooming in */
+  color-scheme: dark;
+}
+
+/* ---------- openings board ---------- */
+.v4-asof {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+.v4-asof-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.v4-gear {
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.v4-gear-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.v4-gear-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  min-width: 64px;
+}
+.v4-gear-line {
+  margin: 2px 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.v4-boats {
+  margin: 0;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.v4-source {
+  margin-top: 6px;
+  font-size: 0.85rem;
+}
+.v4-source summary {
+  cursor: pointer;
+  padding: 8px 0;
+  color: var(--gray-light, #a9a9a5);
+  list-style-position: inside;
+}
+.v4-content blockquote {
+  margin: 6px 0 8px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--sunset-gold, #f4a460);
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #e6e6e1;
+}
+.v4-periods {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.v4-periods li {
+  padding: 8px 0;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+.v4-period-time {
+  font-weight: 600;
+}
+
+/* ---------- announcement feed ---------- */
+.v4-ann-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.v4-ann {
+  border: 1px solid rgba(58, 159, 243, 0.18);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: rgba(10, 20, 40, 0.45);
+  overflow: hidden;
+}
+.v4-ann-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.v4-ann-title {
+  flex: 1 1 160px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.v4-ann-date {
+  font-size: 0.8rem;
+}
+.v4-ann-body {
+  padding: 0 12px 12px;
+}
+.v4-ann-text {
+  margin: 0 0 10px;
+  white-space: pre-line;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: #e6e6e1;
+}
+
+/* ---------- escapement and forecast ---------- */
+.v4-river-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.v4-river-head h3 {
+  margin: 0;
+}
+.v4-river-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+.v4-river-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--gray-light, #a9a9a5);
+}
+.v4-river-foot strong {
+  color: var(--white, #fafaf7);
+}
+.v4-spark {
+  flex: 0 0 110px;
+  height: 36px;
+}
+
+.v4-goalbar {
+  position: relative;
+  height: 14px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.v4-goalbar-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(244, 164, 96, 0.35) 0 6px,
+    rgba(244, 164, 96, 0.18) 6px 12px
+  );
+}
+.v4-goalbar-fill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 0;
+  border-radius: 4px;
+  min-width: 2px;
+}
+.v4-goalbar-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--sunset-gold, #f4a460);
+}
+.v4-goalbar-over {
+  position: absolute;
+  right: 6px;
+  top: -1px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 16px;
+  color: #fff;
+}
+
+.v4-fc-row {
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.v4-fc-row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+.v4-fc-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 6px;
+  font-size: 0.92rem;
+}
+.v4-fc-table {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.v4-fc-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border-left: 3px solid;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.88rem;
+}
+
+/* ---------- larger screens ---------- */
+@media (min-width: 700px) {
+  .v4-content {
+    padding: 48px 32px 64px;
+  }
+  .v4-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  .v4-card {
+    padding: 24px 22px;
+  }
+  .v4-asof {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .v4-asof-controls {
+    flex-direction: row;
+    align-items: center;
+  }
+  .v4-input {
+    width: auto;
+  }
+  .v4-fc-table {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
