@@ -142,17 +142,18 @@ export default function DatePicker({
       {availableSeasons.length > 0 && (
         <div className="season-selector">
           <label>Season:</label>
-          <div className="season-buttons">
-            {availableSeasons.map((season) => (
-              <button
-                key={season}
-                className={`season-btn ${selectedSeason === season ? "active" : ""}`}
-                onClick={() => onSeasonChange(season)}
-              >
+          <select
+            value={selectedSeason || ""}
+            onChange={(e) => onSeasonChange(Number(e.target.value))}
+            className="date-select season-select"
+            aria-label="Season"
+          >
+            {[...availableSeasons].sort((a, b) => b - a).map((season) => (
+              <option key={season} value={season}>
                 {season}
-              </button>
+              </option>
             ))}
-          </div>
+          </select>
         </div>
       )}
 

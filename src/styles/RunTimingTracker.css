@@ -369,3 +369,81 @@
     font-size: 12px;
   }
 }
+/* ---------- V4: season dropdown and peak dates of all seasons ---------- */
+.run-timing-tracker .season-selector {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: #e2e8f0;
+}
+.run-timing-tracker .season-select {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #475569;
+  background-color: #1e293b;
+  color: #e2e8f0;
+  font-size: 16px;
+  color-scheme: dark;
+}
+.season-source {
+  font-size: 13px;
+  color: #94a3b8;
+}
+.season-source a,
+.peak-history a {
+  color: #60a5fa;
+}
+.peak-history {
+  background-color: rgba(30, 41, 59, 0.6);
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.peak-history h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #60a5fa;
+}
+.peak-table-wrap {
+  overflow-x: auto;
+}
+.peak-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: #e2e8f0;
+}
+.peak-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+  padding: 6px 8px;
+  border-bottom: 3px solid #475569;
+  white-space: nowrap;
+}
+.peak-table td {
+  padding: 8px;
+  border-bottom: 1px solid #334155;
+  white-space: nowrap;
+}
+.peak-table tr.active td {
+  background: rgba(59, 130, 246, 0.15);
+}
+.peak-table tr.peak-typical td {
+  background: rgba(16, 185, 129, 0.1);
+}
+.peak-range,
+.peak-src {
+  font-size: 11px;
+  color: #94a3b8;
+}
+.peak-note {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 10px 0 0;
+}

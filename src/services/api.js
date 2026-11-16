@@ -432,3 +432,5 @@ export const getBriefing = (asOf = null) =>
 /** ADF&G Annual Management Report history (2017 and later). */
 export const getHistoryYears = () => get("/history");
 export const getHistory = (year) => get(`/history/${year}`);
+export const getHistoryCatch = () => get("/history/catch");
+export const getHistoryDay = (mmdd, window = 1) => get(`/history/day?date=${mmdd}&window=${window}`);

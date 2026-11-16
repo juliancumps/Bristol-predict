@@ -683,8 +683,27 @@ app.get("/api/registrations", (req, res) => {
 app.get("/api/escapement", async (req, res) => {
   try {
     const dates = await getAvailableDates(db);
-    const seasons = [...new Set(dates.map((d) => d.season))].sort((a, b) => b - a);
+    const dbSeasons = [...new Set(dates.map((d) => d.season))];
+    const seasons = [...new Set([...dbSeasons, ...historyYears()])].sort((a, b) => b - a);
     const season = parseInt(req.query.season) || seasons[0];
+
+    // A season that is not in the run summary database: use the ADF&G annual report
+    if (!dbSeasons.includes(season)) {
+      const h = historyOf(season);
+      const rivers = {};
+      for (const [name, rows] of Object.entries(h?.escapement || {})) {
+        rivers[name] = rows.map((r) => ({ date: r.date, daily: r.daily ?? 0, cumulative: r.cumulative ?? 0, inRiver: 0 }));
+      }
+      return res.json({
+        season,
+        seasons,
+        source: "amr",
+        sourceUrl: h?.source || null,
+        goals: cached("goals", () => loadReference("escapement_goals")),
+        rivers,
+      });
+    }
+
     const rows = await getRiverSeries(db, season);
     const rivers = {};
     rows.forEach((r) => {
@@ -698,6 +717,7 @@ app.get("/api/escapement", async (req, res) => {
     res.json({
       season,
       seasons,
+      source: "in-season",
       goals: cached("goals", () => loadReference("escapement_goals")),
       rivers,
     });
@@ -841,27 +861,147 @@ app.get("/api/briefing", async (req, res) => {
   }
 });
 
-// History from the ADF&G Annual Management Reports (2017 and later)
+// History from the ADF&G Annual Management Reports (2017 and later).
+// These are FINAL numbers. The screens show them as their own seasons, with the
+// source, and never mix them into the in-season (run summary) days.
+const historyOf = (year) => cached(`history-${year}`, () => loadHistory(year), 10 * 60 * 1000);
+const HISTORY_DISTRICTS = ["naknek", "egegik", "ugashik", "nushagak", "togiak"];
+
+/** River -> district, from the escapement goal list */
+function riverDistricts() {
+  const goals = cached("goals", () => loadReference("escapement_goals"));
+  return Object.fromEntries((goals?.rivers || []).map((g) => [g.name, g.district]));
+}
+
+/** AMR forecast-vs-actual table -> the forecasts.json shape (millions of fish) */
+function historyForecast(h) {
+  const f = h?.forecast;
+  if (!f?.total) return null;
+  const m = (n) => (n == null ? null : Math.round(n / 1e4) / 100);
+  const map = riverDistricts();
+  const districts = {};
+  for (const [river, r] of Object.entries(f.rivers)) {
+    const id = map[river];
+    if (!id) continue;
+    const d = (districts[id] ||= { inshoreRun: 0, actualInshoreRun: 0, harvest: 0, actualHarvest: 0, escapement: null, actualEscapement: 0 });
+    d.inshoreRun += r.forecast || 0;
+    d.actualInshoreRun += r.actual || 0;
+    d.harvest += r.projectedHarvest || 0;
+    d.actualHarvest += r.harvest || 0;
+    d.actualEscapement += r.escapement || 0;
+  }
+  for (const d of Object.values(districts)) {
+    for (const k of ["inshoreRun", "actualInshoreRun", "harvest", "actualHarvest", "actualEscapement"]) d[k] = m(d[k]);
+  }
+  return {
+    source: "amr",
+    sourceUrl: h.source,
+    units: "millions of sockeye",
+    baywide: {
+      inshoreRun: m(f.total.forecast),
+      actualInshoreRun: m(f.total.actual),
+      harvest: m(f.total.projectedHarvest),
+      actualHarvest: m(f.total.harvest),
+      escapement: null,
+      actualEscapement: m(f.total.escapement),
+    },
+    districts,
+  };
+}
+
 app.get("/api/history", (req, res) => {
   const years = cached("history-years", () =>
     historyYears().map((year) => {
-      const h = loadHistory(year);
+      const h = historyOf(year);
       return { year, source: h?.source, importedAt: h?.importedAt, districts: Object.keys(h?.catch || {}), registrationDays: h?.registration?.length || 0 };
     })
   );
   res.json({ years });
 });
 
+// Daily sockeye catch and deliveries for every history season (small, for Run Timing)
+// { years: { 2019: { source, naknek: [["06-19", sockeye, deliveries], ...] } } }
+app.get("/api/history/catch", (req, res) => {
+  res.json(
+    cached("history-catch", () => {
+      const years = {};
+      for (const year of historyYears()) {
+        const h = historyOf(year);
+        if (!h) continue;
+        const y = { source: h.source };
+        for (const id of HISTORY_DISTRICTS) {
+          y[id] = (h.catch?.[id] || [])
+            .filter((r) => r.sockeye)
+            .map((r) => [r.date.slice(0, 5), r.sockeye, (r.deliveriesDrift || 0) + (r.deliveriesSet || 0)]);
+        }
+        years[year] = y;
+      }
+      return { years };
+    })
+  );
+});
+
+// Fish per delivery in past seasons near one day. ?date=07-04 (MM-DD), ?window=1 (days each side)
+// All gear: AMR deliveries are drift + set net together.
+app.get("/api/history/day", (req, res) => {
+  const md = String(req.query.date || "").slice(0, 5);
+  if (!/^\d{2}-\d{2}$/.test(md)) return res.status(400).json({ error: "date must be MM-DD" });
+  const win = Math.min(Math.max(parseInt(req.query.window) || 1, 0), 3);
+  res.json(
+    cached(`history-day-${md}-${win}`, () => {
+      const target = new Date(`2000-${md}T00:00:00Z`).getTime();
+      const near = (date) => Math.abs(new Date(`2000-${date.slice(0, 5)}T00:00:00Z`).getTime() - target) <= win * 864e5;
+      const districts = {};
+      for (const id of HISTORY_DISTRICTS) {
+        const values = [];
+        for (const year of historyYears()) {
+          const rows = (historyOf(year)?.catch?.[id] || []).filter((r) => near(r.date) && r.sockeye != null);
+          const fish = rows.reduce((s, r) => s + r.sockeye, 0);
+          const deliveries = rows.reduce((s, r) => s + (r.deliveriesDrift || 0) + (r.deliveriesSet || 0), 0);
+          if (deliveries >= 20) values.push({ year, fishPerDelivery: Math.round(fish / deliveries) });
+        }
+        const sorted = values.map((v) => v.fishPerDelivery).sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        districts[id] = {
+          values,
+          median: sorted.length ? (sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2)) : null,
+          min: sorted[0] ?? null,
+          max: sorted.at(-1) ?? null,
+        };
+      }
+      return { date: md, window: win, gear: "all", districts };
+    })
+  );
+});
+
 app.get("/api/history/:year", (req, res) => {
   const year = parseInt(req.params.year);
-  const data = year ? cached(`history-${year}`, () => loadHistory(year)) : null;
+  const data = year ? historyOf(year) : null;
   if (!data) return res.status(404).json({ error: `No history for ${req.params.year}` });
   res.json(data);
 });
 
 // Preseason forecasts by year and district
 app.get("/api/forecasts", (req, res) => {
-  res.json(cached("forecasts", () => loadReference("forecasts")) || { years: {} });
+  res.json(
+    cached("forecasts-merged", () => {
+      const base = loadReference("forecasts") || { years: {} };
+      const years = { ...base.years };
+      // Seasons with an ADF&G annual report: add the final run. Add the forecast where
+      // forecasts.json has none.
+      for (const year of historyYears()) {
+        const hf = historyForecast(historyOf(year));
+        if (!hf) continue;
+        if (!years[year]) {
+          years[year] = hf;
+        } else {
+          const y = (years[year] = { ...years[year], final: { sourceUrl: hf.sourceUrl, baywide: hf.baywide, districts: hf.districts } });
+          y.final.source = "amr";
+        }
+      }
+      return { ...base, years };
+    })
+  );
 });
 
 // Error handling middleware

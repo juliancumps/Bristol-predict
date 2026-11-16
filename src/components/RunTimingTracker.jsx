@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { getHistoricalData, formatNumber } from "../services/api";
+import { getAvailableDates, getSeasonDays, getHistoryCatch } from "../services/api";
 import "../styles/RunTimingTracker.css";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"; //for railway backend deployment
@@ -20,55 +20,74 @@ export default function RunTimingTracker({ onBack }) {
   const [availableSeasons, setAvailableSeasons] = useState([]);
   const [selectedSeason, setSelectedSeason] = useState(null);
   const [seasonStarts, setSeasonStarts] = useState({});
+  // season -> "in-season" (ADF&G daily run summary) or "final" (ADF&G annual report)
+  const [seasonSource, setSeasonSource] = useState({});
+  const [historyUrls, setHistoryUrls] = useState({});
 
-  // Load historical data and analyze timing
+  // Load every season: in-season days from the database, older seasons from the annual reports.
+  // Each season comes from one source only.
   useEffect(() => {
     async function loadTimingData() {
       try {
         setLoading(true);
         setError(null);
 
-        // Fetch historical data
-        const historicalData = await getHistoricalData(365);
+        const [datesInfo, history] = await Promise.all([
+          getAvailableDates().catch(() => ({ seasons: [] })),
+          getHistoryCatch().catch(() => ({ years: {} })),
+        ]);
+        const dbSeasons = (datesInfo.seasons || []).map(Number);
+        const historySeasons = Object.keys(history.years || {}).map(Number).filter((y) => !dbSeasons.includes(y));
 
-        if (!historicalData || historicalData.length === 0) {
-          setError("No historical data available");
-          setLoading(false);
-          return;
-        }
-
-        // Extract unique seasons from historical data
-        const seasons = new Set();
-        historicalData.forEach((day) => {
-          if (day.season) {
-            seasons.add(day.season);
-          }
-        });
-
-        const sortedSeasons = Array.from(seasons).sort((a, b) => b - a);
-        setAvailableSeasons(sortedSeasons);
-
-        // Fetch actual season start dates for all seasons
+        const allData = [];
         const startsMap = {};
-        for (const season of sortedSeasons) {
+        const sources = {};
+        const urls = {};
+
+        // In-season seasons: one request per season (the server gives up to 90 days per season)
+        const perSeason = await Promise.all(dbSeasons.map((season) => getSeasonDays(season).catch(() => [])));
+        for (let i = 0; i < dbSeasons.length; i++) {
+          const season = dbSeasons[i];
+          sources[season] = "in-season";
+          allData.push(...(perSeason[i] || []).map((d) => ({ ...d, season: d.season || season })));
           try {
-            //const response = await axios.get(`http://localhost:3001/api/season/${season}/start`); //for local, defore railway deployment
             const response = await axios.get(`${API_BASE_URL}/season/${season}/start`);
             startsMap[season] = response.data.seasonStart;
-          } catch (err) {
-            console.warn(`Could not fetch start date for season ${season}:`, err);
+          } catch {
             startsMap[season] = null;
           }
         }
-        setSeasonStarts(startsMap);
 
-        // Set default to most recent season
-        if (sortedSeasons.length > 0) {
-          setSelectedSeason(sortedSeasons[0]);
+        // Annual report seasons: rebuild the same day shape from the daily catch table
+        for (const season of historySeasons) {
+          const y = history.years[season];
+          sources[season] = "final";
+          urls[season] = y.source;
+          const byDate = {};
+          for (const id of Object.keys(DISTRICTS)) {
+            for (const [md, sockeye] of y[id] || []) {
+              const runDate = `${md}-${season}`;
+              (byDate[runDate] ||= { runDate, season, districts: [] }).districts.push({ id, catchDaily: sockeye });
+            }
+          }
+          const days = Object.values(byDate);
+          allData.push(...days);
+          const first = days.map((d) => d.runDate).sort()[0];
+          startsMap[season] = first || null;
         }
 
-        // Store all historical data so we can filter by season
-        setTimingData({ allData: historicalData });
+        if (allData.length === 0) {
+          setError("No historical data available");
+          return;
+        }
+
+        const sortedSeasons = [...dbSeasons, ...historySeasons].sort((a, b) => b - a);
+        setAvailableSeasons(sortedSeasons);
+        setSeasonStarts(startsMap);
+        setSeasonSource(sources);
+        setHistoryUrls(urls);
+        if (sortedSeasons.length > 0) setSelectedSeason(sortedSeasons[0]);
+        setTimingData({ allData });
       } catch (err) {
         console.error("Error loading timing data:", err);
         setError("Failed to load timing data");
@@ -189,6 +208,30 @@ export default function RunTimingTracker({ onBack }) {
     ? analyzeRunTiming(timingData.allData, selectedSeason, seasonStarts[selectedSeason]) 
     : {};
 
+  // Peak catch date of every season, for each district
+  const allSeasonPeaks = timingData.allData
+    ? availableSeasons.map((season) => ({
+        season,
+        source: seasonSource[season],
+        timing: analyzeRunTiming(timingData.allData, season, seasonStarts[season]),
+      }))
+    : [];
+  // Typical peak = the median day of the year over all seasons
+  const dayOfYear = (date) => Math.round((Date.UTC(2001, date.getMonth(), date.getDate()) - Date.UTC(2001, 0, 1)) / 864e5);
+  const typicalPeak = {};
+  Object.keys(DISTRICTS).forEach((id) => {
+    const days = allSeasonPeaks
+      .map((r) => r.timing[id]?.peakDay)
+      .filter(Boolean)
+      .map(dayOfYear)
+      .sort((a, b) => a - b);
+    if (!days.length) return;
+    const mid = Math.floor(days.length / 2);
+    const median = days.length % 2 ? days[mid] : Math.round((days[mid - 1] + days[mid]) / 2);
+    typicalPeak[id] = { date: new Date(2001, 0, 1 + median), count: days.length, early: days[0], late: days.at(-1) };
+  });
+  const doyLabel = (doy) => getDateString(new Date(2001, 0, 1 + doy));
+
   return (
     <div className="run-timing-tracker">
       {/* Header */}
@@ -217,18 +260,30 @@ export default function RunTimingTracker({ onBack }) {
             {/* Season Selector */}
             {availableSeasons.length > 0 && (
               <div className="season-selector">
-                <label>Select Season:</label>
-                <div className="season-buttons">
+                <label htmlFor="timing-season">Select Season:</label>
+                <select
+                  id="timing-season"
+                  className="season-select"
+                  value={selectedSeason ?? ""}
+                  onChange={(e) => setSelectedSeason(Number(e.target.value))}
+                >
                   {availableSeasons.map((season) => (
-                    <button
-                      key={season}
-                      className={`season-btn ${selectedSeason === season ? 'active' : ''}`}
-                      onClick={() => setSelectedSeason(season)}
-                    >
+                    <option key={season} value={season}>
                       {season}
-                    </button>
+                      {seasonSource[season] === "final" ? " · annual report" : ""}
+                    </option>
                   ))}
-                </div>
+                </select>
+                <span className="season-source">
+                  {seasonSource[selectedSeason] === "final" ? (
+                    <>
+                      Final numbers ·{" "}
+                      <a href={historyUrls[selectedSeason]} target="_blank" rel="noreferrer">ADF&G annual report ↗</a>
+                    </>
+                  ) : (
+                    "ADF&G daily run summary"
+                  )}
+                </span>
               </div>
             )}
 
@@ -292,6 +347,60 @@ export default function RunTimingTracker({ onBack }) {
                   })}
                 </div>
 
+                {/* Peak date in every season */}
+                {allSeasonPeaks.length > 1 && (
+                  <div className="peak-history">
+                    <h3>📅 Peak catch date in each season</h3>
+                    <div className="peak-table-wrap">
+                      <table className="peak-table">
+                        <thead>
+                          <tr>
+                            <th>Season</th>
+                            {Object.entries(DISTRICTS).map(([id, d]) => (
+                              <th key={id} style={{ borderBottomColor: d.color }}>{d.name}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="peak-typical">
+                            <td>Typical</td>
+                            {Object.keys(DISTRICTS).map((id) => (
+                              <td key={id}>
+                                {typicalPeak[id] ? (
+                                  <>
+                                    <strong>{getDateString(typicalPeak[id].date)}</strong>
+                                    <div className="peak-range">
+                                      {doyLabel(typicalPeak[id].early)}–{doyLabel(typicalPeak[id].late)}
+                                    </div>
+                                  </>
+                                ) : (
+                                  "–"
+                                )}
+                              </td>
+                            ))}
+                          </tr>
+                          {allSeasonPeaks.map((row) => (
+                            <tr key={row.season} className={row.season === selectedSeason ? "active" : ""}>
+                              <td>
+                                {row.season}
+                                {row.source === "final" && <span className="peak-src"> report</span>}
+                              </td>
+                              {Object.keys(DISTRICTS).map((id) => (
+                                <td key={id}>{row.timing[id] ? getDateString(row.timing[id].peakDay) : "–"}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <p className="peak-note">
+                      Typical = the middle peak date of all {allSeasonPeaks.length} seasons; below it, the earliest and
+                      latest peak. Seasons marked "report" use the final ADF&G annual report; the others use the ADF&G
+                      daily run summary.
+                    </p>
+                  </div>
+                )}
+
                 {/* Information Section */}
                 <div className="info-section">
                   <h3>📊 How to Use This Data</h3>
@@ -300,7 +409,7 @@ export default function RunTimingTracker({ onBack }) {
                       <span className="info-icon">🎣</span>
                       <p>
                         <strong>First Significant Fishing Day:</strong> When district-wide salmon catches typically reach
-                        meaningful levels (over 20,00 fish per day)
+                        meaningful levels (over 20,000 fish per day)
                       </p>
                     </div>
                     <div className="info-item">

@@ -121,6 +121,12 @@ async function report(year, result) {
         .map(([k, c]) => `${k.replace(" River", "")} ${c.rows}d${c.cumulativeErrors ? ` (${c.cumulativeErrors} cum. errors)` : ""}`)
         .join(", ")
   );
+  const f = result.forecast?.total;
+  console.log(
+    f
+      ? `Forecast: inshore run forecast ${fmt(f.forecast)}, actual ${fmt(f.actual)} (${Object.keys(result.forecast.rivers).length} rivers)`
+      : "Forecast table: not found"
+  );
   console.log(`Rejected rows: ${result.rejected.length}`);
   result.rejected.slice(0, 10).forEach((r) => console.log(`  p${r.page} table ${r.table}: ${r.reason} :: ${r.line.slice(0, 70)}`));
 
@@ -183,6 +189,7 @@ async function main() {
           registration: result.registration,
           escapement: result.escapement,
           totals: result.totals,
+          forecast: result.forecast,
           checks: result.checks,
           rejected: result.rejected,
         };

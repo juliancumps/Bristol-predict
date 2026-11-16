@@ -135,7 +135,11 @@ export default function EscapementTracker({ onBack }) {
         setData(d);
         setError(null);
         if (season === null) setSeason(d.season);
-        return getSeasonDays(d.season).then((rows) => !cancelled && setDays(rows));
+        // Annual report seasons have no daily run summary days
+        if (d.source === "amr") return setDays([]);
+        return getSeasonDays(d.season)
+          .then((rows) => !cancelled && setDays(rows))
+          .catch(() => !cancelled && setDays([]));
       })
       .catch(() => !cancelled && setError("Could not load the escapement data."));
     return () => {
@@ -163,6 +167,10 @@ export default function EscapementTracker({ onBack }) {
   const seasonForecast = forecasts?.years?.[season];
   const nextYear = forecastYears.find((y) => !(data?.seasons || []).includes(y));
   const hasRivers = data && Object.keys(data.rivers).length > 0;
+  // A season from the ADF&G annual report: use the final run, not the daily days
+  const isFinal = data?.source === "amr" && data.season === season;
+  const finalInfo = seasonForecast?.final || (seasonForecast?.source === "amr" ? seasonForecast : null);
+  const finalRun = finalInfo?.baywide?.actualInshoreRun;
 
   return (
     <div className="tools-hub-container">
@@ -179,12 +187,23 @@ export default function EscapementTracker({ onBack }) {
         </div>
 
         {data && (
-          <div className="v4-chips">
-            {data.seasons.map((s) => (
-              <button key={s} className={`v4-chip ${season === s ? "active" : ""}`} onClick={() => setSeason(s)}>
-                {s}
-              </button>
-            ))}
+          <label className="v4-season-select">
+            Season
+            <select className="v4-input" value={season ?? ""} onChange={(e) => setSeason(Number(e.target.value))}>
+              {data.seasons.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                  {data.source === "amr" && s === season ? " · final report" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {isFinal && (
+          <div className="v4-notice">
+            {season}: final numbers from the{" "}
+            <a href={data.sourceUrl} target="_blank" rel="noreferrer">ADF&G annual report ↗</a>. River counts are tower
+            counts (Nushagak: sonar). This season is not in the daily run summary data.
           </div>
         )}
 
@@ -197,22 +216,33 @@ export default function EscapementTracker({ onBack }) {
             <ForecastRow
               name="Bristol Bay (inshore run)"
               color="linear-gradient(90deg, #3b9ff3, #f4a460)"
-              actual={runToDate.total}
+              actual={isFinal ? seasonForecast.baywide.actualInshoreRun * 1e6 : runToDate.total}
               forecast={seasonForecast.baywide.inshoreRun * 1e6}
-              asOfLabel={runToDate.lastDate ? `Run through ${shortDate(runToDate.lastDate)}` : null}
+              asOfLabel={isFinal ? "Final run (ADF&G annual report)" : runToDate.lastDate ? `Run through ${shortDate(runToDate.lastDate)}` : null}
             />
             {DISTRICTS.map((d) => (
               <ForecastRow
                 key={d.id}
                 name={d.name}
                 color={d.color}
-                actual={runToDate[d.id] || 0}
-                forecast={seasonForecast.districts[d.id].inshoreRun * 1e6}
+                actual={(isFinal ? (seasonForecast.districts[d.id]?.actualInshoreRun || 0) * 1e6 : runToDate[d.id]) || 0}
+                forecast={(seasonForecast.districts[d.id]?.inshoreRun || 0) * 1e6}
               />
             ))}
+            {!isFinal && finalRun && (
+              <p className="v4-small v4-final-line">
+                Final run (ADF&G annual report): <strong>{finalRun} M</strong> ·{" "}
+                {Math.round((finalRun / seasonForecast.baywide.inshoreRun) * 100)}% of the forecast.{" "}
+                <a href={finalInfo.sourceUrl} target="_blank" rel="noreferrer">Report ↗</a>
+              </p>
+            )}
             <p className="v4-footnote">
-              Forecast harvest {seasonForecast.baywide.harvest} M · forecast escapement {seasonForecast.baywide.escapement} M ·{" "}
-              <a href={seasonForecast.sourceUrl} target="_blank" rel="noreferrer">ADF&G forecast PDF ↗</a>
+              Forecast harvest {seasonForecast.baywide.harvest} M
+              {seasonForecast.baywide.escapement != null ? ` · forecast escapement ${seasonForecast.baywide.escapement} M` : ""} ·{" "}
+              <a href={seasonForecast.sourceUrl} target="_blank" rel="noreferrer">
+                {seasonForecast.source === "amr" ? "ADF&G annual report ↗" : "ADF&G forecast PDF ↗"}
+              </a>
+              {isFinal ? " · District run = river systems by stock, not by the district that caught them." : ""}
             </p>
           </div>
         ) : (
@@ -271,7 +301,9 @@ export default function EscapementTracker({ onBack }) {
         )}
 
         <p className="v4-footnote">
-          Sources: ADF&G daily run summary, escapement goal ranges, and sockeye forecast. Goal ranges are for the full season.
+          Sources: ADF&G daily run summary, ADF&G annual reports (2017 and later), escapement goal ranges, and sockeye
+          forecast. Goal ranges are for the full season and are today's goals: some goals were different in past
+          seasons.
         </p>
       </div>
     </div>

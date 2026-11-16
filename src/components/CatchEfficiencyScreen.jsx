@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getDailySummary, formatNumber, formatDateForAPI, subtractDays } from "../services/api";
+import { getDailySummary, getHistoryDay, formatNumber, formatDateForAPI, subtractDays } from "../services/api";
 import { addEntry } from "../services/catchLog";
 import CatchLog from "./CatchLog";
 import "../styles/CatchEfficiencyScreen.css";
@@ -34,6 +34,19 @@ export default function CatchEfficiencyScreen({ onNavigateToRunTracker, onNaviga
   const [tide, setTide] = useState("");
   const [notes, setNotes] = useState("");
   const [logVersion, setLogVersion] = useState(0);
+  // Fish per delivery on the same date in past seasons (ADF&G annual reports, all gear)
+  const [pastSeasons, setPastSeasons] = useState(null);
+
+  useEffect(() => {
+    if (!selectedDate) return;
+    let cancelled = false;
+    getHistoryDay(selectedDate.slice(0, 5), 1)
+      .then((d) => !cancelled && setPastSeasons(d))
+      .catch(() => !cancelled && setPastSeasons(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedDate]);
   const [saveMessage, setSaveMessage] = useState(null);
 
   const saveToLog = () => {
@@ -354,6 +367,16 @@ setAvailableDates(sortedDates);
                         </span>
                       </div>
 
+                      {pastSeasons?.districts?.[comp.districtId]?.median != null && (
+                        <div className="past-seasons">
+                          Past seasons, same dates (all gear): median{" "}
+                          <strong>{formatNumber(pastSeasons.districts[comp.districtId].median)}</strong> · range{" "}
+                          {formatNumber(pastSeasons.districts[comp.districtId].min)}–
+                          {formatNumber(pastSeasons.districts[comp.districtId].max)} ·{" "}
+                          {pastSeasons.districts[comp.districtId].values.length} seasons
+                        </div>
+                      )}
+
                       {userSockeyeCount && (
                         <div className="comparison-detail">
                           {comp.difference > 0 ? (
@@ -372,6 +395,13 @@ setAvailableDates(sortedDates);
                     </div>
                   ))}
                 </div>
+                {pastSeasons && (
+                  <p className="past-seasons">
+                    Past seasons = ADF&G annual reports 2017 and later, {selectedDate?.slice(0, 5)} ±1 day. Their
+                    deliveries count drift and set net together, so they are not the same as the drift-only number
+                    above.
+                  </p>
+                )}
               </div>
             </>
           ) : (

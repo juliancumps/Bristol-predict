@@ -222,3 +222,12 @@
     align-items: flex-start;
   }
 }
+
+/* Season dropdown (V4): room for many seasons */
+.season-selector {
+  align-items: center;
+}
+.season-select {
+  width: auto;
+  min-width: 110px;
+}

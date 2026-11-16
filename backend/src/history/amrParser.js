@@ -6,6 +6,8 @@
  *   - Commercial (salmon) catch by (date and) species ... <District> District -> catch[district]
  *   - Daily district registration of drift gillnet permit holders              -> registration
  *   - Daily sockeye salmon escapement tower counts                              -> escapement[river]
+ *   - Nushagak River sonar project (sockeye columns)                            -> escapement["Nushagak River"]
+ *   - Comparison of inshore sockeye salmon forecast versus actual run           -> forecast
  *
  * Empty cells: the PDF leaves some cells blank. Each value is put in the column whose
  * header is nearest to it on the page (x position). A row that still does not fit is
@@ -26,6 +28,17 @@ const REG_KEYS = ["naknek", "naknekDual", "egegik", "egegikDual", "ugashik", "ug
 const EMPTY = /^([–—-]|ND|NA)$/;
 const NUM = /^-?\d{1,3}(,\d{3})*(\.\d+)?$|^-?\d+(\.\d+)?$/;
 const FOOTNOTE = /^[a-z]$/;
+
+const FORECAST_ROW = /^(Kvichak River|Alagnak River|Naknek River|Egegik (?:River|District)|Ugashik (?:River|District)|Wood River|Igushik River|Nushagak River|Nushagak-Mulchatna|Togiak (?:River|District)|Total Bristol Bay)\s+(\d.*)$/i;
+
+/** "EGEGIK DISTRICT" -> "Egegik River"; "Nushagak-Mulchatna" -> "Nushagak River"; total row -> null */
+function canonicalRiver(name) {
+  const n = name.toLowerCase();
+  if (n.startsWith("total")) return null;
+  if (n.startsWith("nushagak")) return "Nushagak River";
+  const first = n.split(/[\s-]/)[0];
+  return `${first[0].toUpperCase()}${first.slice(1)} River`;
+}
 
 /** "1,485,067" -> 1485067; "–" or "ND" -> null; anything else -> undefined (not a value) */
 function value(token) {
@@ -54,6 +67,10 @@ function titleType(text) {
   if (m) return { type: "catch", district: DISTRICT_IDS[m[1].toLowerCase()] };
   if (/Daily district registration of drift gillnet permit holders/i.test(text)) return { type: "registration" };
   if (/Daily sockeye salmon escapement tower counts/i.test(text)) return { type: "tower" };
+  if (/Nushagak River sonar project/i.test(text) && /daily/i.test(text)) return { type: "sonar" };
+  if (/Comparison of inshore sockeye salmon forecast versus actual run/i.test(text)) {
+    return { type: "forecast", unit: /in millions/i.test(text) ? 1e6 : /in thousands/i.test(text) ? 1e3 : null };
+  }
   return { type: "other" };
 }
 
@@ -89,7 +106,7 @@ function placeCells(valueCells, header) {
  * Returns { catch, registration, escapement, totals, checks, rejected, tables }.
  */
 function parseAmrPages(pages, year) {
-  const out = { catch: {}, registration: [], escapement: {}, totals: {}, rejected: [], tables: [] };
+  const out = { catch: {}, registration: [], escapement: {}, totals: {}, forecast: null, rejected: [], tables: [] };
   const tableInfo = {}; // table number -> { type, district, header, rivers }
 
   pages.forEach((lines, pageIndex) => {
@@ -120,7 +137,7 @@ function parseAmrPages(pages, year) {
       const words = cells.map((c) => c.s);
       if (
         (current.type === "catch" && words.includes("Sockeye") && words.includes("Total")) ||
-        (current.type === "tower" && words.includes("Daily") && words.some((w) => /^Cum/.test(w)))
+        ((current.type === "tower" || current.type === "sonar") && words.includes("Daily") && words.some((w) => /^Cum/.test(w)))
       ) {
         current.header = cells.filter((c) => c.s !== "Date");
         continue;
@@ -129,6 +146,31 @@ function parseAmrPages(pages, year) {
       // River names above the tower header
       if (current.type === "tower" && /River/.test(text) && !/^\d/.test(text)) {
         current.rivers = text.match(/[A-Z][a-z]+(?: [A-Z][a-z]+)? River/g) || current.rivers;
+        continue;
+      }
+
+      // Forecast against actual run, by river (one row per river, one total row).
+      // Older reports have one row for a one-river district ("Egegik District") and
+      // call the Nushagak River "Nushagak-Mulchatna".
+      if (current.type === "forecast") {
+        // A page number can stand at the start of a row (same height on the page): "26 Wood River ..."
+        const m = text.replace(/^\d{1,3}\s+(?=[A-Z])/, "").match(FORECAST_ROW);
+        if (m && current.unit) {
+          const tk = m[2].split(/\s+/);
+          const n = (t) => {
+            const v = value(t);
+            return v == null ? null : Math.round(v * current.unit);
+          };
+          const row = { forecast: n(tk[0]), actual: n(tk[1]), escapement: n(tk.at(-4)), projectedHarvest: n(tk.at(-3)), harvest: n(tk.at(-2)) };
+          if ([row.forecast, row.actual].some((v) => v === null || v === undefined || Number.isNaN(v))) {
+            out.rejected.push({ page, table: current.num, line: text, reason: "forecast row" });
+          } else {
+            out.forecast ||= { rivers: {}, total: null };
+            const name = canonicalRiver(m[1]);
+            if (name) out.forecast.rivers[name] = row;
+            else out.forecast.total = row;
+          }
+        }
         continue;
       }
 
@@ -197,6 +239,15 @@ function parseAmrPages(pages, year) {
         const sum = row.naknek + row.egegik + row.ugashik + row.nushagak + row.togiak;
         if (nums.every((v) => v !== null) && sum !== row.total) row.sumOk = false;
         out.registration.push(row);
+      } else if (current.type === "sonar") {
+        // The first two columns are sockeye: daily and cumulative
+        const daily = value(placed[0]);
+        const cumulative = value(placed[1]);
+        if (daily === undefined || cumulative === undefined) {
+          reject("not a number");
+          continue;
+        }
+        if (daily !== null || cumulative !== null) (out.escapement["Nushagak River"] ||= []).push({ date, daily, cumulative });
       } else if (current.type === "tower") {
         const rivers = current.rivers || [];
         if (placed.length !== rivers.length * 2) {

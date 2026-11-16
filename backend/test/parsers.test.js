@@ -478,4 +478,32 @@ test("blank cells are placed by column position, not guessed", () => {
   assert.strictEqual(r.rejected.length, 1); // two values in one column
 });
 
+test("forecast table (old and new layout) and Nushagak sonar", () => {
+  const r = parseAmrPages([
+    [
+      "Table 1.–Comparison of inshore sockeye salmon forecast versus actual run, escapement goals versus actual escapements,",
+      "and projected versus actual commercial catch, by river system and district, in thousands of fish, Bristol Bay, 2017.",
+      "Kvichak River 7,470 6,524 -13 2,000-10,000 3,163 3,470 3,361 -3",
+      "Total 15,478 15,361 -1 3,120-12,320 7,105 8,293 8,256 0",
+      "Egegik District 10,257 14,581 42 800-2,000 2,601 8,559 11,980 40",
+      "26 Wood River 5,292 11,009 108 700-1,800 4,274 3,767 6,735 79",
+      "Nushagak-Mulchatna 1,802 7,700 327 370-900 2,852 1,299 4,848 273",
+      "Kulukak, Osviak, Matogak and Slug River systems in Togiak District.",
+      "Total Bristol Bay 39,929 57,572 44 5,760-19,090 18,792 27,474 38,780 41",
+    ],
+    [
+      "Table 7. –Daily and cumulative passage estimates by salmon species, Nushagak River sonar project,",
+      "Bristol Bay, 2017.",
+      "Sockeye Chinook Chum",
+      "Date Daily Cumulative Daily Cumulative Daily Cumulative",
+      "6/6 163 163 81 81 70 70",
+    ],
+  ], 2017);
+  assert.deepStrictEqual(Object.keys(r.forecast.rivers), ["Kvichak River", "Egegik River", "Wood River", "Nushagak River"]);
+  assert.strictEqual(r.forecast.rivers["Egegik River"].actual, 14581000);
+  assert.strictEqual(r.forecast.total.forecast, 39929000);
+  assert.deepStrictEqual(r.escapement["Nushagak River"], [{ date: "06-06-2017", daily: 163, cumulative: 163 }]);
+  assert.strictEqual(r.rejected.length, 0);
+});
+
 console.log(`\n${passed} tests passed${process.exitCode ? ", SOME FAILED" : ""}`);

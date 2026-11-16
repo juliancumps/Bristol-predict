@@ -33,7 +33,7 @@ function StockBars({ sc }) {
   const rows = [...DISTRICTS, OTHER]
     .map((d) => ({ ...d, share: sc.byDistrict[d.id] || 0, groups: sc.groups.filter((g) => g.district === d.id) }))
     .filter((r) => r.groups.length);
-  const max = Math.max(...rows.map((r) => r.share), 1);
+
   return (
     <div className="v4-stock">
       {rows.map((r) => (
@@ -43,7 +43,7 @@ function StockBars({ sc }) {
             <span className="v4-big-sm">{r.share.toFixed(1)}%</span>
           </div>
           <div className="v4-goalbar">
-            <div className="v4-goalbar-fill" style={{ width: `${(r.share / max) * 100}%`, background: r.color }} />
+            <div className="v4-goalbar-fill" style={{ width: `${Math.min(100, r.share)}%`, background: r.color }} />
           </div>
           <div className="v4-dim v4-small">
             {r.groups.map((g) => `${g.group} ${g.estimate}% (${g.lower}–${g.upper})`).join(" · ")}
@@ -189,17 +189,16 @@ export default function PortMoller({ onBack }) {
         )}
         {stock.length > 0 && (
           <>
-            <div className="v4-chips">
-              {[...stock].reverse().map((s) => (
-                <button
-                  key={s.id}
-                  className={`v4-chip ${selected?.id === s.id ? "active" : ""}`}
-                  onClick={() => setPeriodId(s.id)}
-                >
-                  {periodLabel(s)}
-                </button>
-              ))}
-            </div>
+            <label className="v4-season-select">
+              Sampled
+              <select className="v4-input" value={selected?.id || ""} onChange={(e) => setPeriodId(e.target.value)}>
+                {stock.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {periodLabel(s)}
+                  </option>
+                ))}
+              </select>
+            </label>
             {selected && (
               <div className="v4-card">
                 <div className="v4-river-head">
@@ -207,8 +206,8 @@ export default function PortMoller({ onBack }) {
                   {!selected.complete && <span className="v4-pill v4-pill-check">Check source</span>}
                 </div>
                 <p className="v4-dim v4-small">
-                  {selected.analyzed ?? "?"} of {selected.sampled ?? "?"} fish analyzed · share in % (90% interval
-                  of each group)
+                  {selected.analyzed ?? "?"} of {selected.sampled ?? "?"} fish analyzed · bar = share of the sample
+                  (full bar = 100%) · 90% interval of each group in brackets
                 </p>
                 <StockBars sc={selected} />
                 <p className="v4-footnote">
