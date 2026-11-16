@@ -12,6 +12,7 @@ const DATA_DIR = path.join(__dirname, "..", "data");
 const ANNOUNCEMENTS_DIR = path.join(DATA_DIR, "announcements");
 const REFERENCE_DIR = path.join(DATA_DIR, "reference");
 const PORTMOLLER_DIR = path.join(DATA_DIR, "portmoller");
+const HISTORY_DIR = path.join(DATA_DIR, "history");
 
 function readJson(file, fallback) {
   try {
@@ -73,8 +74,14 @@ function savePortMoller(year, store) {
 
 const portMollerYears = () => yearsIn(PORTMOLLER_DIR);
 
+/** ADF&G Annual Management Report data (data/history/<year>.json), made by src/history/importAmr.js */
+const historyYears = () => yearsIn(HISTORY_DIR);
+const loadHistory = (year) => readJson(path.join(HISTORY_DIR, `${year}.json`), null);
+
 module.exports = {
   loadPortMoller,
+  historyYears,
+  loadHistory,
   savePortMoller,
   portMollerYears,
   yearsIn,

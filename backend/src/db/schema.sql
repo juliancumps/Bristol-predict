@@ -1,0 +1,1 @@
+-- UNUSED (Nov 2026): the tables are made in src/database.js, not from this file. Kept for reference. Safe to delete.

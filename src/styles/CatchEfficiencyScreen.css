@@ -481,3 +481,196 @@
     font-size: 11px;
   }
 }
+/* ---------- V4: 16px fields (no iPhone zoom) and the catch log ---------- */
+.input-field {
+  font-size: 16px;
+  min-height: 44px;
+}
+.log-optional {
+  margin-bottom: 16px;
+  color: #cbd5e1;
+}
+.log-optional summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #60a5fa;
+}
+.log-optional-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+  margin-top: 8px;
+}
+.log-btn {
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #475569;
+  background: rgba(30, 41, 59, 0.8);
+  color: #e2e8f0;
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.log-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.log-btn.primary {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+}
+.log-btn.danger {
+  border-color: rgba(255, 107, 107, 0.6);
+  color: #ffb1b1;
+}
+.log-save {
+  margin-top: 12px;
+  width: 100%;
+}
+.efficiency-log {
+  grid-column: 1 / -1;
+}
+.catch-log {
+  background-color: rgba(30, 41, 59, 0.6);
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  padding: 20px;
+}
+.catch-log h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #60a5fa;
+}
+.catch-log-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.catch-log-seasons {
+  display: flex;
+  gap: 6px;
+}
+.log-chip {
+  min-height: 36px;
+  padding: 4px 12px;
+  border-radius: 18px;
+  border: 1px solid #475569;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 14px;
+  cursor: pointer;
+}
+.log-chip.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+.catch-log-totals {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.catch-log-totals > div {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 12px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.catch-log-totals span {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #e2e8f0;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.catch-log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.catch-log-item {
+  border: 1px solid #334155;
+  border-left: 4px solid #3b82f6;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: rgba(15, 23, 42, 0.5);
+}
+.catch-log-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: #e2e8f0;
+  font-size: 15px;
+}
+.catch-log-sub {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+.catch-log-diff .better {
+  color: #6ee7b7;
+  font-weight: 600;
+}
+.catch-log-diff .worse {
+  color: #ffb1b1;
+  font-weight: 600;
+}
+.catch-log-diff .muted {
+  color: #64748b;
+  font-size: 13px;
+}
+.catch-log-actions,
+.catch-log-backup {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.catch-log-backup {
+  margin-top: 16px;
+}
+.catch-log-edit {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+.catch-log-edit label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #cbd5e1;
+  text-transform: uppercase;
+}
+.catch-log-edit .wide {
+  grid-column: 1 / -1;
+}
+.catch-log-note {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 8px 0 0;
+}
+@media (min-width: 700px) {
+  .catch-log-totals {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+

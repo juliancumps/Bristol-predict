@@ -428,3 +428,7 @@ export const getPortMoller = (year = null) =>
 /** Everything for the morning check in one request. ?asOf replays a past morning. */
 export const getBriefing = (asOf = null) =>
   get(asOf ? `/briefing?asOf=${encodeURIComponent(asOf)}` : "/briefing");
+
+/** ADF&G Annual Management Report history (2017 and later). */
+export const getHistoryYears = () => get("/history");
+export const getHistory = (year) => get(`/history/${year}`);

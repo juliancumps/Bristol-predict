@@ -40,6 +40,7 @@
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.17",
     "tsx": "^4.20.6",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "vite-plugin-pwa": "^2.0.0"
   }
 }

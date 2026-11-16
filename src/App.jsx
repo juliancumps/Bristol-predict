@@ -12,6 +12,7 @@ import EscapementTracker from "./components/EscapementTracker";
 import PortMoller from "./components/PortMoller";
 import FleetTracker from "./components/FleetTracker";
 import DailyBriefing from "./components/DailyBriefing";
+import OfflineBanner from "./components/OfflineBanner";
 import "./styles/BristolBayMap.css";
 import "./App.css";
 
@@ -26,7 +27,7 @@ function viewFromUrl() {
   const view = new URLSearchParams(window.location.search).get("view");
   if (VIEWS.includes(view)) return view;
   // Setting on the Daily Briefing screen: open the app on the briefing.
-  if (!window.location.search) {
+  if (!new URLSearchParams(window.location.search).get("view")) {
     try {
       if (window.localStorage.getItem("bp.startView") === "briefing") return "briefing";
     } catch {
@@ -102,6 +103,7 @@ function App() {
   // After splash complete, show map dashboard
   return (
     <>
+      <OfflineBanner />
       {currentView === "map" && (
         <BristolBayMap
           onNavigateToCatchEfficiency={() => setCurrentView("efficiency")}

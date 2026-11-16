@@ -358,16 +358,12 @@ export default function BristolBayMap({ onNavigateToToolsHub, onBackToSplash }) 
     setLoading(true);
     setError(null);
 
-    console.log("FETCH START - dates:", selectedDateRange);
     
     const data = await getDateRangeData(
       selectedDateRange.startDate,
       selectedDateRange.endDate
     );
 
-    console.log("API RESPONSE:", data);
-    console.log("Is array?:", Array.isArray(data));
-    console.log("Length:", data?.length);
 
     setRangeDataRaw(data);
     const aggregated = aggregateDateRangeData(data);
@@ -715,9 +711,6 @@ useEffect(() => {
         {dateRangeMode && rangeData ? (
           // DATE RANGE MODE: ONLY the date range line chart is showed
           <>
-          {console.log("DEBUG - rangeDataRaw:", rangeDataRaw)}
-          {console.log("DEBUG - is array?:", Array.isArray(rangeDataRaw))}
-          {console.log("DEBUG - length:", rangeDataRaw?.length)}
           <LineChart_DateRange rangeData={rangeDataRaw} districts={DISTRICTS} />
         </>
         ) : (

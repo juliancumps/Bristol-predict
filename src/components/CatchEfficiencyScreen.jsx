@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { getDailySummary, formatNumber, formatDateForAPI, subtractDays } from "../services/api";
+import { addEntry } from "../services/catchLog";
+import CatchLog from "./CatchLog";
 import "../styles/CatchEfficiencyScreen.css";
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"; //for railway deployment
 
@@ -19,6 +21,34 @@ export default function CatchEfficiencyScreen({ onNavigateToRunTracker, onNaviga
   const [districtData, setDistrictData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Catch log fields (optional)
+  const [district, setDistrict] = useState(() => {
+    try {
+      return window.localStorage.getItem("bp.homeDistrict") || "nushagak";
+    } catch {
+      return "nushagak";
+    }
+  });
+  const [pricePerLb, setPricePerLb] = useState("");
+  const [sets, setSets] = useState("");
+  const [tide, setTide] = useState("");
+  const [notes, setNotes] = useState("");
+  const [logVersion, setLogVersion] = useState(0);
+  const [saveMessage, setSaveMessage] = useState(null);
+
+  const saveToLog = () => {
+    const entry = addEntry({ date: selectedDate, district, pounds, avgWeight, pricePerLb, sets, tide, notes });
+    if (entry) {
+      setSaveMessage(`Saved: ${formatNumber(entry.sockeye)} sockeye on ${selectedDate}.`);
+      setPricePerLb("");
+      setSets("");
+      setTide("");
+      setNotes("");
+      setLogVersion((v) => v + 1);
+    } else {
+      setSaveMessage("Not saved. The browser storage is not available (private mode?).");
+    }
+  };
 
   //calculate user's sockeye count
   const userSockeyeCount =
@@ -170,6 +200,7 @@ setAvailableDates(sortedDates);
               <input
                 id="pounds"
                 type="number"
+                inputMode="decimal"
                 placeholder="e.g., 5000"
                 value={pounds}
                 onChange={(e) => setPounds(e.target.value)}
@@ -183,6 +214,7 @@ setAvailableDates(sortedDates);
               <input
                 id="avgWeight"
                 type="number"
+                inputMode="decimal"
                 placeholder="e.g., 4.5"
                 value={avgWeight}
                 onChange={(e) => setAvgWeight(e.target.value)}
@@ -193,7 +225,7 @@ setAvailableDates(sortedDates);
             </div>
 
             <div className="form-group">
-              <label htmlFor="selectedDate">Compare Against Date</label>
+              <label htmlFor="selectedDate">Delivery date (compare against)</label>
               <select
                 id="selectedDate"
                 value={selectedDate}
@@ -222,6 +254,42 @@ setAvailableDates(sortedDates);
               </select>
             </div>
 
+            <div className="form-group">
+              <label htmlFor="logDistrict">District fished</label>
+              <select
+                id="logDistrict"
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                className="input-field"
+              >
+                {Object.entries(DISTRICTS).map(([id, d]) => (
+                  <option key={id} value={id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <details className="log-optional">
+              <summary>More details for the log (optional)</summary>
+              <div className="log-optional-grid">
+                <div className="form-group">
+                  <label htmlFor="price">Price $/lb</label>
+                  <input id="price" type="number" inputMode="decimal" step="0.01" className="input-field" value={pricePerLb} onChange={(e) => setPricePerLb(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="sets">Sets</label>
+                  <input id="sets" type="number" inputMode="numeric" className="input-field" value={sets} onChange={(e) => setSets(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="tide">Tide</label>
+                  <input id="tide" placeholder="e.g. flood, 2h before high" className="input-field" value={tide} onChange={(e) => setTide(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="notes">Notes</label>
+                  <input id="notes" className="input-field" value={notes} onChange={(e) => setNotes(e.target.value)} />
+                </div>
+              </div>
+            </details>
+
             {/* show calculated sockeye count */}
             {userSockeyeCount && (
               <div className="calculation-display">
@@ -230,8 +298,12 @@ setAvailableDates(sortedDates);
                 <div className="calc-formula">
                   ({formatNumber(parseInt(pounds))} lbs ÷ {avgWeight} lbs/fish)
                 </div>
+                <button className="log-btn primary log-save" onClick={saveToLog} disabled={!selectedDate}>
+                  Save to my log
+                </button>
               </div>
             )}
+            {saveMessage && <p className="catch-log-note">{saveMessage}</p>}
           </div>
         </div>
 
@@ -308,6 +380,10 @@ setAvailableDates(sortedDates);
               <p>👈 Enter your catch data to see comparisons</p>
             </div>
           )}
+        </div>
+        {/* Personal catch log (saved in this browser only) */}
+        <div className="efficiency-log">
+          <CatchLog refreshKey={logVersion} />
         </div>
       </div>
 

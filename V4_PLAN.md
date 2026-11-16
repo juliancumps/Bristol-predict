@@ -323,3 +323,22 @@ Add a setting (saved in `localStorage`) to open the app on the briefing screen. 
 6. Feature B (catch log).
 7. Feature C (history), then the items in section 8 that need it.
 8. June 2027, first week of the season: check the live run summary "Registrations" table, the first 2027 announcements against the status board, and that the scheduled job commits data.
+
+---
+
+## 10. Status (2026-11-16)
+
+Done: A (Port Moller), B (catch log), C (history parser and import, 2017-2025), D (Fleet screen), E (Daily Briefing), F (offline PWA), debug `console.log` cleanup in `BristolBayMap.jsx`. `npm test`: 18 tests pass.
+
+Findings:
+- BBSRI link 3 ("C+E by District and Day 2011-2026") is a PDF of **charts only** (`HistoricalCEandPMTF.N.pdf` on mcusercontent.com). It has no data table, so history comes from the AMR PDFs.
+- AMR parse check (in the browser, all report years): 2017-2025 parse well. Daily sockeye adds up to 99-100% of the printed season total in each district; the rest is confidential days. Against the in-season database (same days): 2024 and 2025 are 98-104% for the four big districts. 2023 in-season data in the database ends earlier than the season. Togiak is 130-190% because it fishes after the database season ends.
+- 2012-2016 use an older table layout and fail. `importAmr.js` skips them unless you use `--force`.
+
+Owner commands:
+- `npm install` (project root, adds `vite-plugin-pwa`)
+- `cd backend && npm run update:portmoller -- 2025 2026` (loads the BBSRI catch updates)
+- `cd backend && npm run history -- 2017-2025` (loads the AMR history; prints the check report)
+- Workflow: add `data/portmoller` to the `git add` line in `.github/workflows/update-data.yml`.
+
+Not done: section 8 items (what you should be catching, run progress, season summary page, 2023/2024 forecasts, expert feed, file deletions), and the June 2027 checks.

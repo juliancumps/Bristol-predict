@@ -18,3 +18,18 @@ html, body {
 body::before {
   display: none !important;
 }
+/* Offline banner (V4 offline mode) */
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 6px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0a1428;
+  background: #f4a460;
+}

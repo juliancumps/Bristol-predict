@@ -405,4 +405,77 @@ test("BBSRI page links and running total", () => {
   assert.deepStrictEqual(cum.map((c) => c.cumulative), [7, 46, 64]);
 });
 
+/* ---------- ADF&G Annual Management Report tables ---------- */
+const { parseAmrPages } = require("../src/history/amrParser");
+console.log("Annual Management Report");
+test("catch, registration and tower tables (2023 text)", () => {
+  const pages = [
+    [
+      "Table 9.–Commercial salmon catch by date and species, in numbers of fish, Naknek-Kvichak District,",
+      "Bristol Bay, 2023.",
+      "Hours fished Deliveries",
+      "Date Drift Set Drift Set Sockeye Chinook Chum Pink Coho Total",
+      "a",
+      "6/16 9 9 1 0 – – – – – –",
+      "6/19 15 15 13 11 2,557 3 17 0 0 2,577",
+      "6/27 8.5 8.5 179 177 182,288 19 1,418 0 0 183,670",
+      "-continued-",
+    ],
+    [
+      "Table 9.–Page 2 of 2.",
+      "Date Drift Set Drift Set Sockeye Chinook Chum Pink Coho Total",
+      "7/3 18.5 24 596 687 1,485,067 72 2,141 0 0 1,487,280",
+      "Total 12,946 8,719 1,669,912 94 3,576 0 0 1,673,527",
+      "Table 10.–Daily district registration of drift gillnet permit holders and dual vessel registration, by",
+      "district, Bristol Bay, 2023.",
+      "Date total dual total dual total dual total dual total",
+      "6/2 3 0 8 1 0 0 1 0 0 12",
+      "Average 370 80 371 90 93 23 374 100 18 1,226",
+    ],
+    [
+      "Table 17.–Daily sockeye salmon escapement tower counts by river system, Bristol Bay westside, 2023.",
+      "Wood River Igushik River Togiak River",
+      "Date Daily Cum. Daily Cum. Daily Cum.",
+      "6/17 930 930 – – – –",
+      "6/18 2,484 3,414 ND ND – –",
+    ],
+    [
+      "Table 18.–Commercial salmon catch by date and species, in numbers of fish, Nushagak District, Bristol",
+      "Bay, 2023.",
+      "Date Nushagak Igushik Drift Set Sockeye Chinook Chum Pink Coho Total",
+      "6/1 0/0 0/13.5 – 0 – – – – – –",
+    ],
+  ];
+  const r = parseAmrPages(pages, 2023);
+  assert.strictEqual(r.catch.naknek.length, 4);
+  assert.deepStrictEqual(r.catch.naknek[0], {
+    date: "06-16-2023", hours: ["9", "9"], deliveriesDrift: 1, deliveriesSet: 0,
+    sockeye: null, chinook: null, chum: null, pink: null, coho: null, total: null,
+  });
+  assert.strictEqual(r.catch.naknek[3].sockeye, 1485067);
+  assert.strictEqual(r.catch.naknek[2].sumOk, false); // 182,288 + ... is not 183,670 in the source
+  assert.strictEqual(r.checks.naknek.percentOfTotal, 100);
+  assert.deepStrictEqual(r.catch.nushagak[0].hours, ["0/0", "0/13.5"]);
+  assert.strictEqual(r.registration.length, 1);
+  assert.strictEqual(r.registration[0].egegikDual, 1);
+  assert.deepStrictEqual(r.escapement["Wood River"][1], { date: "06-18-2023", daily: 2484, cumulative: 3414 });
+  assert.strictEqual(r.escapement["Igushik River"], undefined);
+  assert.strictEqual(r.rejected.length, 0);
+});
+test("blank cells are placed by column position, not guessed", () => {
+  const cell = (s, x, w = 10) => ({ s, x, w });
+  const header = ["Drift", "Set", "Drift", "Set", "Sockeye", "Chinook", "Chum", "Pink", "Coho", "Total"].map((s, i) => cell(s, 100 + i * 40, 20));
+  const pages = [[
+    "Table 12.–Commercial salmon catch by species, in numbers of fish, Egegik District, Bristol Bay, 2023.",
+    { text: "Date ...", cells: [cell("Date", 60), ...header] },
+    { text: "6/12 24 24 2", cells: [cell("6/12", 60), cell("24", 105), cell("24", 145), cell("2", 185, 5)] },
+    { text: "6/13 24 99", cells: [cell("6/13", 60), cell("24", 105), cell("99", 107)] },
+  ]];
+  const r = parseAmrPages(pages, 2023);
+  assert.strictEqual(r.catch.egegik.length, 1);
+  assert.strictEqual(r.catch.egegik[0].deliveriesDrift, 2);
+  assert.strictEqual(r.catch.egegik[0].sockeye, null);
+  assert.strictEqual(r.rejected.length, 1); // two values in one column
+});
+
 console.log(`\n${passed} tests passed${process.exitCode ? ", SOME FAILED" : ""}`);

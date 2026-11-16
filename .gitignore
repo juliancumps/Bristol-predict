@@ -34,3 +34,6 @@ Thumbs.db
 .env
 .env.*
 backend/.env
+
+# AMR report PDFs (downloaded by backend/src/history/importAmr.js)
+backend/data/history/pdf/

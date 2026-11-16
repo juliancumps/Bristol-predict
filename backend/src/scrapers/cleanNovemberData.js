@@ -1,3 +1,4 @@
+// UNUSED (Nov 2026): no part of the app calls this file. Kept for reference. Safe to delete.
 /**
  * Script to remove specific dates from the database
  * Removes: July 21, 2023 and July 26, 2024

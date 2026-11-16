@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from "recharts";
-import { getRegistrations, getSeasonDays, formatAkTime, formatNumber } from "../services/api";
+import { getRegistrations, getSeasonDays, getHistoryYears, getHistory, formatAkTime, formatNumber } from "../services/api";
 import { DISTRICTS, districtName, districtColor, isoShort } from "../services/districts";
 import "../styles/ToolsHub.css";
 import "../styles/V4Tools.css";
@@ -76,7 +76,7 @@ function DistrictLines({ data, unit }) {
               dataKey={d.id}
               stroke={d.color}
               strokeWidth={2}
-              dot={{ r: 3 }}
+              dot={data.length > 20 ? false : { r: 3 }}
               connectNulls
               isAnimationActive={false}
             />
@@ -92,6 +92,19 @@ export default function FleetTracker({ onBack }) {
   const [reg, setReg] = useState(null);
   const [days, setDays] = useState(null);
   const [error, setError] = useState(null);
+  const [historyYears, setHistoryYears] = useState([]);
+  const [history, setHistory] = useState(null);
+
+  useEffect(() => {
+    getHistoryYears()
+      .then((h) => setHistoryYears(h.years.filter((y) => y.registrationDays > 0).map((y) => y.year)))
+      .catch(() => setHistoryYears([]));
+  }, []);
+
+  useEffect(() => {
+    setHistory(null);
+    if (year && historyYears.includes(year)) getHistory(year).then(setHistory).catch(() => setHistory(null));
+  }, [year, historyYears]);
 
   useEffect(() => {
     let cancelled = false;
@@ -117,6 +130,12 @@ export default function FleetTracker({ onBack }) {
   }, [rows]);
   const totalLatest = Object.values(latest).reduce((s, r) => s + (r.vessels || 0), 0);
   const boats = pivot(rows, "vessels");
+  const allYears = [...new Set([...(reg?.years || []), ...historyYears])].sort((a, b) => b - a);
+  // AMR daily registration: permit holders per district (the "total" columns)
+  const amrReg = (history?.registration || []).map((r) => ({
+    day: `${r.date.slice(6)}-${r.date.slice(0, 2)}-${r.date.slice(3, 5)}`,
+    naknek: r.naknek, egegik: r.egegik, ugashik: r.ugashik, nushagak: r.nushagak, togiak: r.togiak,
+  }));
   const perBoat = pivot(rows, "catchPerBoat");
 
   return (
@@ -133,9 +152,9 @@ export default function FleetTracker({ onBack }) {
           </div>
         </div>
 
-        {reg && reg.years.length > 1 && (
+        {allYears.length > 1 && (
           <div className="v4-chips">
-            {reg.years.map((y) => (
+            {allYears.map((y) => (
               <button key={y} className={`v4-chip ${year === y ? "active" : ""}`} onClick={() => setYear(y)}>
                 {y}
               </button>
@@ -149,7 +168,22 @@ export default function FleetTracker({ onBack }) {
           Nushagak, the Eastside office for one district at a time.
         </div>
 
-        {reg && rows.length === 0 && (
+        {amrReg.length > 0 && (
+          <>
+            <h2 className="v4-section-title">Daily registration · {year}</h2>
+            <div className="v4-card">
+              <DistrictLines data={amrReg} unit="permit holders" />
+              <p className="v4-footnote">
+                Drift permit holders registered in each district, by day. Source:{" "}
+                <a href={history.source} target="_blank" rel="noreferrer">ADF&G Annual Management Report ↗</a>.
+                Two permit holders can fish on one boat (dual registration), so boats are fewer than permit
+                holders.
+              </p>
+            </div>
+          </>
+        )}
+
+        {reg && rows.length === 0 && amrReg.length === 0 && (
           <div className="v4-card v4-empty">
             <h3>No boat counts for {reg.year}</h3>
             <p className="v4-dim">The announcements give boat counts from about late June.</p>

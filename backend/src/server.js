@@ -26,7 +26,15 @@ const {
   getRiverSeries,
   DATE_SORT,
 } = require("./database");
-const { loadAnnouncements, announcementYears, loadReference, loadPortMoller, portMollerYears } = require("./store");
+const {
+  loadAnnouncements,
+  announcementYears,
+  loadReference,
+  loadPortMoller,
+  portMollerYears,
+  historyYears,
+  loadHistory,
+} = require("./store");
 const {
   parseStockComposition,
   sharesByDistrict,
@@ -831,6 +839,24 @@ app.get("/api/briefing", async (req, res) => {
     console.error("Error in /api/briefing:", error);
     res.status(500).json({ error: "Failed to build the briefing", message: error.message });
   }
+});
+
+// History from the ADF&G Annual Management Reports (2017 and later)
+app.get("/api/history", (req, res) => {
+  const years = cached("history-years", () =>
+    historyYears().map((year) => {
+      const h = loadHistory(year);
+      return { year, source: h?.source, importedAt: h?.importedAt, districts: Object.keys(h?.catch || {}), registrationDays: h?.registration?.length || 0 };
+    })
+  );
+  res.json({ years });
+});
+
+app.get("/api/history/:year", (req, res) => {
+  const year = parseInt(req.params.year);
+  const data = year ? cached(`history-${year}`, () => loadHistory(year)) : null;
+  if (!data) return res.status(404).json({ error: `No history for ${req.params.year}` });
+  res.json(data);
 });
 
 // Preseason forecasts by year and district
